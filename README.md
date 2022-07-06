@@ -1,0 +1,1 @@
+# Bitrix-img2picture-modile
