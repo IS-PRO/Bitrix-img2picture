@@ -1,0 +1,5 @@
+<?
+$MESS["ISPRO_IMG2PICTURE_UNSTEP_BEFORE"] 	   = "Модуль";
+$MESS["ISPRO_IMG2PICTURE_UNSTEP_AFTER"]  	   = "удален";
+$MESS["ISPRO_IMG2PICTURE_STEP_SUBMIT_BACK"]   = "Вернуться в список";
+?>
