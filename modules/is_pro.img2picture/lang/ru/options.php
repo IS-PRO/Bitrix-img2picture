@@ -14,7 +14,7 @@ $MESS['ISPRO_ING2PICTURE_MODULE_MODE'] = 'Режим работы модуля';
 $MESS['ISPRO_ING2PICTURE_MODULE_MODE_off'] = 'Выключен';
 $MESS['ISPRO_ING2PICTURE_MODULE_MODE_test'] = 'Тестирование';
 $MESS['ISPRO_ING2PICTURE_MODULE_MODE_on'] = 'Включен';
-
+$MESS['ISPRO_ING2PICTURE_SAVE'] = 'Сохранить';
 
 $MESS['ISPRO_IMG2PICTURE_INFO'] = '
 Модуль заменяет теги img на теги picture с ресайзом и конвертацией изображений.

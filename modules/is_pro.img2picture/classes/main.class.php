@@ -53,8 +53,17 @@ class MainClass
 		$arImg = $this->get_tags('img', $content, false);
 		foreach ($arImg as $img) {
 
-			/* проверим на исключения */
 			$need = true;
+			$arResult = [];
+
+			if (trim($img['src']) == '') {
+				$need = false;
+				continue;
+			} 
+			
+
+			/* проверим на исключения */
+			
 			if (is_array($arParams['EXCEPTIONS'])) {
 				foreach ($arParams['EXCEPTIONS'] as $exception) {
 					if (preg_match($exception, $img['src'])) {
@@ -80,8 +89,7 @@ class MainClass
 				continue;
 			};
 
-
-			$arResult = [];
+			$arResult['img'] = $img;
 			if (is_array($arParams['WIDTH'])) {
 				$files = $this->ResponsiveFiles($img['src'], $arParams['WIDTH']);
 				if (!$files) {
@@ -115,12 +123,13 @@ class MainClass
 					$arResult['sources'][] = '<source srcset="'.$arResult['FILES']['original']['webp'].'"  type="image/webp">';
 				}
 			};
-
+			$place = '';
 			ob_start();
-			@eval ($this->arParams['TEMPLATE']);
+			@eval ('?>'.$this->arParams['TEMPLATE'].'<?');
 			$place = ob_get_contents();
-			ob_end_flush();
+			ob_end_clean();
 			if (trim($place) != '') {
+				//$content .= $img['tag'];
 				$content = str_replace($img['tag'], $place, $content);
 			}
 		}
@@ -156,7 +165,7 @@ class MainClass
 					$loaded = true;
 				};
 				if ($loaded) {
-					$this->resizeInTo($width, $height);
+					$this->smallTo($width, $height);
 					$resized = true;
 					$this->CreateDir($filename, true);
 					if (!$this->save($filename, $this->image_type, $this->arParams['IMG_COMPRESSION'])) {
@@ -180,7 +189,7 @@ class MainClass
 				};
 				if ($loaded) {
 					if (!$resized) {
-						$this->resizeInTo($width, $height);
+						$this->smallTo($width, $height);
 					}
 					$this->CreateDir($filename, true);
 					if (!$this->save($filename, IMAGETYPE_WEBP, $this->arParams['IMG_COMPRESSION'])) {
