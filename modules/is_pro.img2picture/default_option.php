@@ -31,6 +31,5 @@ $is_pro_img2picture_default_options = [
 	'IMG_COMPRESSION' => '75',
 	'TEMPLATE' => file_get_contents(__DIR__.'/default_template.php'),
 	'EXCEPTIONS_DIR' => implode("\n", ['/bitrix/', '/auth/', '/personal/']),
-	'EXCEPTIONS_SRC' => implode("\n", ['http.*', '.*captcha.*', '.*\.php.*', '.*\?.*', '.*\.svg.*', 'data:.*']),
+	'EXCEPTIONS_SRC' => implode("\n", ['http.*', '\/\/.*','.*captcha.*', '.*\.php.*', '.*\?.*', '.*\.svg.*', 'data:.*']),
 ];
-?>
