@@ -10,6 +10,7 @@ class MainClass
 {
 	const DIR = '/upload/img2picture/';
 	const max_width = 99999;
+	const cachePath  = 'img2picture';
 	var $image;
 	var $image_type;
 	var $arParams = array();
@@ -18,7 +19,7 @@ class MainClass
 	public function __construct($arParams)
 	{
 		if (empty($arParams['DOCUMENT_ROOT'])) {
-			$arParams['DOCUMENT_ROOT'] = $_SERVER['DOCUMENT_ROOT'];
+			$arParams['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
 		};
 		if (!empty($arParams['EXCEPTIONS_SRC'])) {
 			$arExceptionsSrc = explode("\n", $arParams['EXCEPTIONS_SRC']);
@@ -37,9 +38,12 @@ class MainClass
 				$arParams['WIDTH'][] = $val['width'];
 			};
 			rsort($arParams['WIDTH']);
+		} else {
+			unset($arParams['RESPONSIVE_VALUE']);
 		};
-
-
+		if ((int) $arParams['CACHE_TTL'] == 0) {
+			$arParams['CACHE_TTL'] = 2592000; /* 30 дней */
+		};
 
 
 		$this->arParams = $arParams;
@@ -51,6 +55,12 @@ class MainClass
 		$arParams = $this->arParams;
 		$arPicture = $this->get_tags('picture', $content, true);
 		$arImg = $this->get_tags('img', $content, false);
+
+		$cache = \Bitrix\Main\Data\Cache::createInstance();
+		$cachePath = self::cachePath;
+		$cacheTtl = (int) $arParams['CACHE_TTL'];
+
+
 		foreach ($arImg as $img) {
 
 			$need = true;
@@ -59,77 +69,98 @@ class MainClass
 			if (trim($img['src']) == '') {
 				$need = false;
 				continue;
-			} 
-			
+			}
 
-			/* проверим на исключения */
-			
-			if (is_array($arParams['EXCEPTIONS'])) {
-				foreach ($arParams['EXCEPTIONS'] as $exception) {
-					if (preg_match($exception, $img['src'])) {
-						$need = false;
-						break;
+
+			$cacheKey =  md5($img['tag']);;
+
+			if ($cache->initCache($cacheTtl, $cacheKey, $cachePath)) {
+				$place = $cache->getVars();
+			} elseif ($cache->startDataCache()) {
+
+				$place = '';
+				/* проверим на исключения */
+				if (is_array($arParams['EXCEPTIONS'])) {
+					foreach ($arParams['EXCEPTIONS'] as $exception) {
+						if (preg_match($exception, $img['src'])) {
+							$need = false;
+							break;
+						};
 					};
 				};
-			};
-			if (!$need) {
-				continue;
-			};
-
-			/* Проверим есть наше изображение уже в picture */
-			if (is_array($arPicture)) {
-				foreach ($arPicture as $picture) {
-					if (strpos($picture['tag'], $img['tag'])) {
-						$need = false;
-						break;
+				if ($need) {
+					/* Проверим есть наше изображение уже в picture */
+					if (is_array($arPicture)) {
+						foreach ($arPicture as $picture) {
+							if (strpos($picture['tag'], $img['tag'])) {
+								$need = false;
+								break;
+							};
+						};
 					};
 				};
-			};
-			if (!$need) {
-				continue;
-			};
+				if ($need) {
+					$arResult['img'] = $img;
+					$arResult['sources'] = [];
+					if (is_array($arParams['WIDTH'])) {
+						$files = $this->ResponsiveFiles($img['src'], $arParams['WIDTH']);
+						if ($files) {
+							$arResult['FILES'] =  $files;
 
-			$arResult['img'] = $img;
-			if (is_array($arParams['WIDTH'])) {
-				$files = $this->ResponsiveFiles($img['src'], $arParams['WIDTH']);
-				if (!$files) {
-					continue;
-				};
-				$arResult['FILES'] =  $files;
+							foreach ($arParams['RESPONSIVE_VALUE'] as $key => $val) {
+								if (!is_array($arResult['FILES'][$val['width']])) {
+									continue;
+								}
+								$addsourse = [];
+								foreach ($arResult['FILES'][$val['width']] as $file_type => $file_src) {
+									if ($file_type == 'webp') {
+										$type = 'type="image/webp"';
+										$index = 0;
+									} else {
+										$ext = substr(strrchr($file_src, '.'), 1);
+										if ($ext == 'jpg') {
+											$ext = 'jpeg';
+										}
+										$type = 'type="image/' . $ext . '"';
+										$index = 1;
+									}
+									$media = 'media="';
+									$mediaand = '';
+									if ((int) $val['min'] > 0) {
+										$media .= $mediaand . '(min-width: ' . $val['min'] . 'px)';
+										$mediaand = ' and ';
+									}
+									if ((int) $val['max'] > (int) $val['min']) {
+										$media .= $mediaand . '(max-width: ' . $val['max'] . 'px)';
+									}
+									$media .= '"';
+									$addsourse[$index] = '<source srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
+								}
+								ksort($addsourse);
+								$arResult['sources'] = array_merge($arResult['sources'], $addsourse);
+							};
+						};
+					};
 
-				if (is_array($arParams['RESPONSIVE_VALUE'])) {
-					foreach ($arParams['RESPONSIVE_VALUE'] as $key=>$val) {
-						if (!is_array($arResult['FILES'][$val['width']])) {
-							continue;
-						}
-						foreach ($arResult['FILES'][$val['width']] as $file_type => $file_src) {
-							if ($file_type == 'webp') {
-								$type = 'type="image/webp"';
-							} else {
-								$type = '';
-							}
-							$arResult['sources'][] = '<source srcset="'.$file_src.'" media="(min-width: '.$val['min'].'px) and (max-width: '.$val['max'].'px)" '.$type.'>';
-						}
-					}
+					$arResult['FILES']['original']['src'] = $img['src'];
+					$arResult['FILES']['original']['type'] = 'image/' . substr(strrchr($img['src'], '.'), 1);
+
+					if ($this->arParams['USE_WEBP'] == 'Y') {
+						$arResult['FILES']['original']['webp'] = $this->ConvertImg2webp($img['src']);
+						if ($arResult['FILES']['original']['webp']) {
+							$arResult['sources'][] = '<source srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
+						};
+					};
+					$place = '';
+					ob_start();
+					@eval('?>' . $this->arParams['TEMPLATE'] . '<?');
+					$place = ob_get_contents();
+					ob_end_clean();
 				}
-			};
+				$cache->endDataCache($place);
+			}
 
-			$arResult['FILES']['original']['src'] = $img['src'];
-			$arResult['sources'][] = '<source srcset="'.$arResult['FILES']['original']['src'].'">';
-
-			if ($this->arParams['USE_WEBP'] == 'Y') {
-				$arResult['FILES']['original']['webp'] = $this->ConvertImg2webp($img['src']);
-				if ($arResult['FILES']['original']['webp']) {
-					$arResult['sources'][] = '<source srcset="'.$arResult['FILES']['original']['webp'].'"  type="image/webp">';
-				}
-			};
-			$place = '';
-			ob_start();
-			@eval ('?>'.$this->arParams['TEMPLATE'].'<?');
-			$place = ob_get_contents();
-			ob_end_clean();
 			if (trim($place) != '') {
-				//$content .= $img['tag'];
 				$content = str_replace($img['tag'], $place, $content);
 			}
 		}
@@ -153,6 +184,7 @@ class MainClass
 		foreach ($arWidth as $width) {
 			$resized = false;
 			$newsrc = self::DIR . '/' . $width . '/' .  $src;
+			$newsrc = str_replace('//', '/', $newsrc);
 			$filename = $doc_root . $newsrc;
 
 			$arResult[$width]['src'] = $newsrc;
@@ -165,12 +197,17 @@ class MainClass
 					$loaded = true;
 				};
 				if ($loaded) {
-					$this->smallTo($width, $height);
-					$resized = true;
-					$this->CreateDir($filename, true);
-					if (!$this->save($filename, $this->image_type, $this->arParams['IMG_COMPRESSION'])) {
-						$arResult[$width]['src'] = '';
-					};
+					$resized = $this->smallTo($width, $height);
+					if ($resized) {
+						$this->CreateDir($filename, true);
+						if (!$this->save($filename, $this->image_type, $this->arParams['IMG_COMPRESSION'])) {
+							unset($arResult[$width]['src']);
+						};
+					} else {
+						unset($arResult[$width]['src']);
+					}
+				} else {
+					unset($arResult[$width]['src']);
 				}
 			}
 			if ($this->arParams['USE_WEBP'] !== 'Y') {
@@ -189,12 +226,25 @@ class MainClass
 				};
 				if ($loaded) {
 					if (!$resized) {
-						$this->smallTo($width, $height);
+						$resized = $this->smallTo($width, $height);
 					}
-					$this->CreateDir($filename, true);
-					if (!$this->save($filename, IMAGETYPE_WEBP, $this->arParams['IMG_COMPRESSION'])) {
-						$arResult[$width]['webp'] = '';
-					};
+					if ($resized) {
+						$this->CreateDir($filename, true);
+						if (!$this->save($filename, IMAGETYPE_WEBP, $this->arParams['IMG_COMPRESSION'])) {
+							unset($arResult[$width]['webp']);
+						};
+						if (filesize($filename) == 0) {
+							unset($arResult[$width]['webp']);
+						}
+					} else {
+						unset($arResult[$width]['webp']);
+					}
+				} else {
+					unset($arResult[$width]['webp']);
+				}
+			} else {
+				if (filesize($filename) == 0) {
+					unset($arResult[$width]['webp']);
 				}
 			}
 		}
@@ -209,25 +259,42 @@ class MainClass
 		$need = false;
 		$doc_root = $this->arParams['DOCUMENT_ROOT'];
 		$webp = self::DIR . $src . '.webp';
+		$webp = str_replace('//', '/', $webp);
 
 		if (!file_exists($doc_root . $webp)) {
 			$need = true;
+		} else {
+			if (filesize($filename) == 0) {
+				return false;
+			}
 		}
 
 		if ($need) {
-			$this->CreateDir($doc_root . $webp, true);
+			$filename = $doc_root . $webp;
+			$this->CreateDir($filename, true);
 			if (!$this->load($doc_root . $src)) {
 				return false;
 			};
-			if (!$this->save($doc_root . $webp, IMAGETYPE_WEBP, $this->arParams['IMG_COMPRESSION'])) {
+			if (!$this->save($filename, IMAGETYPE_WEBP, $this->arParams['IMG_COMPRESSION'])) {
 				return false;
 			};
+			if (filesize($filename) == 0) {
+				return false;
+			}
 		}
 
 		return $webp;
 	}
 
-	function CreateDir($path,  $lastIsFile = false)
+	public function ClearDirCache() {
+		$doc_root = $this->arParams['DOCUMENT_ROOT'];
+		self::RemoveDir($doc_root. self::DIR);
+		self::RemoveDir($doc_root. '/bitrix/cache/'.self::cachePath);
+
+	}
+
+
+	public function CreateDir($path,  $lastIsFile = false)
 	{
 		$dirs = explode('/', $path);
 		if ($lastIsFile) {
@@ -241,6 +308,20 @@ class MainClass
 			};
 			$resultdir .= '/';
 		}
+	}
+
+	public function RemoveDir($path)
+	{
+
+		$files = glob($path . '/*');
+		if ($files) {
+			foreach ($files as $file) {
+				is_dir($file) ? self::RemoveDir($file) : @unlink($file);
+			}
+		}
+		@rmdir($path);
+
+		return;
 	}
 
 	function get_tags($tag, $content, $haveClosedTag = true)
@@ -485,6 +566,9 @@ class MainClass
 		/* */
 		if (($this->getWidth() > $width) or ($this->getHeight() > $height)) {
 			$this->resizeInTo($width, $height);
+			return true;
+		} else {
+			return false;
 		};
 	}
 
