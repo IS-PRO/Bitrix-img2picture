@@ -59,7 +59,7 @@ class MainClass
 		$cache = \Bitrix\Main\Data\Cache::createInstance();
 		$cachePath = self::cachePath;
 		$cacheTtl = (int) $arParams['CACHE_TTL'];
-
+		$arAllreadyReplaced = [];
 
 		foreach ($arImg as $img) {
 
@@ -71,6 +71,10 @@ class MainClass
 				continue;
 			}
 
+			if (in_array($img['tag'], $arAllreadyReplaced)) {
+				$need = false;
+				continue;
+			}
 
 			$cacheKey =  md5($img['tag']);;
 
@@ -161,6 +165,7 @@ class MainClass
 			}
 
 			if (trim($place) != '') {
+				$arAllreadyReplaced[] = $img['tag'];
 				$content = str_replace($img['tag'], $place, $content);
 			}
 		}
