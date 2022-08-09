@@ -14,7 +14,6 @@ class MainClass
 	var $image;
 	var $image_type;
 	var $arParams = array();
-	var $doc_root;
 
 	public function __construct($arParams)
 	{
@@ -22,15 +21,27 @@ class MainClass
 			$arParams['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
 		};
 		if (!empty($arParams['EXCEPTIONS_SRC'])) {
-			$arExceptionsSrc = explode("\n", $arParams['EXCEPTIONS_SRC']);
-			if (is_array($arExceptionsSrc)) {
-				foreach ($arExceptionsSrc as $k => $v) {
-					$arExceptionsSrc[$k] = '|' . trim($v) . '|';
+			$arExceptions = [];
+			$arExceptions = explode("\n", $arParams['EXCEPTIONS_SRC']);
+			if (is_array($arExceptions)) {
+				foreach ($arExceptions as $k => $v) {
+					$arExceptions[$k] = '|' . trim($v) . '|';
 				};
-				$arParams['EXCEPTIONS'] = $arExceptionsSrc;
+				$arParams['EXCEPTIONS_SRC_REG'] = $arExceptions;
 			};
 		};
-		if (!is_numeric($arParams['IMG_COMPRESSION'])) {
+		if (!empty($arParams['EXCEPTIONS_TAG'])) {
+			$arExceptions = [];
+			$arExceptions = explode("\n", $arParams['EXCEPTIONS_TAG']);
+			if (is_array($arExceptions)) {
+				foreach ($arExceptions as $k => $v) {
+					$arExceptions[$k] = '|' . trim($v) . '|';
+				};
+				$arParams['EXCEPTIONS_TAG_REG'] = $arExceptions;
+			};
+		};
+
+		if ((int) $arParams['IMG_COMPRESSION'] == 0) {
 			$arParams['IMG_COMPRESSION'] = 75;
 		};
 		if (is_array($arParams['RESPONSIVE_VALUE'])) {
@@ -44,7 +55,15 @@ class MainClass
 		if ((int) $arParams['CACHE_TTL'] == 0) {
 			$arParams['CACHE_TTL'] = 2592000; /* 30 дней */
 		};
-
+		if (trim($arParams['TEMPLATE']) == '') {
+			$arParams['TEMPLATE'] = '
+			<picture>
+				<?foreach ($arResult["sources"] as $source):?>
+					<?=$source?>
+				<?endforeach?>
+				<?=$arResult["img"]["tag"]?>
+			</picture>';
+		}
 
 		$this->arParams = $arParams;
 	}
@@ -65,14 +84,22 @@ class MainClass
 
 			$need = true;
 			$arResult = [];
-
+			if ($arParams['DEBUG'] == 'Y') {
+				\Bitrix\Main\Diag\Debug::writeToFile(['FOUND_IMG' => $img]);
+			}
 			if (trim($img['src']) == '') {
 				$need = false;
+				if ($arParams['DEBUG'] == 'Y') {
+					\Bitrix\Main\Diag\Debug::writeToFile(['IMG SRC IS EMPTY']);
+				};
 				continue;
 			}
 
 			if (in_array($img['tag'], $arAllreadyReplaced)) {
 				$need = false;
+				if ($arParams['DEBUG'] == 'Y') {
+					\Bitrix\Main\Diag\Debug::writeToFile(['IMG ALLREADY REPLACED']);
+				};
 				continue;
 			}
 
@@ -80,24 +107,46 @@ class MainClass
 
 			if ($cache->initCache($cacheTtl, $cacheKey, $cachePath)) {
 				$place = $cache->getVars();
+				if ($arParams['DEBUG'] == 'Y') {
+					\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $place]);
+				};
 			} elseif ($cache->startDataCache()) {
 
 				$place = '';
 				/* проверим на исключения */
-				if (is_array($arParams['EXCEPTIONS'])) {
-					foreach ($arParams['EXCEPTIONS'] as $exception) {
+				if (is_array($arParams['EXCEPTIONS_SRC_REG'])) {
+					foreach ($arParams['EXCEPTIONS_SRC_REG'] as $exception) {
 						if (preg_match($exception, $img['src'])) {
 							$need = false;
+							if ($arParams['DEBUG'] == 'Y') {
+								\Bitrix\Main\Diag\Debug::writeToFile(['EXCEPTIONS_SRC_REG' => $exception]);
+							};
 							break;
 						};
 					};
 				};
 				if ($need) {
-					/* Проверим есть наше изображение уже в picture */
+					if (is_array($arParams['EXCEPTIONS_TAG_REG'])) {
+						foreach ($arParams['EXCEPTIONS_TAG_REG'] as $exception) {
+							if (preg_match($exception, $img['tag'])) {
+								$need = false;
+								if ($arParams['DEBUG'] == 'Y') {
+									\Bitrix\Main\Diag\Debug::writeToFile(['EXCEPTIONS_TAG_REG' => $exception]);
+								};
+								break;
+							};
+						};
+					};
+				};
+				if ($need) {
+					/* Проверим есть ли наше изображение уже в picture */
 					if (is_array($arPicture)) {
 						foreach ($arPicture as $picture) {
 							if (strpos($picture['tag'], $img['tag'])) {
 								$need = false;
+								if ($arParams['DEBUG'] == 'Y') {
+									\Bitrix\Main\Diag\Debug::writeToFile(['EXCEPTIONS BY ALLREADY IN PICTURE' => $picture['tag']]);
+								};
 								break;
 							};
 						};
@@ -110,6 +159,9 @@ class MainClass
 						$files = $this->ResponsiveFiles($img['src'], $arParams['WIDTH']);
 						if ($files) {
 							$arResult['FILES'] =  $files;
+							if ($arParams['DEBUG'] == 'Y') {
+								\Bitrix\Main\Diag\Debug::writeToFile(['CREATE_FILES' => $arResult['FILES']]);
+							};
 
 							foreach ($arParams['RESPONSIVE_VALUE'] as $key => $val) {
 								if (!is_array($arResult['FILES'][$val['width']])) {
@@ -147,7 +199,11 @@ class MainClass
 					};
 
 					$arResult['FILES']['original']['src'] = $img['src'];
-					$arResult['FILES']['original']['type'] = 'image/' . substr(strrchr($img['src'], '.'), 1);
+					$ext = substr(strrchr($img['src'], '.'), 1);
+					if ($ext == 'jpg') {
+						$ext = 'jpeg';
+					};
+					$arResult['FILES']['original']['type'] = 'image/' . $ext;
 
 					if ($this->arParams['USE_WEBP'] == 'Y') {
 						$arResult['FILES']['original']['webp'] = $this->ConvertImg2webp($img['src']);
@@ -155,6 +211,14 @@ class MainClass
 							$arResult['sources'][] = '<source srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
 						};
 					};
+
+					if ($arParams['DEBUG'] == 'Y') {
+						\Bitrix\Main\Diag\Debug::writeToFile(['CREATED arResult' => $arResult]);
+					};
+					if ($arParams['DEBUG'] == 'Y') {
+						\Bitrix\Main\Diag\Debug::writeToFile(['USED TEMPLATE' => $arParams['TEMPLATE']]);
+					};
+
 					$place = '';
 					ob_start();
 					@eval('?>' . $this->arParams['TEMPLATE'] . '<?');
@@ -167,6 +231,11 @@ class MainClass
 			if (trim($place) != '') {
 				$arAllreadyReplaced[] = $img['tag'];
 				$content = str_replace($img['tag'], $place, $content);
+				if ($arParams['DEBUG'] == 'Y') {
+					\Bitrix\Main\Diag\Debug::writeToFile([
+							'REPLACED_FROM' => $img['tag'],
+							'REPLACED_TO' => $place]);
+				};
 			}
 		}
 	}
@@ -256,11 +325,8 @@ class MainClass
 		return $arResult;
 	}
 
-	function ConvertImg2webp($src)
+	public function ConvertImg2webp(string $src)
 	{
-		if ($this->arParams['USE_WEBP'] !== 'Y') {
-			return false;
-		};
 		$need = false;
 		$doc_root = $this->arParams['DOCUMENT_ROOT'];
 		$webp = self::DIR . $src . '.webp';
@@ -271,8 +337,8 @@ class MainClass
 		} else {
 			if (filesize($filename) == 0) {
 				return false;
-			}
-		}
+			};
+		};
 
 		if ($need) {
 			$filename = $doc_root . $webp;
@@ -285,17 +351,18 @@ class MainClass
 			};
 			if (filesize($filename) == 0) {
 				return false;
-			}
-		}
+			};
+		};
 
 		return $webp;
 	}
 
-	public function ClearDirCache() {
+	public function ClearDirCache()
+	{
 		$doc_root = $this->arParams['DOCUMENT_ROOT'];
-		self::RemoveDir($doc_root. self::DIR);
-		self::RemoveDir($doc_root. '/bitrix/cache/'.self::cachePath);
-
+		self::RemoveDir($doc_root . self::DIR);
+		self::RemoveDir($doc_root . '/bitrix/cache/' . self::cachePath);
+		return true;
 	}
 
 
@@ -304,7 +371,7 @@ class MainClass
 		$dirs = explode('/', $path);
 		if ($lastIsFile) {
 			unset($dirs[count($dirs) - 1]);
-		}
+		};
 		$resultdir = '';
 		foreach ($dirs as $dir) {
 			$resultdir .= $dir;
@@ -312,7 +379,8 @@ class MainClass
 				@mkdir($resultdir);
 			};
 			$resultdir .= '/';
-		}
+		};
+		return $resultdir;
 	}
 
 	public function RemoveDir($path)
@@ -322,8 +390,8 @@ class MainClass
 		if ($files) {
 			foreach ($files as $file) {
 				is_dir($file) ? self::RemoveDir($file) : @unlink($file);
-			}
-		}
+			};
+		};
 		@rmdir($path);
 
 		return;
@@ -387,7 +455,7 @@ class MainClass
 		} else {
 			$this->image_type = false;
 			return false;
-		}
+		};
 		return true;
 	}
 
@@ -412,7 +480,7 @@ class MainClass
 		};
 		if ($permissions != null) {
 			chmod($filename, $permissions);
-		}
+		};
 		return $result;
 	}
 

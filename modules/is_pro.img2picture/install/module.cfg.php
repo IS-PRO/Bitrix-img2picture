@@ -7,7 +7,8 @@ $arModuleCfg = [
 		'USE_WEBP' => 'checkbox', /* Использовать webp Y/N */
 		'IMG_COMPRESSION' => 'text', /* Степень сжатия картинок */
 		'TEMPLATE' => 'textarea', /* Шаблон для замены img тегов */
-		'EXCEPTIONS_SRC' => 'textarea', /* Исключения картинок */
+		'EXCEPTIONS_SRC' => 'textarea', /* Исключения картинок по src*/
+		'EXCEPTIONS_TAG' => 'textarea', /* Исключения картинок по тегу*/
 		'EXCEPTIONS_DIR' => 'textarea', /* Исключения разделов сайта */
 	]
 ];
