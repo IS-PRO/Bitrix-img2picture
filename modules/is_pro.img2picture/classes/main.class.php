@@ -68,8 +68,22 @@ class MainClass
 		$this->arParams = $arParams;
 	}
 
-
 	function doIt(&$content)
+	{
+		$this->ReplaceImg($content);
+		$this->ReplaceBackground(&$content)
+	}
+
+	function ReplaceBackground(&$content)
+	{
+		if (preg_match_all('/(<[^>]+style[^>]*=[^>]*background(-image)*\s*:\s*url\((.*)\)[^>]*>)/ismuU', $content, $matches)) {
+			if ($arParams['DEBUG'] == 'Y') {
+				\Bitrix\Main\Diag\Debug::writeToFile(['FOUND elelement background' => $matches[0]]);
+			};
+		}
+	}
+
+	function ReplaceImg(&$content)
 	{
 		$arParams = $this->arParams;
 		$arPicture = $this->get_tags('picture', $content, true);
