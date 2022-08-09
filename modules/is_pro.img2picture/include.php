@@ -26,9 +26,9 @@ class Main
 		$option = self::GetOptions();
 		if ($option['MODULE_MODE'] == 'test') {
 			if ($_GET['img2picture']) {
-				$SESSION['img2picture'] = $_GET['img2picture'];
+				$_SESSION['img2picture'] = $_GET['img2picture'];
 			}
-			$option['MODULE_MODE'] = $SESSION['img2picture'];
+			$option['MODULE_MODE'] = $_SESSION['img2picture'];
 			$option['DEBUG'] = 'Y';
 		}
 		if ($option['MODULE_MODE'] !== 'on') {
@@ -47,13 +47,27 @@ class Main
 		$content = self::doIt($content, $option);
 	}
 
-	public function doIt($content, $option)
+	public function doIt(string $content, array $option = [])
 	{
+		if (count($option) == 0) {
+			$option = self::GetOptions();
+		}
 		include_once(__DIR__ . '/classes/main.class.php');
 		$option['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
 		$img2picture = new MainClass($option);
 		$img2picture->doIt($content);
 		return $content;
+	}
+
+	public function MakeWebp(string $src, array $option = [])
+	{
+		if (count($option) == 0) {
+			$option = self::GetOptions();
+		}
+		include_once(__DIR__ . '/classes/main.class.php');
+		$option['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
+		$img2picture = new MainClass($option);
+		return $img2picture->ConvertImg2webp($src);
 	}
 
 	public function GetOptions() {
