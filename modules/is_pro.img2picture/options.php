@@ -202,6 +202,15 @@ $tabControl = new CAdminTabControl(str_replace('.', '_', $arModuleCfg['MODULE_ID
 
 	<tr>
 		<td>
+			<?= Loc::getMessage('ISPRO_IMG2PICTURE_EXCEPTIONS_TAG') ?>
+		</td>
+		<td>
+			<textarea name="option_EXCEPTIONS_TAG"><?= $option['EXCEPTIONS_TAG'] ?></textarea>
+		</td>
+	</tr>
+
+	<tr>
+		<td>
 			<?= Loc::getMessage('ISPRO_IMG2PICTURE_MODULE_MODE') ?>
 		</td>
 		<td>

@@ -29,6 +29,7 @@ Class is_pro_img2picture extends CModule
 	{
 		global $DB, $APPLICATION, $step;
 		$this->InstallEvents();
+		$this->SetDefaultOptions();
 		ModuleManager::registerModule($this->MODULE_ID);
 		return true;
 	}
@@ -37,6 +38,7 @@ Class is_pro_img2picture extends CModule
 	{
 		global $DB, $APPLICATION, $step;
 		$this->UnInstallEvents();
+		$this->RemoveOptions();
 		ModuleManager::unRegisterModule($this->MODULE_ID);
 		return true;
 	}
@@ -46,6 +48,22 @@ Class is_pro_img2picture extends CModule
 	{
 		RegisterModuleDependences("main", "OnEndBufferContent", $this->MODULE_ID, "IS_PRO\img2picture\Main", "img2picture");
 		return false;
+	}
+
+	public function SetDefaultOptions()
+	{
+		include(__DIR__."/module.cfg.php");
+		include(__DIR__ . "/../default_option.php");
+		foreach ($options_list as $option_name => $option_type) {
+			$option[$option_name] = $is_pro_img2picture_default_options[$option_name];
+			\Bitrix\Main\Config\Option::set($arModuleCfg['MODULE_ID'], $option_name, $option[$option_name]);
+		}
+	}
+
+	public function RemoveOptions()
+	{
+		include(__DIR__."/module.cfg.php");
+		COption::RemoveOption($arModuleCfg['MODULE_ID'], "");
 	}
 
 	public function UnInstallEvents()
