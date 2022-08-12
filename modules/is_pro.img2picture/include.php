@@ -1,6 +1,9 @@
 <?
-
 namespace IS_PRO\img2picture;
+
+require_once(__DIR__ . '/lib/SimpleImage.php');
+require_once(__DIR__ . '/lib/main.class.php');
+
 
 if (class_exists('\IS_PRO\img2picture\Main')) {
 	return;
@@ -8,11 +11,34 @@ if (class_exists('\IS_PRO\img2picture\Main')) {
 
 class Main
 {
-	const DIR = '/upload/img2picture/';
-	var $image;
-	var $image_type;
-	var $template;
-	var $arParams;
+
+	function SetParamsJS() {
+		/*
+		global $USER;
+		if ($USER->IsAdmin()) {
+			return;
+		};
+		if (\CSite::InDir('/bitrix/')) {
+			return;
+		};
+		$option = self::GetOptions();
+		if ($option['MODULE_MODE'] !== 'on') {
+			return;
+		}
+		$json_options = json_encode($option);
+		$jsInit = "
+		<script>
+			document.addEventListener('DOMContentLoaded', function(){
+				const img2picture = new Cimg2picture(".$json_options.");
+		  	})
+		</script>
+		";
+		$jsPath = str_replace($option['DOCUMENT_ROOT'], '', __DIR__). "/lib/img2picturebg.js";
+		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath);
+		\Bitrix\Main\Page\Asset::getInstance()->addString($jsInit);
+		return true;
+		*/
+	}
 
 	public function img2picture(&$content)
 	{
@@ -24,13 +50,7 @@ class Main
 			return;
 		};
 		$option = self::GetOptions();
-		if ($option['MODULE_MODE'] == 'test') {
-			if ($_GET['img2picture']) {
-				$_SESSION['img2picture'] = $_GET['img2picture'];
-			}
-			$option['MODULE_MODE'] = $_SESSION['img2picture'];
-			$option['DEBUG'] = 'Y';
-		}
+
 		if ($option['MODULE_MODE'] !== 'on') {
 			return;
 		}
@@ -44,9 +64,19 @@ class Main
 				};
 			};
 		};
-<<<<<<< HEAD
-		include_once(__DIR__ . '/lib/main.class.php');
-=======
+
+		$json_options = json_encode($option);
+		$jsInit = "
+		<script>
+			document.addEventListener('DOMContentLoaded', function(){
+				const img2picture = new Cimg2picture(".$json_options.");
+				img2picture.init();
+		  	})
+		</script>
+		";
+		$jsPath = str_replace($option['DOCUMENT_ROOT'], '', __DIR__). "/lib/img2picturebg.js";
+		$script =  '<script src="'.$jsPath.'"></script>'.$jsInit;
+		$content = str_replace('</head>', $script.'</head>', $content);
 		$content = self::doIt($content, $option);
 	}
 
@@ -55,8 +85,7 @@ class Main
 		if (count($option) == 0) {
 			$option = self::GetOptions();
 		}
-		include_once(__DIR__ . '/classes/main.class.php');
->>>>>>> 7ae4de4d5745d0de621ee8e155050d04a6303291
+
 		$option['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
 		$img2picture = new MainClass($option);
 		$img2picture->doIt($content);
@@ -68,8 +97,6 @@ class Main
 		if (count($option) == 0) {
 			$option = self::GetOptions();
 		}
-		include_once(__DIR__ . '/classes/main.class.php');
-		$option['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
 		$img2picture = new MainClass($option);
 		return $img2picture->ConvertImg2webp($src);
 	}
@@ -83,6 +110,16 @@ class Main
 				$option[$option_name . '_VALUE'] = @json_decode($option[$option_name], true);
 			}
 		}
+		if ($option['MODULE_MODE'] == 'test') {
+			if ($_GET['img2picture']) {
+				$_SESSION['img2picture'] = $_GET['img2picture'];
+			}
+			$option['MODULE_MODE'] = $_SESSION['img2picture'];
+			$option['DEBUG'] = 'Y';
+		};
+		$option['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
 		return $option;
 	}
+
+
 }

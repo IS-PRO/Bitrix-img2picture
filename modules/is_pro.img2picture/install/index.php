@@ -29,8 +29,8 @@ Class is_pro_img2picture extends CModule
 	{
 		global $DB, $APPLICATION, $step;
 		$this->InstallEvents();
-		$this->SetDefaultOptions();
 		ModuleManager::registerModule($this->MODULE_ID);
+		$this->SetDefaultOptions();
 		return true;
 	}
 
@@ -46,6 +46,7 @@ Class is_pro_img2picture extends CModule
 
 	public function InstallEvents()
 	{
+		RegisterModuleDependences("main", "OnProlog",	$this->MODULE_ID,"IS_PRO\img2picture\Main", "SetParamsJS");
 		RegisterModuleDependences("main", "OnEndBufferContent", $this->MODULE_ID, "IS_PRO\img2picture\Main", "img2picture");
 		return false;
 	}
@@ -68,6 +69,7 @@ Class is_pro_img2picture extends CModule
 
 	public function UnInstallEvents()
 	{
+		UnRegisterModuleDependences("main", "OnProlog", $this->MODULE_ID, "IS_PRO\img2picture\Main", "SetParamsJS");
 		UnRegisterModuleDependences("main", "OnEndBufferContent", $this->MODULE_ID, "IS_PRO\img2picture\Main", "img2picture");
 		return false;
 	}
