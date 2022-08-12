@@ -50,7 +50,7 @@ class Main
 				};
 			};
 		};
-		include_once(__DIR__ . '/classes/main.class.php');
+		include_once(__DIR__ . '/lib/main.class.php');
 		$option['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
 		$img2picture = new MainClass($option);
 		$img2picture->doIt($content);
