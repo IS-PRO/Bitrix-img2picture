@@ -16,18 +16,18 @@ class Cimg2picture
 		setTimeout(function () {
 			const doc = document.querySelector('body');
 			const MutationObserver = window.MutationObserver;
-			const myObserver = new MutationObserver(img2picture_setBackground);
+			const myObserver = new MutationObserver(img2picture_showUmages);
 			const obsConfig = { attributes: true, subtree: true };
 
 			myObserver.observe(doc, obsConfig);
 
-			thisClass.setBackground();
+			thisClass.showUmages();
 
 			window.addEventListener('scroll', function () {
-				thisClass.setBackground();
+				thisClass.showUmages();
 			});
 			window.addEventListener('resize', function () {
-				thisClass.setBackground();
+				thisClass.showUmages();
 			});
 		}, 600);
 	}
@@ -68,7 +68,7 @@ class Cimg2picture
 		}, 500);
 	}
 
-	setBackground()
+	showUmages()
 	{
 		const thisClass = this;
 		const windowHeight = (window.innerHeight || document.documentElement.clientHeight);
@@ -109,12 +109,28 @@ class Cimg2picture
 				element.style.backgroundImage = 'url(' + background_url + ')';
 			}
 		})
+		elements = document.querySelectorAll('*[data-img2picture-srcset]:not(*[data-img2picture-showed])');
+		elements.forEach(function (element, index) {
+			const imgRect = element.getBoundingClientRect();
+			if ((top < imgRect.top) && (bottom > imgRect.top)) {
+				const srcset = element.getAttribute('data-img2picture-srcset');
+				element.setAttribute('srcset', srcset);
+				element.setAttribute('data-img2picture-showed', 'Y');
+			}
+		});
 	};
 
 }
 
-function img2picture_setBackground() {
+function img2picture_showUmages() {
 	if (typeof img2picture != 'undefined') {
-		img2picture.setBackground();
+		img2picture.showUmages();
 	}
 }
+
+document.addEventListener('DOMContentLoaded', function () {
+	if (typeof img2picture_options != 'undefined') {
+		const img2picture = new Cimg2picture(img2picture_options);
+		img2picture.init();
+	}
+})

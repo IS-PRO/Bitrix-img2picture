@@ -68,13 +68,10 @@ class Main
 		$json_options = json_encode($option);
 		$jsInit = "
 		<script>
-			document.addEventListener('DOMContentLoaded', function(){
-				const img2picture = new Cimg2picture(".$json_options.");
-				img2picture.init();
-		  	})
+			const img2picture_options = ".$json_options.";
 		</script>
 		";
-		$jsPath = str_replace($option['DOCUMENT_ROOT'], '', __DIR__). "/lib/img2picturebg.js";
+		$jsPath = str_replace($option['DOCUMENT_ROOT'], '', __DIR__). "/lib/js/img2picture.js";
 		$script =  '<script src="'.$jsPath.'"></script>'.$jsInit;
 		$content = str_replace('</head>', $script.'</head>', $content);
 		$content = self::doIt($content, $option);
