@@ -29,7 +29,7 @@ $is_pro_img2picture_default_options = [
 	]),
 	'USE_WEBP' => 'Y',
 	'IMG_COMPRESSION' => '75',
-	'TEMPLATE' => file_get_contents(__DIR__.'/default_template.php'),
+	'TEMPLATE' => '',
 	'EXCEPTIONS_DIR' => implode("\n", ['/bitrix/', '/auth/', '/personal/']),
 	'UNEXCEPTIONS_DIR' => '',
 	'EXCEPTIONS_SRC' => implode("\n", ['http.*', '\/\/.*','.*captcha.*', '.*\.php.*', '.*\?.*', '.*\.svg.*', 'data:.*']),
