@@ -14,10 +14,11 @@ class Cimg2picture
 		const thisClass = this;
 
 		setTimeout(function () {
+			const validAttribute = ['data-img2picture-background', 'data-img2picture-srcset'];
 			const doc = document.querySelector('body');
 			const MutationObserver = window.MutationObserver;
 			const myObserver = new MutationObserver(img2picture_showUmages);
-			const obsConfig = { attributes: true, subtree: true };
+			const obsConfig = { attributes: true, subtree: true, attributeFilter: validAttribute};
 
 			myObserver.observe(doc, obsConfig);
 
@@ -84,40 +85,47 @@ class Cimg2picture
 			}
 		});
 		let elements = document.querySelectorAll('*[data-img2picture-background]');
-		elements.forEach(function (element, index) {
-			const imgRect = element.getBoundingClientRect();
-			if ((top < imgRect.top) && (bottom > imgRect.top)) {
-				const background_text = element.getAttribute('data-img2picture-background');
-				const backgrounds = JSON.parse(background_text);
-				let background_url = '';
-				if (backgrounds.FILES[needWidth].length > 0) {
-					if ((thisClass.options.webp) && (typeof backgrounds.FILES[needWidth].webp != 'undefined')) {
-						background_url = backgrounds.FILES[needWidth].webp;
-					} else {
-						background_url = backgrounds.FILES[needWidth].src;
+		if (elements.length > 0) {
+			elements.forEach(function (element, index) {
+				const imgRect = element.getBoundingClientRect();
+				if ((top < imgRect.top) && (bottom > imgRect.top)) {
+					const background_text = element.getAttribute('data-img2picture-background');
+					const backgrounds = JSON.parse(background_text);
+					let background_url = '';
+					if (typeof backgrounds.FILES[needWidth] != 'undefined') {
+						if (backgrounds.FILES[needWidth].length > 0) {
+							if ((thisClass.options.webp) && (typeof backgrounds.FILES[needWidth].webp != 'undefined')) {
+								background_url = backgrounds.FILES[needWidth].webp;
+							} else {
+								background_url = backgrounds.FILES[needWidth].src;
+							}
+						}
 					}
-				} else {
-					if ((thisClass.options.webp) && (typeof backgrounds.FILES['original'].webp != 'undefined')) {
-						background_url = backgrounds.FILES['original'].webp;
-						if (!background_url) {
+					if (background_url == '') {
+						if ((thisClass.options.webp) && (typeof backgrounds.FILES['original'].webp != 'undefined')) {
+							background_url = backgrounds.FILES['original'].webp;
+							if (!background_url) {
+								background_url = backgrounds.FILES['original'].src;
+							}
+						} else {
 							background_url = backgrounds.FILES['original'].src;
 						}
-					} else {
-						background_url = backgrounds.FILES['original'].src;
 					}
+					element.style.backgroundImage = 'url(' + background_url + ')';
 				}
-				element.style.backgroundImage = 'url(' + background_url + ')';
-			}
-		})
+			})
+		};
 		elements = document.querySelectorAll('*[data-img2picture-srcset]:not(*[data-img2picture-showed])');
-		elements.forEach(function (element, index) {
-			const imgRect = element.getBoundingClientRect();
-			if ((top < imgRect.top) && (bottom > imgRect.top)) {
-				const srcset = element.getAttribute('data-img2picture-srcset');
-				element.setAttribute('srcset', srcset);
-				element.setAttribute('data-img2picture-showed', 'Y');
-			}
-		});
+		if (elements.length > 0) {
+			elements.forEach(function (element, index) {
+				const imgRect = element.getBoundingClientRect();
+				if ((top < imgRect.top) && (bottom > imgRect.top)) {
+					const srcset = element.getAttribute('data-img2picture-srcset');
+					element.setAttribute('srcset', srcset);
+					element.setAttribute('data-img2picture-showed', 'Y');
+				}
+			});
+		}
 	};
 
 }
