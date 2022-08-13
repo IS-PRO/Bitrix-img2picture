@@ -59,6 +59,8 @@ class MainClass extends CSimpleImage
 		if (empty($arParams['LAZYLOAD'])) {
 			$arParams['LAZYLOAD'] = 'Y';
 		}
+		$arParams['1PX']['src'] = str_replace([$arParams['DOCUMENT_ROOT'], '/lib/'], '', __DIR__).'/images/1px.png';
+		$arParams['1PX']['webp'] = str_replace([$arParams['DOCUMENT_ROOT'], '/lib/'], '', __DIR__).'/images/1px.png';
 		/*
 		if (trim($arParams['TEMPLATE']) == '') {
 			$arParams['TEMPLATE'] = '
@@ -262,9 +264,12 @@ class MainClass extends CSimpleImage
 					$arResult['img'] = $img;
 					$arResult['sources'] = [];
 
+					$PreparedOriginal = $this->PrepareOriginal($img['src']);
+
 					$files = $this->PrepareResponsive($img['src'], $arParams['WIDTH']);
 					if ($files) {
 						$arResult['FILES'] =  $files;
+
 						if ($arParams['DEBUG'] == 'Y') {
 							\Bitrix\Main\Diag\Debug::writeToFile(['CREATE_FILES' => $arResult['FILES']]);
 						};
@@ -273,11 +278,19 @@ class MainClass extends CSimpleImage
 							if (!is_array($arResult['FILES'][$val['width']])) {
 								continue;
 							};
+							if (count($arResult['FILES'][$val['width']])==0) {
+								continue;
+							};
 							$addsourse = [];
+							$addsourseLazy= [];
 							foreach ($arResult['FILES'][$val['width']] as $file_type => $file_src) {
 								if ($file_type == 'webp') {
 									$type = 'type="image/webp"';
-									$lazy = 'srcset="'.$arResult['FILES'][self::smallWidth]['webp'].'"';
+									if ($arResult['FILES'][self::smallWidth]['webp'] !== '') {
+										$lazy = 'srcset="'.$arResult['FILES'][self::smallWidth]['webp'].'"';
+									} else {
+										$lazy = 'srcset="'.$arParams['1PX']['webp'].'"';
+									}
 									$index = 0;
 								} else {
 									$ext = substr(strrchr($file_src, '.'), 1);
@@ -285,7 +298,11 @@ class MainClass extends CSimpleImage
 										$ext = 'jpeg';
 									}
 									$type = 'type="image/' . $ext . '"';
-									$lazy = 'srcset="'.$arResult['FILES'][self::smallWidth]['src'].'"';
+									if ($arResult['FILES'][self::smallWidth]['src'] != '') {
+										$lazy = 'srcset="'.$arResult['FILES'][self::smallWidth]['src'].'"';
+									} else {
+										$lazy = 'srcset="'.$arParams['1PX']['webp'].'"';
+									}
 									$index = 1;
 								};
 								$media = 'media="';
@@ -307,10 +324,13 @@ class MainClass extends CSimpleImage
 						};
 					};
 
-
-					$arResult['FILES']['original'] = $this->PrepareOriginal($img['src']);
+					$arResult['FILES']['original'] = $PreparedOriginal;
 					if ($arResult['FILES']['original']['webp']) {
-						$lazy = 'srcset="'.$arResult['FILES'][self::smallWidth]['webp'].'"';
+						if ($arResult['FILES'][self::smallWidth]['webp'] !== '') {
+							$lazy = 'srcset="'.$arResult['FILES'][self::smallWidth]['webp'].'"';
+						} else {
+							$lazy = 'srcset="'.$arParams['1PX']['webp'].'"';
+						}
 						$arResult['sources'][] = '<source srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
 						$arResult['sources_lazy'][] = '<source '.$lazy.' data-img2picture-srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
 					};
@@ -320,11 +340,16 @@ class MainClass extends CSimpleImage
 					};
 
 					$arResult["img_lazy"]["tag"] = '<img ';
-					foreach *($arResult["img"] as $attr_name=>$attr_val) {
+					foreach ($arResult["img"] as $attr_name=>$attr_val) {
 						if ($attr_name != 'tag') {
 							if ($attr_name == 'src') {
 								$arResult["img_lazy"]["tag"] .= ' data-img2picture-srcset="'.$attr_val.'"';
-								$arResult["img_lazy"]["tag"] .= ' srcset="'.$arResult['FILES'][self::smallWidth]['src'].'"';
+								if ($arResult['FILES'][self::smallWidth]['src'] != '') {
+									$arResult["img_lazy"]["tag"] .= ' srcset="'.$arResult['FILES'][self::smallWidth]['src'].'"';
+								} else {
+									$arResult["img_lazy"]["tag"] .= ' srcset="'.$arParams['1PX']['src'].'"';
+								}
+
 							}
 							$arResult["img_lazy"]["tag"] .= ' '.$attr_name.'="'.$attr_val.'"';
 						}
@@ -340,19 +365,27 @@ class MainClass extends CSimpleImage
 						$place = ob_get_contents();
 						ob_end_clean();
 					} elseif ($arParams['LAZYLOAD'] != "Y") {
-						$place = '<picture>';
-						foreach ($arResult["sources"] as $source){
-							$place .= $source;
-						};
-						$place .= $arResult["img"]["tag"];
-						$place .= '</picture>';
+						if (count($arResult["sources"]) > 0) {
+							$place = '<picture>';
+							foreach ($arResult["sources"] as $source){
+								$place .= $source;
+							};
+							$place .= $arResult["img"]["tag"];
+							$place .= '</picture>';
+						} else {
+							$place = $arResult["img"]["tag"];
+						}
 					} else {
-						$place = '<picture>';
-						foreach ($arResult["sources_lazy"] as $source){
-							$place .= $source;
-						};
-						$place .= $arResult["img_lazy"]["tag"];
-						$place .= '</picture>';
+						if (count($arResult["sources_lazy"]) > 0) {
+							$place = '<picture>';
+							foreach ($arResult["sources_lazy"] as $source){
+								$place .= $source;
+							};
+							$place .= $arResult["img_lazy"]["tag"];
+							$place .= '</picture>';
+						} else {
+							$place = $arResult["img_lazy"]["tag"];
+						}
 					};
 				};
 				$cache->endDataCache($place);
