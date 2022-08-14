@@ -3,6 +3,10 @@
 use Bitrix\Main;
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\Loader;
+use Bitrix\Main\Text\HtmlFilter;
+use IS_PRO\img2picture\Cimg2picture;
+
+global $USER;
 
 if (!$USER->IsAdmin()) {
 	return;
@@ -28,13 +32,34 @@ $options_list = $arModuleCfg['options_list'];
 
 $ok_message = '';
 $eeror_message = '';
-if ($request->getpost('saveoptionsdefault') != '') {
-	include(__DIR__ . "/default_option.php");
+
+if (check_bitrix_sessid()) {
+	if (!empty($request->getpost('save'))) {
+		$saveOption = true;
+	}
+
+	if (!empty($request->getpost('reset'))) {
+		$setDefault = true;
+	}
 }
 
-foreach ($options_list as $option_name => $option_type) {
-	if (($request->getpost('saveoptions') != '') || ($request->getpost('saveoptionsdefault') != '')) {
+$isConfigurated = \Bitrix\Main\Config\Option::get($arModuleCfg['MODULE_ID'], 'IS_CONFIGURATED');
+if ($isConfigurated != 'Y') {
+	\Bitrix\Main\Config\Option::set($arModuleCfg['MODULE_ID'], 'IS_CONFIGURATED', 'Y');
+	$setDefault = true;
+}
+
+function checkOption(string $option_name, $option)
+{
+	/* Тут проверяем значение настроек, если есть ошибка, то возвращаем ее текст, иначе вернем true */
+	return true;
+}
+
+
+foreach ($options_list as $option_name => $arOption) {
+	if ($saveOption) {
 		$option[$option_name] = $request->getpost('option_' . $option_name);
+		$optionIsValid = checkOption($option_name, $option[$option_name]);
 		if ($option_name == 'RESPONSIVE') {
 			foreach ($option[$option_name] as $key => $val) {
 				if ((trim($val['width']) == '')) {
@@ -45,23 +70,26 @@ foreach ($options_list as $option_name => $option_type) {
 		if (is_array($option[$option_name])) {
 			$option[$option_name] = json_encode($option[$option_name]);
 		};
-		if ($request->getpost('saveoptionsdefault') != '') {
-			$option[$option_name] = $is_pro_img2picture_default_options[$option_name];
-		};
+	}
+	if ($setDefault) {
+		$option[$option_name] = $arOption['default'];
+		$optionIsValid = true;
+	};
+	if (($saveOption || $setDefault) && ($optionIsValid === true)) {
 		\Bitrix\Main\Config\Option::set($arModuleCfg['MODULE_ID'], $option_name, $option[$option_name]);
 		$ok_message .= 'SAVED: ' . Loc::getMessage('ISPRO_IMG2PICTURE_' . $option_name) . PHP_EOL;
 	};
 
 	$option[$option_name] = \Bitrix\Main\Config\Option::get($arModuleCfg['MODULE_ID'], $option_name);
-	if ($option_type == 'json') {
+	if ($arOption['type'] == 'json') {
 		$option[$option_name . '_VALUE'] = @json_decode($option[$option_name], true);
 	};
 };
+
 if ($request->getpost('removefiles') != '') {
-	include_once(__DIR__ . '/classes/main.class.php');
-	$img2picture = new \IS_PRO\img2picture\MainClass($option);
-	$img2picture->ClearDirCache();
+	Cimg2picture::ClearDirCache();
 };
+
 if ($ok_message != '') {
 	$message = new \CAdminMessage(array(
 		'MESSAGE' => $ok_message,
@@ -89,7 +117,13 @@ while ($i < 5) {
 
 $tabList = [
 	[
-		'DIV' => 'edit1',
+		'DIV' => 'description',
+		'TAB' => Loc::getMessage('ISPRO_IMG2PICTURE_TAB_SET_DESC'),
+		'ICON' => 'ib_settings',
+		'TITLE' => Loc::getMessage('ISPRO_IMG2PICTURE_TAB_TITLE_DESC')
+	],
+	[
+		'DIV' => 'setting',
 		'TAB' => Loc::getMessage('ISPRO_IMG2PICTURE_TAB_SET_OPTION'),
 		'ICON' => 'ib_settings',
 		'TITLE' => Loc::getMessage('ISPRO_IMG2PICTURE_TAB_TITLE_OPTION')
@@ -107,133 +141,84 @@ $tabControl = new CAdminTabControl(str_replace('.', '_', $arModuleCfg['MODULE_ID
 </style>
 <form method="POST" action="<?= $currentUrl; ?>" enctype="multipart/form-data" id="img2picture_form">
 	<?= bitrix_sessid_post(); ?>
-	<?
-	$tabControl->Begin();
-	?>
+	<? $tabControl->Begin(); ?>
 
-	<?
-	$tabControl->BeginNextTab();
-	?>
+	<? $tabControl->BeginNextTab(); ?>
 	<tr>
 		<td colspan="2">
 			<?= BeginNote(); ?>
 			<?= Loc::getMessage('ISPRO_IMG2PICTURE_INFO'); ?>
 			<?= EndNote(); ?>
 		</td>
-	</tr <tr>
-	<td width="20%" valign="top">
-		<?= Loc::getMessage('ISPRO_IMG2PICTURE_RESPONSIVE') ?>
-	</td>
-	<td width="80%">
-		<table width="100%">
-			<tr>
-				<th>
-					<?= Loc::getMessage('ISPRO_IMG2PICTURE_MIN_SCREEN_WIDTH') ?>
-				</th>
-				<th>
-					<?= Loc::getMessage('ISPRO_IMG2PICTURE_MAX_SCREEN_WIDTH') ?>
-				</th>
-				<th>
-					<?= Loc::getMessage('ISPRO_IMG2PICTURE_MAX_IMG_WIDTH') ?>
-				</th>
-			</tr>
-			<? foreach ($option['RESPONSIVE_VALUE'] as $key => $val) : ?>
-				<tr>
-					<td>
-						<input type="number" name="option_RESPONSIVE[<?= $key ?>][min]" value="<?= $val['min'] ?>">
-					</td>
-					<td>
-						<input type="number" name="option_RESPONSIVE[<?= $key ?>][max]" value="<?= $val['max'] ?>">
-					</td>
-					<td>
-						<input type="number" name="option_RESPONSIVE[<?= $key ?>][width]" value="<?= $val['width'] ?>">
-					</td>
-				</tr>
-			<? endforeach ?>
-		</table>
-	</td>
 	</tr>
 
-	<tr>
-		<td>
-			<?= Loc::getMessage('ISPRO_IMG2PICTURE_USE_WEBP') ?>
-		</td>
-		<td>
-			<input type="hidden" name="option_USE_WEBP" value="N" />
-			<input type="checkbox" name="option_USE_WEBP" value="Y" <?= ($option['USE_WEBP'] == "Y") ? 'checked="checked"' : '' ?> />
-		</td>
-	</tr>
+	<? $tabControl->BeginNextTab(); ?>
 
-	<tr>
-		<td>
-			<?= Loc::getMessage('ISPRO_IMG2PICTURE_IMG_COMPRESSION') ?>
-		</td>
-		<td>
-			<input type="number" name="option_IMG_COMPRESSION" value="<?= $option['IMG_COMPRESSION'] ?>" min="0" max="100" />
-		</td>
-	</tr>
+	<?foreach ($options_list as $option_name => $arOption) :?>
+		<tr>
+			<td width="20%" valign="top">
+				<?= Loc::getMessage('ISPRO_IMG2PICTURE_'.$option_name) ?>
+			</td>
+			<td width="80%">
+				<?if ($arOption['type'] == 'textarea') :?>
+					<textarea name="option_<?=$option_name?>"><?= HtmlFilter::encode($option[$option_name]) ?></textarea>
+				<?elseif ($arOption['type'] == 'checkbox') :?>
+					<input type="hidden"  name="option_<?=$option_name?>" value="N" />
+					<input type="checkbox" name="option_<?=$option_name?>" value="Y" <?= ($option[$option_name] == "Y") ? 'checked="checked"' : '' ?> />
+				<?elseif ($arOption['type'] == 'select') :?>
+					<select name="option_<?=$option_name?>">
+					<? foreach ($arOption['values'] as $value) : ?>
+						<option value="<?= $value ?>" <?= ($option[$option_name] == $value) ? 'selected' : '' ?>>
+							<?= Loc::getMessage('ISPRO_IMG2PICTURE_'.$option_name.'_'.$value) ?>
+						</option>
+					<? endforeach ?>
+					</select>
+				<?elseif ($option_name == 'RESPONSIVE') :?>
+					<table width="100%">
+						<tr>
+							<th>
+								<?= Loc::getMessage('ISPRO_IMG2PICTURE_MIN_SCREEN_WIDTH') ?>
+							</th>
+							<th>
+								<?= Loc::getMessage('ISPRO_IMG2PICTURE_MAX_SCREEN_WIDTH') ?>
+							</th>
+							<th>
+								<?= Loc::getMessage('ISPRO_IMG2PICTURE_MAX_IMG_WIDTH') ?>
+							</th>
+						</tr>
+						<? foreach ($option['RESPONSIVE_VALUE'] as $key => $val) : ?>
+							<tr>
+								<td>
+									<input type="number" name="option_RESPONSIVE[<?= $key ?>][min]" value="<?= $val['min'] ?>">
+								</td>
+								<td>
+									<input type="number" name="option_RESPONSIVE[<?= $key ?>][max]" value="<?= $val['max'] ?>">
+								</td>
+								<td>
+									<input type="number" name="option_RESPONSIVE[<?= $key ?>][width]" value="<?= $val['width'] ?>">
+								</td>
+							</tr>
+						<? endforeach ?>
+					</table>
+				<?else :?>
+					<input type="<?=$arOption['type']?>" name="option_<?=$option_name?>" value="<?=HtmlFilter::encode($option[$option_name])?>" />
+				<?endif?>
 
-	<tr>
-		<td>
-			<?= Loc::getMessage('ISPRO_IMG2PICTURE_TEMPLATE') ?>
-		</td>
-		<td>
-			<textarea name="option_TEMPLATE"><?= $option['TEMPLATE'] ?></textarea>
-		</td>
-	</tr>
+			</td>
+		</tr>
+	<?endforeach?>
 
-	<tr>
-		<td>
-			<?= Loc::getMessage('ISPRO_IMG2PICTURE_EXCEPTIONS_DIR') ?>
-		</td>
-		<td>
-			<textarea name="option_EXCEPTIONS_DIR"><?= $option['EXCEPTIONS_DIR'] ?></textarea>
-		</td>
-	</tr>
 
-	<tr>
-		<td>
-			<?= Loc::getMessage('ISPRO_IMG2PICTURE_EXCEPTIONS_SRC') ?>
-		</td>
-		<td>
-			<textarea name="option_EXCEPTIONS_SRC"><?= $option['EXCEPTIONS_SRC'] ?></textarea>
-		</td>
-	</tr>
-
-	<tr>
-		<td>
-			<?= Loc::getMessage('ISPRO_IMG2PICTURE_EXCEPTIONS_TAG') ?>
-		</td>
-		<td>
-			<textarea name="option_EXCEPTIONS_TAG"><?= $option['EXCEPTIONS_TAG'] ?></textarea>
-		</td>
-	</tr>
-
-	<tr>
-		<td>
-			<?= Loc::getMessage('ISPRO_IMG2PICTURE_MODULE_MODE') ?>
-		</td>
-		<td>
-
-			<select name="option_MODULE_MODE">
-				<? $arModuleMode = ['off', 'test', 'on']; ?>
-				<? foreach ($arModuleMode as $mode) : ?>
-
-					<option value="<?= $mode ?>" <?= ($option['MODULE_MODE'] == $mode) ? 'selected' : '' ?>><?= Loc::getMessage('ISPRO_IMG2PICTURE_MODULE_MODE_' . $mode) ?></option>
-				<? endforeach ?>
-			</select>
-		</td>
-	</tr>
 
 	<tr>
 		<td colspan="2">
+			<input type="submit" class="adm-btn-save" name="save" value="<? echo Loc::getMessage('ISPRO_IMG2PICTURE_SAVE'); ?>">
+			<input type="submit" class="adm-btn-save" name="reset" value="<? echo Loc::getMessage('ISPRO_IMG2PICTURE_DEFAULT'); ?>">
+			<input type="submit" class="adm-btn-save" name="removefiles" value="<? echo Loc::getMessage('ISPRO_IMG2PICTURE_REMOVE_FILES'); ?>">
 
 		</td>
 	</tr>
 
 	<? $tabControl->Buttons(); ?>
-	<input type="submit" class="adm-btn-save" name="saveoptions" value="<? echo Loc::getMessage('ISPRO_IMG2PICTURE_SAVE'); ?>">
-	<input type="submit" class="adm-btn-save" name="saveoptionsdefault" value="<? echo Loc::getMessage('ISPRO_IMG2PICTURE_DEFAULT'); ?>">
-	<input type="submit" class="adm-btn-save" name="removefiles" value="<? echo Loc::getMessage('ISPRO_IMG2PICTURE_REMOVE_FILES'); ?>">
 	<? $tabControl->End(); ?>
 </form>

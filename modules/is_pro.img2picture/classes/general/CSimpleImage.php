@@ -2,6 +2,10 @@
 
 namespace IS_PRO\img2picture;
 
+if (class_exists('\IS_PRO\img2picture\CSimpleImage')) {
+	return;
+}
+
 class CSimpleImage
 {
 

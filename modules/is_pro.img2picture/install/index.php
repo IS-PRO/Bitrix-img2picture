@@ -9,6 +9,7 @@ Class is_pro_img2picture extends CModule
 	{
 		if(file_exists(__DIR__."/module.cfg.php")){
 			include(__DIR__."/module.cfg.php");
+			$this->arModuleCfg =  $arModuleCfg;
 		}
 		if(file_exists(__DIR__."/version.php")){
 			$arModuleVersion = array();
@@ -46,31 +47,29 @@ Class is_pro_img2picture extends CModule
 
 	public function InstallEvents()
 	{
-		RegisterModuleDependences("main", "OnProlog",	$this->MODULE_ID,"IS_PRO\img2picture\Main", "SetParamsJS");
-		RegisterModuleDependences("main", "OnEndBufferContent", $this->MODULE_ID, "IS_PRO\img2picture\Main", "img2picture");
+		/*RegisterModuleDependences("main", "OnProlog",	$this->MODULE_ID,"IS_PRO\img2picture\Cimg2picture", "SetParamsJS");*/
+		RegisterModuleDependences("main", "OnEndBufferContent", $this->MODULE_ID, "IS_PRO\img2picture\Cimg2picture", "img2picture");
 		return false;
 	}
 
 	public function SetDefaultOptions()
 	{
-		include(__DIR__."/module.cfg.php");
-		include(__DIR__ . "/../default_option.php");
-		foreach ($options_list as $option_name => $option_type) {
-			$option[$option_name] = $is_pro_img2picture_default_options[$option_name];
-			\Bitrix\Main\Config\Option::set($arModuleCfg['MODULE_ID'], $option_name, $option[$option_name]);
+		$options_list = $this->arModuleCfg['options_list'];
+		foreach ($options_list as $option_name => $arOption) {
+			$option[$option_name] = $arOption['default'];
+			\Bitrix\Main\Config\Option::set($this->MODULE_ID, $option_name, $option[$option_name]);
 		}
 	}
 
 	public function RemoveOptions()
 	{
-		include(__DIR__."/module.cfg.php");
-		COption::RemoveOption($arModuleCfg['MODULE_ID'], "");
+		COption::RemoveOption($this->MODULE_ID);
 	}
 
 	public function UnInstallEvents()
 	{
-		UnRegisterModuleDependences("main", "OnProlog", $this->MODULE_ID, "IS_PRO\img2picture\Main", "SetParamsJS");
-		UnRegisterModuleDependences("main", "OnEndBufferContent", $this->MODULE_ID, "IS_PRO\img2picture\Main", "img2picture");
+		/*UnRegisterModuleDependences("main", "OnProlog", $this->MODULE_ID, "IS_PRO\img2picture\Cimg2picture", "SetParamsJS");*/
+		UnRegisterModuleDependences("main", "OnEndBufferContent", $this->MODULE_ID, "IS_PRO\img2picture\Cimg2picture", "img2picture");
 		return false;
 	}
 

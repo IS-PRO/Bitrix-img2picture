@@ -2,12 +2,14 @@
 
 namespace IS_PRO\img2picture;
 
-if (class_exists('\IS_PRO\img2picture\MainClass')) {
+use IS_PRO\img2picture\CSimpleImage;
+
+if (class_exists('\IS_PRO\img2picture\CImageManupulator')) {
 	return;
 }
 
 
-class MainClass extends CSimpleImage
+class CImageManupulator extends CSimpleImage
 {
 	const DIR = '/upload/img2picture/';
 	const max_width = 99999;
@@ -61,18 +63,6 @@ class MainClass extends CSimpleImage
 		}
 		$arParams['1PX']['src'] = str_replace([$arParams['DOCUMENT_ROOT'], '/lib/'], '', __DIR__).'/images/1px.png';
 		$arParams['1PX']['webp'] = str_replace([$arParams['DOCUMENT_ROOT'], '/lib/'], '', __DIR__).'/images/1px.png';
-		/*
-		if (trim($arParams['TEMPLATE']) == '') {
-			$arParams['TEMPLATE'] = '
-			<picture>
-				<?foreach ($arResult["sources"] as $source):?>
-					<?=$source?>
-				<?endforeach?>
-				<?=$arResult["img"]["tag"]?>
-			</picture>';
-		}
-		*/
-
 		$this->arParams = $arParams;
 	}
 
@@ -349,7 +339,6 @@ class MainClass extends CSimpleImage
 								} else {
 									$arResult["img_lazy"]["tag"] .= ' srcset="'.$arParams['1PX']['src'].'"';
 								}
-
 							}
 							$arResult["img_lazy"]["tag"] .= ' '.$attr_name.'="'.$attr_val.'"';
 						}
