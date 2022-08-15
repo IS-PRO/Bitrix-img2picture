@@ -253,6 +253,7 @@ class CImageManupulator extends CSimpleImage
 				if ($need) {
 					$arResult['img'] = $img;
 					$arResult['sources'] = [];
+					$arResult['sources_lazy'] = [];
 
 					$PreparedOriginal = $this->PrepareOriginal($img['src']);
 
@@ -309,6 +310,7 @@ class CImageManupulator extends CSimpleImage
 								$addsourseLazy[$index] = '<source '.$lazy.' data-img2picture-srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
 							};
 							ksort($addsourse);
+							ksort($addsourseLazy);
 							$arResult['sources'] = array_merge($arResult['sources'], $addsourse);
 							$arResult['sources_lazy'] = array_merge($arResult['sources_lazy'], $addsourseLazy);
 						};
