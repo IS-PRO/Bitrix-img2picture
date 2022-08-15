@@ -23,14 +23,18 @@ class CSimpleImage
 		$this->image_type = $image_info[2];
 		if ($this->image_type == IMAGETYPE_JPEG) {
 			$this->image = imagecreatefromjpeg($filename);
+			imagepalettetotruecolor($this->image);
 		} elseif ($this->image_type == IMAGETYPE_GIF) {
 			$this->image = imagecreatefromgif($filename);
+			imagepalettetotruecolor($this->image);
 		} elseif ($this->image_type == IMAGETYPE_PNG) {
 			$this->image = imagecreatefrompng($filename);
+			imagepalettetotruecolor($this->image);
 			imagealphablending($this->image, false);
 			imagesavealpha($this->image, true);
 		} elseif ($this->image_type == IMAGETYPE_WEBP) {
 			$this->image = imagecreatefromwebp($filename);
+			imagepalettetotruecolor($this->image);
 			imagealphablending($this->image, false);
 			imagesavealpha($this->image, true);
 		} else {
