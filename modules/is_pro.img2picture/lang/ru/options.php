@@ -21,10 +21,12 @@ $MESS['ISPRO_IMG2PICTURE_TEMPLATE'] = '
 </pre>
 ';
 $MESS['ISPRO_IMG2PICTURE_USE_WEBP'] = 'Применить конвертацию изображений в webp';
+$MESS['ISPRO_IMG2PICTURE_LAZYLOAD'] = 'Использовать ленивую загрузку изображений (lazyload)';
+$MESS['ISPRO_IMG2PICTURE_BACKGROUNDS'] = 'Обрабатывать изображения в style="background..."';
 $MESS['ISPRO_IMG2PICTURE_IMG_COMPRESSION'] = 'Качество сохряняемых изображений (0-100)';
-$MESS['ISPRO_IMG2PICTURE_EXCEPTIONS_DIR'] = 'Исключения: каталоги (директории) сайта, где не будет раотать модуль';
-$MESS['ISPRO_IMG2PICTURE_EXCEPTIONS_SRC'] = 'Исключения: регулярные выражения по аттрибуту src на изображения, которые не надо преобразовывать';
-$MESS['ISPRO_IMG2PICTURE_EXCEPTIONS_TAG'] = 'Исключения: регулярные выражения по тегу img целиком, которые не надо преобразовывать';
+$MESS['ISPRO_IMG2PICTURE_EXCEPTIONS_DIR'] = 'Исключения:<br>каталоги (директории) сайта, где не будет раотать модуль';
+$MESS['ISPRO_IMG2PICTURE_EXCEPTIONS_SRC'] = 'Исключения:<br>регулярные выражения по аттрибуту src на изображения, которые не надо преобразовывать';
+$MESS['ISPRO_IMG2PICTURE_EXCEPTIONS_TAG'] = 'Исключения:<br>регулярные выражения по тегу img целиком, которые не надо преобразовывать';
 
 $MESS['ISPRO_IMG2PICTURE_MODULE_MODE'] = 'Режим работы модуля';
 $MESS['ISPRO_IMG2PICTURE_MODULE_MODE_off'] = 'Выключен';

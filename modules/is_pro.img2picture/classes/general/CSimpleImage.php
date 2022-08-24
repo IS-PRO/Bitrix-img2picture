@@ -27,16 +27,15 @@ class CSimpleImage
 			$this->image = imagecreatefromgif($filename);
 		} elseif ($this->image_type == IMAGETYPE_PNG) {
 			$this->image = imagecreatefrompng($filename);
-			imagealphablending($this->image, false);
-			imagesavealpha($this->image, true);
 		} elseif ($this->image_type == IMAGETYPE_WEBP) {
 			$this->image = imagecreatefromwebp($filename);
-			imagealphablending($this->image, false);
-			imagesavealpha($this->image, true);
 		} else {
 			$this->image_type = false;
 			return false;
 		}
+		imagepalettetotruecolor($this->image);
+		imagealphablending($this->image, false);
+		imagesavealpha($this->image, true);
 		return true;
 	}
 

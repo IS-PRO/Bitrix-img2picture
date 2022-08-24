@@ -57,6 +57,17 @@ $arModuleCfg = [
 			'default' => '75'
 		],
 
+		/* Использовать lazyload Y/N */
+		'LAZYLOAD' => [
+			'type'=>'checkbox',
+			'default' => 'Y'
+		],
+
+		/* Обрабатывать картинки в style="background..." Y/N */
+		'BACKGROUNDS' => [
+			'type'=>'checkbox',
+			'default' => 'Y'
+		],
 
 
 		/* Исключения картинок по src*/
@@ -78,9 +89,11 @@ $arModuleCfg = [
 		],
 
 		/* Шаблон для замены img тегов */
+		/*
 		'TEMPLATE' => [
 			'type' => 'textarea',
 			'default' => ''
 		],
+		*/
 	]
 ];
