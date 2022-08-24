@@ -10,6 +10,36 @@ if (class_exists('\IS_PRO\img2picture\Cimg2picture')) {
 class Cimg2picture
 {
 
+	public function SetParamsJS()
+	{
+		global $USER;
+		if ($USER->IsAdmin()) {
+			return;
+		};
+		if (\CSite::InDir('/bitrix/')) {
+			return;
+		};
+		$option = self::GetOptions();
+
+		if ($option['MODULE_MODE'] !== 'on') {
+			return;
+		};
+		if (trim($option['EXCEPTIONS_DIR'])) {
+			$dirs = explode("\n", $option['EXCEPTIONS_DIR']);
+			if (is_array($dirs)) {
+				foreach ($dirs as $dir) {
+					if (\CSite::InDir($dir)) {
+						return;
+					};
+				};
+			};
+		};
+
+		$jsPath = str_replace($option['DOCUMENT_ROOT'], '', __DIR__). "/../../lib/js/";
+		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'lozad.min.js');
+		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'img2picture.min.js');
+	}
+
 	public function img2picture(&$content)
 	{
 		global $USER;
@@ -34,7 +64,7 @@ class Cimg2picture
 				};
 			};
 		};
-
+		/*
 		$json_options = json_encode($option);
 		$jsInit = "
 		<script>
@@ -44,6 +74,7 @@ class Cimg2picture
 		$jsPath = str_replace($option['DOCUMENT_ROOT'], '', __DIR__). "/../../lib/js/img2picture.min.js";
 		$script =  '<script src="'.$jsPath.'"></script>'.$jsInit;
 		$content = str_replace('</head>', $script.'</head>', $content);
+		*/
 		$content = self::doIt($content, $option);
 	}
 
@@ -84,6 +115,7 @@ class Cimg2picture
 			$option['MODULE_MODE'] = $_SESSION['img2picture'];
 			$option['DEBUG'] = 'Y';
 		};
+		$option['MODULE_CONFIG'] = $arModuleCfg;
 		$option['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
 		return $option;
 	}
