@@ -85,9 +85,10 @@ class CImageManupulator extends CSimpleImage
 	function ReplaceBackground(&$content)
 	{
 		$arParams = $this->arParams;
-		$preg = '/<[^>]+style[^>]*=[^>]*background(-image)*\s*:\s*url\((.*)\)[^>]*>/ismuU';
+		$preg = '/<[^>]+style[^>]*=[^>]*(background(-image)*\s*:\s*url\((.*)\))[^>]*>/ismuU';
 		$tagkey = 0;
-		$srckey = 2;
+		$backgroundKey = 2;
+		$srckey = 3;
 
 		if (preg_match_all($preg, $content, $matches)) {
 			if ($arParams['DEBUG'] == 'Y') {
@@ -111,6 +112,7 @@ class CImageManupulator extends CSimpleImage
 				$need = true;
 				$arResult = [];
 				$img['tag'] = $matches[$tagkey][$key];
+				$img['bg']  = $matches[$backgroundKey][$key];
 				$img['src'] = $matches[$srckey][$key];
 				$img['src'] = trim($img['src'], '"');
 				$img['src'] = trim($img['src'], "'");
