@@ -28,21 +28,24 @@ document.addEventListener('DOMContentLoaded', function () {
 		};
 		webp[i].img.src=webp[i].src;
 	};
+
+	const elements = document.querySelectorAll('*[data-i2p]');
+
+
 	setTimeout(function() {
 		webpEnable = (webp.lossy.support && webp.lossless.support);
 
-		const elements = document.querySelectorAll('*[data-i2p]');
-		const observer = lozad(elements, {
-			loaded: function(el) {
-				el.classList.add('loaded');
-				if (webpEnable) {
-					el.classList.add('webp');
-				}
-			}
-		});
-		observer.observe();
-
+		if (webpEnable) {
+			elements.forEach(el => {
+				el.classList.add('webp')
+			})
+		}
 	}, 500);
 
-
+	const observer = lozad(elements, {
+		loaded: function(el) {
+			el.classList.add('loaded');
+		}
+	});
+	observer.observe();
 })

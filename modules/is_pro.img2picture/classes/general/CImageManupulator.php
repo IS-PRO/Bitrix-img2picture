@@ -61,8 +61,8 @@ class CImageManupulator extends CSimpleImage
 		if (empty($arParams['LAZYLOAD'])) {
 			$arParams['LAZYLOAD'] = 'Y';
 		}
-		$arParams['1PX']['src'] = str_replace([$arParams['DOCUMENT_ROOT'], '/lib/'], '', __DIR__).'/images/1px.png';
-		$arParams['1PX']['webp'] = str_replace([$arParams['DOCUMENT_ROOT'], '/lib/'], '', __DIR__).'/images/1px.png';
+		$arParams['1PX']['src'] = str_replace([$arParams['DOCUMENT_ROOT'], '/classes/general'], '', __DIR__).'/image/1px.png';
+		$arParams['1PX']['webp'] = str_replace([$arParams['DOCUMENT_ROOT'], '/classes/general'], '', __DIR__).'/image/1px.webp';
 		$this->arParams = $arParams;
 	}
 
@@ -150,6 +150,7 @@ class CImageManupulator extends CSimpleImage
 						$arResult['img'] = $img;
 						$arResult['md5key'] = $cacheKey;
 						$files = $this->PrepareResponsive($img['src'], $arParams['WIDTH']);
+						$PreparedOriginal = $this->PrepareOriginal($img['src']);
 						if ($files) {
 							$arResult['FILES'] =  $files;
 							if ($arResult['FILES'][self::smallWidth]['src'] == '') {
@@ -172,6 +173,8 @@ class CImageManupulator extends CSimpleImage
 								$haveFiles = false;
 								$addsourse  = ['', ''];
 								$addsourseLazy  = ['', ''];
+								$minmax = 0;
+
 								foreach ($arResult['FILES'][$val['width']] as $file_type => $file_src) {
 									if ($file_type == 'webp') {
 										$haveFiles = true;
@@ -186,15 +189,19 @@ class CImageManupulator extends CSimpleImage
 								if ($haveFiles) {
 									$arResult['style'] .= '@media ';
 									$styleand = '';
-									if ((int) $val['min'] > 0) {
+									if ((int) $val['min'] >= 0) {
 										$arResult['style'] .= '(min-width: ' . $val['min'] . 'px)';
 										$styleand = ' and ';
+										if ($minmax < $val['min']) {
+											$minmax = $val['min'];
+										};
 									};
-									/*
 									if ((int) $val['max'] > (int) $val['min']) {
 										$arResult['style'] .= $styleand . '(max-width: ' . $val['max'] . 'px)';
+										if ($minmax < $val['max']) {
+											$minmax = $val['max'];
+										};
 									};
-									*/
 									$arResult['style'] .= '{';
 									if ($arParams['LAZYLOAD'] != "Y") {
 										$arResult['style'] .= $addsourse[0].$addsourse[1];
@@ -204,6 +211,20 @@ class CImageManupulator extends CSimpleImage
 									$arResult['style'] .= '}';
 								}
 							}
+							$arResult['FILES']['original'] = $PreparedOriginal;
+							$arResult['style'] .= '@media (min-width: '.(int) $minmax.'px) {';
+							if ($arParams['LAZYLOAD'] != "Y") {
+								$arResult['style'] .= '*'.$arResult['cssSelector'].'{background-image:url('.$arResult['FILES']['original']['src'].')}';
+								if ($arResult['FILES']['original']['webp'] != '') {
+									$arResult['style'] .= '.webp'.$arResult['cssSelector'].'{background-image:url('.$arResult['FILES']['original']['webp'].')}';
+								}
+							} else {
+								$arResult['style'] .= '.loaded'.$arResult['cssSelector'].'{background-image:url('.$arResult['FILES']['original']['src'].')}';
+								if ($arResult['FILES']['original']['webp'] != '') {
+									$arResult['style'] .= '.webp.loaded'.$arResult['cssSelector'].'{background-image:url('.$arResult['FILES']['original']['webp'].')}';
+								}
+							}
+							$arResult['style'] .= '}';
 							$arResult['style'] .= '</style>';
 
 							$arResult['place'] = $arResult['style'].
@@ -355,15 +376,15 @@ class CImageManupulator extends CSimpleImage
 								};
 								$media = 'media="';
 								$mediaand = '';
-								if ((int) $val['min'] > 0) {
+								if ((int) $val['min'] >= 0) {
 									$media .= $mediaand . '(min-width: ' . $val['min'] . 'px)';
 									$mediaand = ' and ';
 								};
-								/*
+
 								if ((int) $val['max'] > (int) $val['min']) {
 									$media .= $mediaand . '(max-width: ' . $val['max'] . 'px)';
 								};
-								*/
+
 								$media .= '"';
 								$addsourse[$index] = '<source srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
 								$addsourseLazy[$index] = '<source '.$lazy.' data-i2p="Y" data-srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';

@@ -36,8 +36,8 @@ class Cimg2picture
 		};
 
 		$jsPath = str_replace($option['DOCUMENT_ROOT'], '', __DIR__). "/../../lib/js/";
-		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'lozad.js');
-		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'img2picture.js');
+		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'lozad.min.js');
+		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'img2picture.min.js');
 	}
 
 	public function img2picture(&$content)
