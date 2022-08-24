@@ -61,8 +61,8 @@ class CImageManupulator extends CSimpleImage
 		if (empty($arParams['LAZYLOAD'])) {
 			$arParams['LAZYLOAD'] = 'Y';
 		}
-		$arParams['1PX']['src'] = str_replace([$arParams['DOCUMENT_ROOT'], '/classes/general/'], '', __DIR__).'/images/1px.png';
-		$arParams['1PX']['webp'] = str_replace([$arParams['DOCUMENT_ROOT'], '/classes/general/'], '', __DIR__).'/images/1px.webp';
+		$arParams['1PX']['src'] = str_replace([$arParams['DOCUMENT_ROOT'], '/classes/general'], '', __DIR__).'/image/1px.png';
+		$arParams['1PX']['webp'] = str_replace([$arParams['DOCUMENT_ROOT'], '/classes/general'], '', __DIR__).'/image/1px.webp';
 		$this->arParams = $arParams;
 	}
 
