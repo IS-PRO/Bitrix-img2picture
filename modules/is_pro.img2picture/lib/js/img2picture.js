@@ -45,6 +45,16 @@ document.addEventListener('DOMContentLoaded', function () {
 	const observer = lozad(elements, {
 		loaded: function(el) {
 			el.classList.add('loaded');
+			if ((el.nodeName.toLowerCase() === 'img') &&
+				(el.parentNode.nodeName.toLowerCase() === 'picture'))
+			{
+				const sourses = el.parentNode.querySelectorAll('source');
+				if (sourses) {
+					sourses.forEach(source => {
+						observer.triggerLoad(source);
+					})
+				}
+			}
 		}
 	});
 	observer.observe();
