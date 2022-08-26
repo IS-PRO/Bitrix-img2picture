@@ -70,6 +70,12 @@ $arModuleCfg = [
 		],
 
 
+		/* в каких аттрибутах тега img искать ссылку на картинку */
+		'ATTR_SRC' => [
+			'type'=>'textarea',
+			'default' => 'src',
+		],
+
 		/* Исключения картинок по src*/
 		'EXCEPTIONS_SRC' => [
 			'type' => 'textarea',
@@ -86,6 +92,12 @@ $arModuleCfg = [
 		'EXCEPTIONS_DIR' => [
 			'type' => 'textarea',
 			'default' => implode("\n", ['/bitrix/', '/auth/', '/personal/'])
+		],
+
+		/* Время хранения кеша */
+		'CACHE_TTL' => [
+			'type' => 'text',
+			'default' => '2592000' /* 30 дней */
 		],
 
 		/* Шаблон для замены img тегов */

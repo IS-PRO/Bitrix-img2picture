@@ -32,6 +32,7 @@ $options_list = $arModuleCfg['options_list'];
 
 $ok_message = '';
 $eeror_message = '';
+$options_list_error = [];
 
 if (check_bitrix_sessid()) {
 	if (!empty($request->getpost('save'))) {
@@ -52,6 +53,9 @@ if ($isConfigurated != 'Y') {
 function checkOption(string $option_name, $option)
 {
 	/* Тут проверяем значение настроек, если есть ошибка, то возвращаем ее текст, иначе вернем true */
+	if (($option_name == 'ATTR_SRC') && (trim($option) == '')) {
+		return loc::getMessage('ISPRO_IMG2PICTURE_'.$option_name.'_ERROR');
+	}
 	return true;
 }
 
@@ -60,6 +64,10 @@ foreach ($options_list as $option_name => $arOption) {
 	if ($saveOption) {
 		$option[$option_name] = $request->getpost('option_' . $option_name);
 		$optionIsValid = checkOption($option_name, $option[$option_name]);
+		if ($optionIsValid !== true) {
+			$options_list_error[$option_name] = $optionIsValid;
+			$eeror_message .= 'ERROR: ' . mb_substr(Loc::getMessage('ISPRO_IMG2PICTURE_' . $option_name), 0, 40) . PHP_EOL;
+		};
 		if ($option_name == 'RESPONSIVE') {
 			foreach ($option[$option_name] as $key => $val) {
 				if ((trim($val['width']) == '')) {
@@ -77,7 +85,9 @@ foreach ($options_list as $option_name => $arOption) {
 	};
 	if (($saveOption || $setDefault) && ($optionIsValid === true)) {
 		\Bitrix\Main\Config\Option::set($arModuleCfg['MODULE_ID'], $option_name, $option[$option_name]);
-		$ok_message .= 'SAVED: ' . Loc::getMessage('ISPRO_IMG2PICTURE_' . $option_name) . PHP_EOL;
+		if (!setDefault) {
+			$ok_message .= 'SAVED: ' . mb_substr(Loc::getMessage('ISPRO_IMG2PICTURE_' . $option_name), 0, 40) . PHP_EOL;
+		}
 	};
 
 	$option[$option_name] = \Bitrix\Main\Config\Option::get($arModuleCfg['MODULE_ID'], $option_name);
@@ -160,6 +170,13 @@ $tabControl = new CAdminTabControl(str_replace('.', '_', $arModuleCfg['MODULE_ID
 				<?= Loc::getMessage('ISPRO_IMG2PICTURE_'.$option_name) ?>
 			</td>
 			<td width="80%">
+				<?if ($options_list_error[$option_name] != '') {
+					$message = new \CAdminMessage(array(
+						'MESSAGE' => $options_list_error[$option_name],
+						'TYPE' => 'ERROR'
+					));
+					echo $message->Show();
+				}?>
 				<?if ($arOption['type'] == 'textarea') :?>
 					<textarea name="option_<?=$option_name?>"><?= HtmlFilter::encode($option[$option_name]) ?></textarea>
 				<?elseif ($arOption['type'] == 'checkbox') :?>

@@ -20,9 +20,7 @@
 
 Модуль заменяет теги img на теги picture с ресайзом и конвертацией изображений.
 
-Модуль работает только с тегами img, у которых есть аттрибут src.
-
-Модуль обрабатвает изображение из аттрибута src. (Т.е. в src должна быть ссылка на полноразмерное изображение)
+Модуль так-же заменяет background с ресайзом и конвертацией изображений.
 
 Модуль не работает если текущий пользователь адмиристратор - для того чтобы не заменять теги во время редактирования контента.
 
@@ -69,3 +67,26 @@ $option - необязательный массив
 	IS_PRO\img2picture\GetOptions()
 
 вернет параметры модуля
+
+# Доступные события модуля:
+Можно перехватить и кастомизировать замену
+
+	/* Для перехвата замены img */
+	AddEventHandler("is_pro.img2picture", "OnPrepareResultImg", "MyPicture");
+
+	function MyPicture(&$arResult)
+	{
+		/* Какой-то код меняющий $arResult */
+	}
+
+	/* Для перехвата замены backgropunds */
+	AddEventHandler("is_pro.img2picture", "OnPrepareResultBackground", "MyBackground");
+
+	function MyBackground(&$arResult)
+	{
+		/* Какой-то код меняющий $arResult */
+	}
+
+# Поблагодарить
+
+Можно пройдя по ссылке https://www.sberbank.ru/ru/person/dl/jc?linkname=jGTzsJPtWFkAxVW2S
