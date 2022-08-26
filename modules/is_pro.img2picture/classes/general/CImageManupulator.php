@@ -75,11 +75,14 @@ class CImageManupulator extends CSimpleImage
 
 		$this->ReplaceImg($content);
 
-		if ($arParams['DEBUG'] == 'Y') {
-			\Bitrix\Main\Diag\Debug::writeToFile(['ReplaceBackground_'.date('Y.M.d H:i:s') => 'start']);
-		};
+		if ($arParams['BACKGROUNDS'] == 'Y') {
 
-		$this->ReplaceBackground($content);
+			if ($arParams['DEBUG'] == 'Y') {
+				\Bitrix\Main\Diag\Debug::writeToFile(['ReplaceBackground_'.date('Y.M.d H:i:s') => 'start']);
+			};
+
+			$this->ReplaceBackground($content);
+		}
 	}
 
 	public function ReplaceBackground(&$content)
