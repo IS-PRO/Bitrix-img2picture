@@ -160,9 +160,9 @@ class CImageManupulator extends CSimpleImage
 					if ($arParams['DEBUG'] == 'Y') {
 						\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $chachedPlace]);
 					};
-					if (is_array($chachedPlace)) [
+					if (is_array($chachedPlace)) {
 						$chachedPlace = $chachedPlace['palce'];
-					]
+					}
 				} elseif ($cache->startDataCache()) {
 					$arResult = [];
 					$arResult['place'] = '';
