@@ -156,10 +156,13 @@ class CImageManupulator extends CSimpleImage
 				$cacheKey =  md5($img['tag']);
 
 				if ($cache->initCache($cacheTtl, $cacheKey, $cachePath)) {
-					$arResult = $cache->getVars();
+					$chachedPlace = $cache->getVars();
 					if ($arParams['DEBUG'] == 'Y') {
-						\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $arResult]);
+						\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $chachedPlace]);
 					};
+					if (is_array($chachedPlace)) [
+						$chachedPlace = $chachedPlace['palce'];
+					]
 				} elseif ($cache->startDataCache()) {
 					$arResult = [];
 					$arResult['place'] = '';
@@ -183,9 +186,10 @@ class CImageManupulator extends CSimpleImage
 							ExecuteModuleEventEx($arEvent, array(&$arResult));
 						};
 					}
-
-					$cache->endDataCache($arResult);
+					$chachedPlace = $arResult['place'];
+					$cache->endDataCache($chachedPlace);
 				};
+				$arResult['place'] = $chachedPlace;
 				if (trim($arResult['place']) != '') {
 					$arAllreadyReplaced[] = $img['tag'];
 					$content = str_replace($img['tag'], $arResult['place'], $content);
@@ -246,10 +250,13 @@ class CImageManupulator extends CSimpleImage
 			$cacheKey =  md5($img['tag']);;
 
 			if ($cache->initCache($cacheTtl, $cacheKey, $cachePath)) {
-				$arResult = $cache->getVars();
+				$chachedPlace = $cache->getVars();
 				if ($arParams['DEBUG'] == 'Y') {
-					\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $place]);
+					\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $chachedPlace]);
 				};
+				if (is_array($chachedPlace)) {
+					$chachedPlace = $arResult['place'];
+				}
 			} elseif ($cache->startDataCache()) {
 				$arResult = [];
 				$arResult['place'] = '';
@@ -283,10 +290,10 @@ class CImageManupulator extends CSimpleImage
 						ExecuteModuleEventEx($arEvent, array(&$arResult));
 					};
 				}
-
-				$cache->endDataCache($arResult);
+				$chachedPlace = $arResult['place'];
+				$cache->endDataCache($chachedPlace);
 			};
-
+			$arResult['place'] = $chachedPlace;;
 			if (trim($arResult['place']) != '') {
 				$arAllreadyReplaced[] = $img['tag'];
 				$content = str_replace($img['tag'], $arResult['place'], $content);
