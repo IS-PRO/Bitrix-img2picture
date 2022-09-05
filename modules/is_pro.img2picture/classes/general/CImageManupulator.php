@@ -170,12 +170,12 @@ class CImageManupulator extends CSimpleImage
 				$cacheKey =  md5($img['tag']);
 
 				if ($cache->initCache($cacheTtl, $cacheKey, $cachePath)) {
-					$chachedPlace = $cache->getVars();
+					$cachedPlace = $cache->getVars();
 					if ($arParams['DEBUG'] == 'Y') {
-						\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $chachedPlace]);
+						\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $cachedPlace]);
 					};
-					if (is_array($chachedPlace)) {
-						$chachedPlace = $chachedPlace['palce'];
+					if (is_array($cachedPlace)) {
+						$cachedPlace = $cachedPlace['palce'];
 					}
 				} elseif ($cache->startDataCache()) {
 					$arResult = [];
@@ -200,10 +200,10 @@ class CImageManupulator extends CSimpleImage
 							ExecuteModuleEventEx($arEvent, array(&$arResult));
 						};
 					}
-					$chachedPlace = $arResult['place'];
-					$cache->endDataCache($chachedPlace);
+					$cachedPlace = $arResult['place'];
+					$cache->endDataCache($cachedPlace);
 				};
-				$arResult['place'] = $chachedPlace;
+				$arResult['place'] = $cachedPlace;
 				if (trim($arResult['place']) != '') {
 					$arAllreadyReplaced[] = $img['tag'];
 					$content = str_replace($img['tag'], $arResult['place'], $content);
@@ -264,12 +264,12 @@ class CImageManupulator extends CSimpleImage
 			$cacheKey =  md5($img['tag']);;
 
 			if ($cache->initCache($cacheTtl, $cacheKey, $cachePath)) {
-				$chachedPlace = $cache->getVars();
+				$cachedPlace = $cache->getVars();
 				if ($arParams['DEBUG'] == 'Y') {
-					\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $chachedPlace]);
+					\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $cachedPlace]);
 				};
-				if (is_array($chachedPlace)) {
-					$chachedPlace = $arResult['place'];
+				if (is_array($cachedPlace)) {
+					$cachedPlace = $arResult['place'];
 				}
 			} elseif ($cache->startDataCache()) {
 				$arResult = [];
@@ -304,10 +304,10 @@ class CImageManupulator extends CSimpleImage
 						ExecuteModuleEventEx($arEvent, array(&$arResult));
 					};
 				}
-				$chachedPlace = $arResult['place'];
-				$cache->endDataCache($chachedPlace);
+				$cachedPlace = $arResult['place'];
+				$cache->endDataCache($cachedPlace);
 			};
-			$arResult['place'] = $chachedPlace;;
+			$arResult['place'] = $cachedPlace;;
 			if (trim($arResult['place']) != '') {
 				$arAllreadyReplaced[] = $img['tag'];
 				$content = str_replace($img['tag'], $arResult['place'], $content);
