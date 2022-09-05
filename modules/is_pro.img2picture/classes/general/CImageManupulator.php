@@ -11,18 +11,24 @@ if (class_exists('\IS_PRO\img2picture\CImageManupulator')) {
 
 class CImageManupulator extends CSimpleImage
 {
-	const DIR = '/upload/img2picture/';
-	const max_width = 99999;
-	const cachePath  = 'img2picture';
-	const smallWidth = 100;
+	const
+			DIR = '/upload/img2picture/',
+	 		max_width = 99999,
+	 		cachePath  = 'img2picture',
+	 		smallWidth = 100,
+			onePXpng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+			onePXwebp = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA';
+
 	var $arParams = array();
 
 	public function __construct($arParams)
 	{
+		/* DOCUMENT_ROOT */
 		if (empty($arParams['DOCUMENT_ROOT'])) {
 			$arParams['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
 		};
 
+		/* ATTR_SRC_VALUES */
 		$arParams['ATTR_SRC_VALUES'] = [];
 		if (!empty($arParams['ATTR_SRC'])) {
 			$arAttrs = [];
@@ -40,7 +46,7 @@ class CImageManupulator extends CSimpleImage
 			$arParams['ATTR_SRC_VALUES'][] = 'src';
 		};
 
-
+		/* EXCEPTIONS_SRC_REG */
 		if (!empty($arParams['EXCEPTIONS_SRC'])) {
 			$arParams['EXCEPTIONS_SRC_REG'] = [];
 			$arExceptions = [];
@@ -54,6 +60,8 @@ class CImageManupulator extends CSimpleImage
 				};
 			};
 		};
+
+		/* EXCEPTIONS_TAG_REG */
 		if (!empty($arParams['EXCEPTIONS_TAG'])) {
 			$arParams['EXCEPTIONS_TAG_REG'] = [];
 			$arExceptions = [];
@@ -68,9 +76,12 @@ class CImageManupulator extends CSimpleImage
 			};
 		};
 
+		/* IMG_COMPRESSION */
 		if ((int) $arParams['IMG_COMPRESSION'] == 0) {
 			$arParams['IMG_COMPRESSION'] = 75;
 		};
+
+		/* WIDTH */
 		if (is_array($arParams['RESPONSIVE_VALUE'])) {
 			foreach ($arParams['RESPONSIVE_VALUE'] as $key => $val) {
 				$arParams['WIDTH'][] = $val['width'];
@@ -80,14 +91,17 @@ class CImageManupulator extends CSimpleImage
 		} else {
 			unset($arParams['RESPONSIVE_VALUE']);
 		};
-		if ((int) $arParams['CACHE_TTL'] == 0) {
-			$arParams['CACHE_TTL'] = 2592000; /* 30 дней */
-		};
+
+		/* LAZYLOAD */
 		if (empty($arParams['LAZYLOAD'])) {
 			$arParams['LAZYLOAD'] = 'Y';
 		}
-		$arParams['1PX']['src'] = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=';
-		$arParams['1PX']['webp'] = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA';
+
+		/* CACHE_TTL */
+		if ((int) $arParams['CACHE_TTL'] == 0) {
+			$arParams['CACHE_TTL'] = 2592000; /* 30 дней */
+		};
+
 		$this->arParams = $arParams;
 	}
 
@@ -476,7 +490,7 @@ class CImageManupulator extends CSimpleImage
 						if (!empty($arResult['FILES'][self::smallWidth]['webp'])) {
 							$lazy = 'srcset="'.$arResult['FILES'][self::smallWidth]['webp'].'"';
 						} else {
-							$lazy = 'srcset="'.$arParams['1PX']['webp'].'"';
+							$lazy = 'srcset="'.self::onePXwebp.'"';
 						}
 						$index = 0;
 					} else {
@@ -488,7 +502,7 @@ class CImageManupulator extends CSimpleImage
 						if (!empty($arResult['FILES'][self::smallWidth]['src'])) {
 							$lazy = 'srcset="'.$arResult['FILES'][self::smallWidth]['src'].'"';
 						} else {
-							$lazy = 'srcset="'.$arParams['1PX']['src'].'"';
+							$lazy = 'srcset="'.self::onePXpng.'"';
 						}
 						$index = 1;
 					};
@@ -527,7 +541,7 @@ class CImageManupulator extends CSimpleImage
 			if (!empty($arResult['FILES'][self::smallWidth]['webp'])) {
 				$lazy = 'srcset="'.$arResult['FILES'][self::smallWidth]['webp'].'"';
 			} else {
-				$lazy = 'srcset="'.$arParams['1PX']['webp'].'"';
+				$lazy = 'srcset="'.self::onePXwebp.'"';
 			}
 			$arResult['sources'][] = '<source srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
 			$arResult['sources_lazy'][] = '<source '.$lazy.'  data-i2p="Y" data-srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
@@ -545,7 +559,7 @@ class CImageManupulator extends CSimpleImage
 					if (!empty($arResult['FILES'][self::smallWidth]['src'])) {
 						$arResult["img_lazy"]["tag"] .= ' srcset="'.$arResult['FILES'][self::smallWidth]['src'].'"';
 					} else {
-						$arResult["img_lazy"]["tag"] .= ' srcset="'.$arParams['1PX']['src'].'"';
+						$arResult["img_lazy"]["tag"] .= ' srcset="'.self::onePXpng.'"';
 					}
 				}
 				$arResult["img_lazy"]["tag"] .= ' '.$attr_name.'="'.$attr_val.'"';
