@@ -2,7 +2,9 @@
 use Bitrix\Main\Localization\Loc;
 use Bitrix\Main\ModuleManager;
 Loc::loadMessages(__FILE__);
-
+if (class_exists('is_pro_img2picture')) {
+	return;
+}
 Class is_pro_img2picture extends CModule
 {
 	public function __construct()
