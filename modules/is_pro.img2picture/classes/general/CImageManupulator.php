@@ -204,9 +204,15 @@ class CImageManupulator extends CSimpleImage
 					$cache->endDataCache($cachedPlace);
 				};
 				$arResult['place'] = $cachedPlace;
-				if (trim($arResult['place']) != '') {
+				if ((trim($arResult['place']) != '') && (mb_strpos($arResult['place'],'</style>'))) {
+					list($tohead, $newtag) = explode('</style>', $arResult['place']);
+					$tohead .= '</style></head>';
 					$arAllreadyReplaced[] = $img['tag'];
-					$content = str_replace($img['tag'], $arResult['place'], $content);
+					$content = str_replace(
+						['</head>', $img['tag']],
+						[$tohead, $newtag],
+						$content
+					);
 					if ($arParams['DEBUG'] == 'Y') {
 						\Bitrix\Main\Diag\Debug::writeToFile([
 								'REPLACED_FROM' => $img['tag'],
