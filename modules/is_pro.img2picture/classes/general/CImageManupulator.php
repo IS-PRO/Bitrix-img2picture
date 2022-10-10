@@ -175,7 +175,7 @@ class CImageManupulator extends CSimpleImage
 						\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $cachedPlace]);
 					};
 					if (is_array($cachedPlace)) {
-						$cachedPlace = $cachedPlace['palce'];
+						$cachedPlace = $cachedPlace['place'];
 					}
 				} elseif ($cache->startDataCache()) {
 					$arResult = [];
