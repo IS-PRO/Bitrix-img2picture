@@ -109,6 +109,6 @@ function MyBackground(&$arResult)
 </pre>
 
 <h2>Поблагодарить</h2>
-<p>Можно пройдя по <a href="https://www.sberbank.ru/ru/person/dl/jc?linkname=jGTzsJPtWFkAxVW2S" target="_blank">ссылке</a></p>
+<p>Можно пройдя по <a href="https://www.sberbank.com/ru/person/dl/jc?linkname=jGTzsJPtWFkAxVW2S" target="_blank">ссылке</a></p>
 
 ';

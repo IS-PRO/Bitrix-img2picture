@@ -89,4 +89,4 @@ $option - необязательный массив
 
 # Поблагодарить
 
-Можно пройдя по ссылке https://www.sberbank.ru/ru/person/dl/jc?linkname=jGTzsJPtWFkAxVW2S
+Можно пройдя по ссылке https://www.sberbank.com/ru/person/dl/jc?linkname=jGTzsJPtWFkAxVW2S
