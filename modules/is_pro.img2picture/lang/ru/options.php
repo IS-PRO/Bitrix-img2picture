@@ -67,22 +67,36 @@ $MESS['ISPRO_IMG2PICTURE_INFO'] = '
 </p>
 
 <h3>Доступные функции:</h3>
-
 <p>
-<b>IS_PRO\img2picture\Cimg2picture\doIt(string $content, array $option = [])</b><br>
+Для использования функций включите модуль
+<pre>
+CModule::IncludeModule("is_pro.img2picture");
+</pre>
+</p>
+<hr>
+<p>
+<pre>
+IS_PRO\img2picture\Cimg2picture\doIt(string $content, array $option = [])
+</pre>
 вернет контент с замененными img на picture<br>
 $content - контент в котором необходимо заменить все img<br>
 $option - необязательный массив параметров замены
 </p>
+<hr>
 <p>
-<b>IS_PRO\img2picture\Cimg2picture\MakeWebp(string $src, array $option = [])</b><br>
+<pre>
+IS_PRO\img2picture\Cimg2picture\MakeWebp(string $src, array $option = [])
+</pre>
 вернет ссылку на созданный webp<br>
 в случае не удачи вернет false<br>
 $src - ссылка на изображение<br>
 $option - необязательный массив параметров замены
 </p>
+<hr>
 <p>
-<b>IS_PRO\img2picture\Cimg2picture\GetOptions()</b><br>
+<pre>
+IS_PRO\img2picture\Cimg2picture\GetOptions()
+</pre>
 вернет параметры модуля
 </p>
 
