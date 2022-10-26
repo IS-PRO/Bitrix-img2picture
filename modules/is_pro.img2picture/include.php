@@ -3,8 +3,8 @@ if (file_exists(__DIR__ . "/install/module.cfg.php")) {
 	include(__DIR__ . "/install/module.cfg.php");
 };
 
-CModule::IncludeModule($arModuleCfg['MODULE_ID']);
-global $DBType;
+use Bitrix\Main\Loader;
+Loader::includeModule($arModuleCfg['MODULE_ID']);
 
 $arClasses=array(
 	/* Библиотеки и классы для авто загрузки */
@@ -13,4 +13,4 @@ $arClasses=array(
 	'IS_PRO\img2picture\Cimg2picture'=>'classes/general/Cimg2picture.php'
 );
 
-CModule::AddAutoloadClasses($arModuleCfg['MODULE_ID'], $arClasses);
+Loader::registerAutoLoadClasses($arModuleCfg['MODULE_ID'], $arClasses);
