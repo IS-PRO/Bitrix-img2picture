@@ -177,7 +177,7 @@ class CImageManupulator extends CSimpleImage
 					if (is_array($cachedPlace)) {
 						$cachedPlace = $cachedPlace['place'];
 					}
-				} elseif ($cache->startDataCache()) {
+				} else {
 					$arResult = [];
 					$arResult['place'] = '';
 					if (mb_strpos($img['tag'], 'data-i2p')) {
@@ -199,9 +199,11 @@ class CImageManupulator extends CSimpleImage
 						foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultBackground', true) as $arEvent) {
 							ExecuteModuleEventEx($arEvent, array(&$arResult));
 						};
-					}
+					};
 					$cachedPlace = $arResult['place'];
-					$cache->endDataCache($cachedPlace);
+					if ($cache->startDataCache()) {
+						$cache->endDataCache($cachedPlace);
+					};
 				};
 				$arResult['place'] = $cachedPlace;
 				if ((trim($arResult['place']) != '') && (mb_strpos($arResult['place'],'</style>'))) {
@@ -277,7 +279,7 @@ class CImageManupulator extends CSimpleImage
 				if (is_array($cachedPlace)) {
 					$cachedPlace = $arResult['place'];
 				}
-			} elseif ($cache->startDataCache()) {
+			} else {
 				$arResult = [];
 				$arResult['place'] = '';
 
@@ -311,7 +313,9 @@ class CImageManupulator extends CSimpleImage
 					};
 				}
 				$cachedPlace = $arResult['place'];
-				$cache->endDataCache($cachedPlace);
+				if ($cache->startDataCache()) {
+					$cache->endDataCache($cachedPlace);
+				}
 			};
 			$arResult['place'] = $cachedPlace;;
 			if (trim($arResult['place']) != '') {
