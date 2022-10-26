@@ -8,20 +8,7 @@ $MESS['ISPRO_IMG2PICTURE_RESPONSIVE'] = 'Адаптив';
 $MESS['ISPRO_IMG2PICTURE_MIN_SCREEN_WIDTH'] = 'Минимальная ширина экрана экрана (min-width), px';
 $MESS['ISPRO_IMG2PICTURE_MAX_SCREEN_WIDTH'] = 'Максимальная ширина экрана экрана (max-width), px';
 $MESS['ISPRO_IMG2PICTURE_MAX_IMG_WIDTH'] = 'Ширина изображения px';
-/*
-$MESS['ISPRO_IMG2PICTURE_TEMPLATE'] = '
-Шаблон замены тега img<br>
-Например
-<pre>
-	<picture>
-		<?foreach ($arResult["sourses_lazy"] as $sourse):?>
-			<?=$sourse?>
-		<?endforeach?>
-		<?=$arResult["img_lazy"]["tag"]?>
-	</picture>
-</pre>
-';
-*/
+
 $MESS['ISPRO_IMG2PICTURE_USE_WEBP'] = 'Применить конвертацию изображений в webp';
 $MESS['ISPRO_IMG2PICTURE_LAZYLOAD'] = 'Использовать ленивую загрузку изображений (lazyload)';
 $MESS['ISPRO_IMG2PICTURE_ATTR_SRC'] = 'В каких аттрибутах тега img искать ссылку на изображение *<br> (по умолчанию src)';
@@ -121,6 +108,13 @@ function MyBackground(&$arResult)
 	/* Какой-то код меняющий $arResult */
 }
 </pre>
+
+<h2>Управление модулем на странице</h2>
+
+<p>Иногда надо обновить кеш только на конкретной странице или посмотреть почему что-то неправильно конвертируется</p>
+<p>включить отладку на странице ?img2pictureDebug=Y</p>
+<p>отчистить кеш и переконвертировать картинки на странице ?img2pictureClearCache=Y</p>
+
 
 <h2>Поблагодарить</h2>
 <p>Можно пройдя по <a href="https://www.sberbank.com/ru/person/dl/jc?linkname=jGTzsJPtWFkAxVW2S" target="_blank">ссылке</a></p>

@@ -64,17 +64,6 @@ class Cimg2picture
 				};
 			};
 		};
-		/*
-		$json_options = json_encode($option);
-		$jsInit = "
-		<script>
-			const img2picture_options = ".$json_options.";
-		</script>
-		";
-		$jsPath = str_replace($option['DOCUMENT_ROOT'], '', __DIR__). "/../../lib/js/img2picture.min.js";
-		$script =  '<script src="'.$jsPath.'"></script>'.$jsInit;
-		$content = str_replace('</head>', $script.'</head>', $content);
-		*/
 		$content = self::doIt($content, $option);
 	}
 
@@ -115,6 +104,15 @@ class Cimg2picture
 			$option['MODULE_MODE'] = $_SESSION['img2picture'];
 			$option['DEBUG'] = 'Y';
 		};
+		if ($option['MODULE_MODE'] == 'on') {
+			if ($_GET['img2pictureDebug'] == 'Y') {
+				$option['DEBUG'] = 'Y';
+			};
+			if ($_GET['img2pictureClearCache'] == 'Y') {
+				$option['CLEAR_CACHE'] = 'Y';
+			};
+		};
+
 		$option['MODULE_CONFIG'] = $arModuleCfg;
 		$option['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
 		return $option;

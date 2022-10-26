@@ -169,7 +169,7 @@ class CImageManupulator extends CSimpleImage
 
 				$cacheKey =  md5($img['tag']);
 
-				if ($cache->initCache($cacheTtl, $cacheKey, $cachePath)) {
+				if (($cache->initCache($cacheTtl, $cacheKey, $cachePath)) && ($arParams['CLEAR_CACHE'] != 'Y')) {
 					$cachedPlace = $cache->getVars();
 					if ($arParams['DEBUG'] == 'Y') {
 						\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $cachedPlace]);
@@ -269,7 +269,7 @@ class CImageManupulator extends CSimpleImage
 
 			$cacheKey =  md5($img['tag']);;
 
-			if ($cache->initCache($cacheTtl, $cacheKey, $cachePath)) {
+			if (($cache->initCache($cacheTtl, $cacheKey, $cachePath)) && ($arParams['CLEAR_CACHE'] != 'Y')) {
 				$cachedPlace = $cache->getVars();
 				if ($arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $cachedPlace]);
@@ -405,7 +405,7 @@ class CImageManupulator extends CSimpleImage
 
 			$arResult[$width]['src'] = $newsrc;
 
-			if (!file_exists($filename)) {
+			if ((!file_exists($filename)) || ($this->arParams['CLEAR_CACHE'] == 'Y')) {
 				if (!$loaded) {
 					if (!$this->load($doc_root . $src)) {
 						return false;
@@ -433,7 +433,7 @@ class CImageManupulator extends CSimpleImage
 			/* подготовим webp */
 			$filename = $doc_root . $newsrc . '.webp';
 			$arResult[$width]['webp'] = $newsrc . '.webp';
-			if (!file_exists($filename)) {
+			if ((!file_exists($filename)) || ($this->arParams['CLEAR_CACHE'] == 'Y')) {
 				if (!$loaded) {
 					if (!$this->load($doc_root . $src)) {
 						return false;
@@ -705,7 +705,7 @@ class CImageManupulator extends CSimpleImage
 		$webp = str_replace('//', '/', $webp);
 		$filename = $doc_root . $webp;
 
-		if (!file_exists($doc_root . $webp)) {
+		if ((!file_exists($filename)) || ($this->arParams['CLEAR_CACHE'] == 'Y')) {
 			$need = true;
 		} else {
 			if (filesize($filename) == 0) {
