@@ -108,8 +108,8 @@ class Cimg2picture
 			if ($_GET['img2pictureDebug'] == 'Y') {
 				$option['DEBUG'] = 'Y';
 			};
-			if ($_GET['img2pictureClearCache'] == 'Y') {
-				$option['CLEAR_CACHE'] = 'Y';
+			if ($_GET['img2pictureClearCache'] != '') {
+				$option['CLEAR_CACHE'] = $_GET['img2pictureClearCache'];
 			};
 		};
 

@@ -409,7 +409,19 @@ class CImageManupulator extends CSimpleImage
 
 			$arResult[$width]['src'] = $newsrc;
 
-			if ((!file_exists($filename)) || ($this->arParams['CLEAR_CACHE'] == 'Y')) {
+			if (
+				(!file_exists($filename)) ||
+				(in_array(
+					$this->arParams['CLEAR_CACHE'],
+					[
+						'Y',
+						$doc_root . $src,
+						$src,
+						$filename,
+						$newsrc
+					]
+				))
+			) {
 				if (!$loaded) {
 					if (!$this->load($doc_root . $src)) {
 						return false;
@@ -429,6 +441,10 @@ class CImageManupulator extends CSimpleImage
 				} else {
 					unset($arResult[$width]['src']);
 				}
+			} else {
+				if (in_array(filesize($filename),[0, 4096]))  {
+					unset($arResult[$width]['src']);
+				}
 			}
 			if ($this->arParams['USE_WEBP'] !== 'Y') {
 				continue;
@@ -437,7 +453,18 @@ class CImageManupulator extends CSimpleImage
 			/* подготовим webp */
 			$filename = $doc_root . $newsrc . '.webp';
 			$arResult[$width]['webp'] = $newsrc . '.webp';
-			if ((!file_exists($filename)) || ($this->arParams['CLEAR_CACHE'] == 'Y')) {
+			if ((!file_exists($filename)) ||
+				(in_array(
+					$this->arParams['CLEAR_CACHE'],
+					[
+						'Y',
+						$doc_root . $src,
+						$src,
+						$filename,
+						$newsrc
+					]
+				))
+			) {
 				if (!$loaded) {
 					if (!$this->load($doc_root . $src)) {
 						return false;
@@ -453,7 +480,7 @@ class CImageManupulator extends CSimpleImage
 						if (!$this->save($filename, IMAGETYPE_WEBP, $this->arParams['IMG_COMPRESSION'])) {
 							unset($arResult[$width]['webp']);
 						};
-						if (filesize($filename) == 0) {
+						if (in_array(filesize($filename),[0, 4096]))  {
 							unset($arResult[$width]['webp']);
 						}
 					} else {
@@ -463,7 +490,7 @@ class CImageManupulator extends CSimpleImage
 					unset($arResult[$width]['webp']);
 				}
 			} else {
-				if (filesize($filename) == 0) {
+				if (in_array(filesize($filename),[0, 4096]))  {
 					unset($arResult[$width]['webp']);
 				}
 			}
@@ -709,10 +736,21 @@ class CImageManupulator extends CSimpleImage
 		$webp = str_replace('//', '/', $webp);
 		$filename = $doc_root . $webp;
 
-		if ((!file_exists($filename)) || ($this->arParams['CLEAR_CACHE'] == 'Y')) {
+		if ((!file_exists($filename)) ||
+			(in_array(
+				$this->arParams['CLEAR_CACHE'],
+				[
+					'Y',
+					$doc_root . $src,
+					$src,
+					$filename,
+					$webp
+				]
+			))
+		) {
 			$need = true;
 		} else {
-			if (filesize($filename) == 0) {
+			if (in_array(filesize($filename),[0, 4096]))  {
 				return false;
 			};
 		};
