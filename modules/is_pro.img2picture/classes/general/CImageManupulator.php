@@ -647,7 +647,7 @@ class CImageManupulator extends CSimpleImage
 			};
 			$arResult['cssSelector'] = '[data-i2p="'.$arResult['md5key'].'"]';
 			$arResult['style'] = '<style>';
-			$arResult['style'] .= '*'.$arResult['cssSelector'].'{background-image:url('.$arResult['FILES'][self::smallWidth]['src'].')}';
+			$arResult['style'] .= '*'.$arResult['cssSelector'].'{background-image:url("'.$arResult['FILES'][self::smallWidth]['src'].'")}';
 			foreach ($arParams['RESPONSIVE_VALUE'] as $key => $val) {
 				if (!is_array($arResult['FILES'][$val['width']])) {
 					continue;
@@ -663,12 +663,12 @@ class CImageManupulator extends CSimpleImage
 				foreach ($arResult['FILES'][$val['width']] as $file_type => $file_src) {
 					if ($file_type == 'webp') {
 						$haveFiles = true;
-						$addsourse[1] = '.webp'.$arResult['cssSelector'].'{background-image:url('. $file_src.')}';
-						$addsourseLazy[1] = '.webp.loaded'.$arResult['cssSelector'].'{background-image:url('. $file_src.')}';
+						$addsourse[1] = '.webp'.$arResult['cssSelector'].'{background-image:url("'. $file_src.'")}';
+						$addsourseLazy[1] = '.webp.loaded'.$arResult['cssSelector'].'{background-image:url("'. $file_src.'")}';
 					} else {
 						$haveFiles = true;
-						$addsourse[0] = '*'.$arResult['cssSelector'].'{background-image:url('. $file_src.')}';
-						$addsourseLazy[0] = '.loaded'.$arResult['cssSelector'].'{background-image:url('. $file_src.')}';
+						$addsourse[0] = '*'.$arResult['cssSelector'].'{background-image:url("'. $file_src.'")}';
+						$addsourseLazy[0] = '.loaded'.$arResult['cssSelector'].'{background-image:url("'. $file_src.'")}';
 					};
 				}
 				if ($haveFiles) {
@@ -699,14 +699,14 @@ class CImageManupulator extends CSimpleImage
 			$arResult['FILES']['original'] = $PreparedOriginal;
 			$arResult['style'] .= '@media (min-width: '.(int) $minmax.'px) {';
 			if ($arParams['LAZYLOAD'] != "Y") {
-				$arResult['style'] .= '*'.$arResult['cssSelector'].'{background-image:url('.$arResult['FILES']['original']['src'].')}';
+				$arResult['style'] .= '*'.$arResult['cssSelector'].'{background-image:url("'.$arResult['FILES']['original']['src'].'")}';
 				if ($arResult['FILES']['original']['webp'] != '') {
-					$arResult['style'] .= '.webp'.$arResult['cssSelector'].'{background-image:url('.$arResult['FILES']['original']['webp'].')}';
+					$arResult['style'] .= '.webp'.$arResult['cssSelector'].'{background-image:url("'.$arResult['FILES']['original']['webp'].'")}';
 				}
 			} else {
-				$arResult['style'] .= '.loaded'.$arResult['cssSelector'].'{background-image:url('.$arResult['FILES']['original']['src'].')}';
+				$arResult['style'] .= '.loaded'.$arResult['cssSelector'].'{background-image:url("'.$arResult['FILES']['original']['src'].'")}';
 				if ($arResult['FILES']['original']['webp'] != '') {
-					$arResult['style'] .= '.webp.loaded'.$arResult['cssSelector'].'{background-image:url('.$arResult['FILES']['original']['webp'].')}';
+					$arResult['style'] .= '.webp.loaded'.$arResult['cssSelector'].'{background-image:url("'.$arResult['FILES']['original']['webp'].'")}';
 				}
 			}
 			$arResult['style'] .= '}';
