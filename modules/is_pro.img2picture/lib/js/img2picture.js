@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-
+	let webpEnable = false;
 	let webp = {
 		lossy: {
 			src: 'data:image/webp;base64,UklGRiIAAABXR'+
@@ -36,41 +36,41 @@ document.addEventListener('DOMContentLoaded', function () {
     myObserver.observe (doc, obsConfig);
     InitI2Plazyload();
 
-})
 
-function InitI2Plazyload() {
+	function InitI2Plazyload() {
+		const elements = document.querySelectorAll('*[data-i2p]:not(.i2p)');
 
-	let webpEnable = false;
-	const elements = document.querySelectorAll('*[data-i2p]:not(.i2p)');
+		elements.forEach(el => {
+			el.classList.add('i2p');
+		});
 
-	elements.forEach(el => {
-		el.classList.add('i2p');
-	});
+		setTimeout(function() {
+			webpEnable = (webp.lossy.support && webp.lossless.support);
 
-	setTimeout(function() {
-		webpEnable = (webp.lossy.support && webp.lossless.support);
+			if (webpEnable) {
+				elements.forEach(el => {
+					el.classList.add('webp')
+				})
+			}
+		}, 500);
 
-		if (webpEnable) {
-			elements.forEach(el => {
-				el.classList.add('webp')
-			})
-		}
-	}, 500);
-
-	const observer = lozad(elements, {
-		loaded: function(el) {
-			el.classList.add('loaded');
-			if ((el.nodeName.toLowerCase() === 'img') &&
-				(el.parentNode.nodeName.toLowerCase() === 'picture'))
-			{
-				const sourses = el.parentNode.querySelectorAll('source');
-				if (sourses) {
-					sourses.forEach(source => {
-						observer.triggerLoad(source);
-					})
+		const observer = lozad(elements, {
+			loaded: function(el) {
+				el.classList.add('loaded');
+				if ((el.nodeName.toLowerCase() === 'img') &&
+					(el.parentNode.nodeName.toLowerCase() === 'picture'))
+				{
+					const sourses = el.parentNode.querySelectorAll('source');
+					if (sourses) {
+						sourses.forEach(source => {
+							observer.triggerLoad(source);
+						})
+					}
 				}
 			}
-		}
-	});
-	observer.observe();
-}
+		});
+		observer.observe();
+	}
+
+})
+
