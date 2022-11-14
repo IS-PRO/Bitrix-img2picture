@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', function () {
 
-	let webpEnable = false;
+
 	let webp = {
 		lossy: {
 			src: 'data:image/webp;base64,UklGRiIAAABXR'+
@@ -29,8 +29,23 @@ document.addEventListener('DOMContentLoaded', function () {
 		webp[i].img.src=webp[i].src;
 	};
 
-	const elements = document.querySelectorAll('*[data-i2p]');
+	const doc = document.querySelector('body');
+    const MutationObserver    = window.MutationObserver;
+    const myObserver = new MutationObserver(InitI2Plazyload);
+    const obsConfig = { childList: true, subtree: true };
+    myObserver.observe (doc, obsConfig);
+    InitI2Plazyload();
 
+})
+
+function InitI2Plazyload() {
+
+	let webpEnable = false;
+	const elements = document.querySelectorAll('*[data-i2p]:not(.i2p)');
+
+	elements.forEach(el => {
+		el.classList.add('i2p');
+	});
 
 	setTimeout(function() {
 		webpEnable = (webp.lossy.support && webp.lossless.support);
@@ -58,4 +73,4 @@ document.addEventListener('DOMContentLoaded', function () {
 		}
 	});
 	observer.observe();
-})
+}
