@@ -10,7 +10,7 @@ if (class_exists('\IS_PRO\img2picture\Cimg2picture')) {
 class Cimg2picture
 {
 
-	public function SetParamsJS()
+	public static function SetParamsJS()
 	{
 		global $USER;
 		if ($USER->IsAdmin()) {
@@ -40,7 +40,7 @@ class Cimg2picture
 		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'img2picture.min.js');
 	}
 
-	public function img2picture(&$content)
+	public static function img2picture(&$content)
 	{
 		global $USER;
 		if ($USER->IsAdmin()) {
@@ -67,7 +67,7 @@ class Cimg2picture
 		$content = self::doIt($content, $option);
 	}
 
-	public function doIt(string $content, array $option = [])
+	public static function doIt(string $content, array $option = [])
 	{
 		if (count($option) == 0) {
 			$option = self::GetOptions();
@@ -79,7 +79,7 @@ class Cimg2picture
 		return $content;
 	}
 
-	public function MakeWebp(string $src, array $option = [])
+	public static function MakeWebp(string $src, array $option = [])
 	{
 		if (count($option) == 0) {
 			$option = self::GetOptions();
@@ -88,7 +88,7 @@ class Cimg2picture
 		return $img2picture->ConvertImg2webp($src);
 	}
 
-	public function GetOptions() {
+	public static function GetOptions() {
 		include(__DIR__ . "/../../install/module.cfg.php");
 		$options_list = $arModuleCfg['options_list'];
 		foreach ($options_list as $option_name => $arOption) {
@@ -118,7 +118,7 @@ class Cimg2picture
 		return $option;
 	}
 
-	public function ClearDirCache() {
+	public static function ClearDirCache() {
 		$option = self::GetOptions();
 		$img2picture = new CImageManupulator($option);
 		return $img2picture->ClearDirCache($src);

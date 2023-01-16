@@ -42,7 +42,7 @@ class CImageManupulator extends CSimpleImage
 				};
 			};
 		};
-		if (count($arParams['ATTR_SRC_VALUES']) == 0)  {
+		if (!isset($arParams['ATTR_SRC_VALUES']) || (count($arParams['ATTR_SRC_VALUES']) == 0)) {
 			$arParams['ATTR_SRC_VALUES'][] = 'src';
 		};
 
@@ -605,7 +605,7 @@ class CImageManupulator extends CSimpleImage
 		$arResult["img_lazy"]["tag"] .= '>';
 
 		if ($arParams['LAZYLOAD'] != "Y") {
-			if (count($arResult["sources"]) > 0) {
+			if ((isset($arResult["sources"])) && (count($arResult["sources"]) > 0)) {
 				$arResult['place'] = '<picture>';
 				foreach ($arResult["sources"] as $source){
 					$arResult['place'] .= $source;
@@ -616,7 +616,7 @@ class CImageManupulator extends CSimpleImage
 				$arResult['place'] = $arResult["img"]["tag"];
 			}
 		} else {
-			if (count($arResult["sources_lazy"]) > 0) {
+			if ((isset($arResult["sources_lazy"])) && (count($arResult["sources_lazy"]) > 0)) {
 				$arResult['place'] = '<picture  data-i2p="Y">';
 				foreach ($arResult["sources_lazy"] as $source){
 					$arResult['place'] .= $source;
