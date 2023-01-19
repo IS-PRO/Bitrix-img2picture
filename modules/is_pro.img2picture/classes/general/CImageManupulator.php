@@ -169,7 +169,7 @@ class CImageManupulator extends CSimpleImage
 
 				$cacheKey =  md5($img['tag']);
 
-				if (($cache->initCache($cacheTtl, $cacheKey, $cachePath)) && ($arParams['CLEAR_CACHE'] != 'Y')) {
+				if (($cache->initCache($cacheTtl, $cacheKey, $cachePath)) && (empty($arParams['CLEAR_CACHE']))) {
 					$cachedPlace = $cache->getVars();
 					if ($arParams['DEBUG'] == 'Y') {
 						\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $cachedPlace]);
@@ -271,7 +271,7 @@ class CImageManupulator extends CSimpleImage
 
 			$cacheKey =  md5($img['tag']);;
 
-			if (($cache->initCache($cacheTtl, $cacheKey, $cachePath)) && ($arParams['CLEAR_CACHE'] != 'Y')) {
+			if (($cache->initCache($cacheTtl, $cacheKey, $cachePath)) && (empty($arParams['CLEAR_CACHE']))) {
 				$cachedPlace = $cache->getVars();
 				if ($arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $cachedPlace]);
