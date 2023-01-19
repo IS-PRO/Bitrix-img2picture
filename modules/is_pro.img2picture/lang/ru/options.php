@@ -13,11 +13,11 @@ $MESS['ISPRO_IMG2PICTURE_USE_WEBP'] = 'Применить конвертацию
 $MESS['ISPRO_IMG2PICTURE_LAZYLOAD'] = 'Использовать ленивую загрузку изображений (lazyload)';
 $MESS['ISPRO_IMG2PICTURE_ATTR_SRC'] = 'В каких аттрибутах тега img искать ссылку на изображение *<br> (по умолчанию src)';
 $MESS['ISPRO_IMG2PICTURE_ATTR_SRC_ERROR'] = 'Поле является обязательным для заполнения (по умолчанию "src")';
-$MESS['ISPRO_IMG2PICTURE_CACHE_TTL'] = 'Время хранения кеша (по умолчанию 2592000 - 30 дней)';
+$MESS['ISPRO_IMG2PICTURE_CACHE_TTL'] = 'Время хранения кеша<br>(по умолчанию 2592000 - 30 дней)';
 
 $MESS['ISPRO_IMG2PICTURE_BACKGROUNDS'] = 'Обрабатывать изображения в style="background..."';
 $MESS['ISPRO_IMG2PICTURE_IMG_COMPRESSION'] = 'Качество сохряняемых изображений (0-100)';
-$MESS['ISPRO_IMG2PICTURE_EXCEPTIONS_DIR'] = 'Исключения:<br>каталоги (директории) сайта, где не будет раотать модуль';
+$MESS['ISPRO_IMG2PICTURE_EXCEPTIONS_DIR'] = 'Исключения:<br>каталоги (директории) сайта, где модуль не будет работать';
 $MESS['ISPRO_IMG2PICTURE_EXCEPTIONS_SRC'] = 'Исключения:<br>регулярные выражения по аттрибуту src на изображения, которые не надо преобразовывать';
 $MESS['ISPRO_IMG2PICTURE_EXCEPTIONS_TAG'] = 'Исключения:<br>регулярные выражения по тегу img целиком, которые не надо преобразовывать';
 
@@ -108,15 +108,20 @@ function MyBackground(&$arResult)
 	/* Какой-то код меняющий $arResult */
 }
 </pre>
+<p>
+$arResult["place"] - содержит результирующий тег
+</p>
 
 <h2>Управление модулем на странице</h2>
-
 <p>Иногда надо обновить кеш только на конкретной странице или посмотреть почему что-то неправильно конвертируется</p>
+<p><b>Вы должны быть НЕ авторизованы</b></p>
 <p>включить отладку на странице ?img2pictureDebug=Y</p>
-<p>отчистить кеш и переконвертировать картинки на странице ?img2pictureClearCache=Y</p>
+<p>отчистить кеш и переконвертировать изображений на странице ?img2pictureClearCache=Y</p>
+<p>отчистить кеш и переконвертировать отдельного изображения на странице ?img2pictureClearCache=[SRC картинки]</p>
 
 
 <h2>Поблагодарить</h2>
-<p>Можно пройдя по <a href="https://www.sberbank.com/ru/person/dl/jc?linkname=jGTzsJPtWFkAxVW2S" target="_blank">ссылке</a></p>
+<p>На <a href="https://boosty.to/ispro" target="_blank">bossty</a></p>
+<p>Присоединиться к сбору в Сбере <a href="https://www.sberbank.com/ru/person/dl/jc?linkname=jGTzsJPtWFkAxVW2S" target="_blank">ссылке</a></p>
 
 ';
