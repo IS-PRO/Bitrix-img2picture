@@ -35,7 +35,7 @@ class Cimg2picture
 			};
 		};
 		$jsPath = '';
-		$jsPathChanks = explode('/', __DIR__);
+		$jsPathChanks = explode('/', str_replace("\\", '/' ,__DIR__));
 		$isPath = false;
 		if (is_array($jsPathChanks)) {
 			foreach ($jsPathChanks as $Chank) {
@@ -51,6 +51,9 @@ class Cimg2picture
 				}
 			}
 		}
+		echo '<pre data-id="!!! DEBUG: '.__FILE__.' at '.__LINE__.' line !!!" style="display:none">';
+		echo $jsPath.'lozad.min.js';
+		echo '</pre>';
 		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'lozad.min.js');
 		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'img2picture.min.js');
 	}
@@ -107,7 +110,7 @@ class Cimg2picture
 		include(__DIR__ . "/../../install/module.cfg.php");
 		$options_list = $arModuleCfg['options_list'];
 		foreach ($options_list as $option_name => $arOption) {
-			$option[$option_name] = \Bitrix\Main\Config\Option::get($arModuleCfg['MODULE_ID'], $option_name);
+			$option[$option_name] = \Bitrix\Main\Config\Option::get($arModuleCfg['MODULE_ID'], $option_name, SITE_ID);
 			if ($arOption['type'] == 'json') {
 				$option[$option_name . '_VALUE'] = @json_decode($option[$option_name], true);
 			}
@@ -136,7 +139,7 @@ class Cimg2picture
 	public static function ClearDirCache() {
 		$option = self::GetOptions();
 		$img2picture = new CImageManupulator($option);
-		return $img2picture->ClearDirCache($src);
+		return $img2picture->ClearDirCache();
 	}
 
 }

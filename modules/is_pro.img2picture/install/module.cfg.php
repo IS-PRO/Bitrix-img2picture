@@ -99,13 +99,5 @@ $arModuleCfg = [
 			'type' => 'text',
 			'default' => '2592000' /* 30 дней */
 		],
-
-		/* Шаблон для замены img тегов */
-		/*
-		'TEMPLATE' => [
-			'type' => 'textarea',
-			'default' => ''
-		],
-		*/
 	]
 ];
