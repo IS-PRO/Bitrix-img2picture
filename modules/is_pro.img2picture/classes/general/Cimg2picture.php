@@ -51,9 +51,6 @@ class Cimg2picture
 				}
 			}
 		}
-		echo '<pre data-id="!!! DEBUG: '.__FILE__.' at '.__LINE__.' line !!!" style="display:none">';
-		echo $jsPath.'lozad.min.js';
-		echo '</pre>';
 		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'lozad.min.js');
 		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'img2picture.min.js');
 	}

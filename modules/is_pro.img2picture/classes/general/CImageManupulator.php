@@ -730,6 +730,9 @@ class CImageManupulator extends CSimpleImage
 
 	public function ConvertImg2webp(string $src)
 	{
+		if ($this->arParams['DEBUG'] == 'Y') {
+			\Bitrix\Main\Diag\Debug::writeToFile(['TRY CONVERT TO WEBP' => $src]);
+		};
 		$need = false;
 		$doc_root = $this->arParams['DOCUMENT_ROOT'];
 		$webp = self::DIR . $src . '.webp';
@@ -755,18 +758,41 @@ class CImageManupulator extends CSimpleImage
 			};
 		};
 
+		if ($this->arParams['DEBUG'] == 'Y') {
+			\Bitrix\Main\Diag\Debug::writeToFile(['NEED CONVERT TO WEBP' => $need]);
+		};
+
 		if ($need) {
 
 			$this->CreateDir($filename, true);
 			if (!$this->load($doc_root . $src)) {
+
+				if ($this->arParams['DEBUG'] == 'Y') {
+					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO WEBP' => 'NOT LOAD: '.$doc_root . $src]);
+				};
+
 				return false;
 			};
 			if (!$this->save($filename, IMAGETYPE_WEBP, $this->arParams['IMG_COMPRESSION'])) {
+
+				if ($this->arParams['DEBUG'] == 'Y') {
+					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO WEBP' => 'NOT SAVE: '.$filename]);
+				};
+
 				return false;
 			};
 			if (filesize($filename) == 0) {
+
+				if ($this->arParams['DEBUG'] == 'Y') {
+					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO WEBP' => 'SAVED FILE IS EMPTY: '.$filename]);
+				};
+
 				return false;
 			};
+		};
+
+		if ($this->arParams['DEBUG'] == 'Y') {
+			\Bitrix\Main\Diag\Debug::writeToFile(['RESULT CONVERT TO WEBP' => $webp]);
 		};
 
 		return $webp;
