@@ -64,6 +64,13 @@ class Cimg2picture
 		if (\CSite::InDir('/bitrix/')) {
 			return;
 		};
+		if (strtoupper($_SERVER['REQUEST_METHOD']) == 'POST') {
+			return;
+		}
+		if ((!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest')) {
+			return;
+		}
+
 		$option = self::GetOptions();
 
 		if ($option['MODULE_MODE'] !== 'on') {
