@@ -63,7 +63,7 @@ CModule::IncludeModule("is_pro.img2picture");
 <hr>
 <p>
 <pre>
-IS_PRO\img2picture\Cimg2picture\doIt(string $content, array $option = [])
+IS_PRO\img2picture\Cimg2picture::doIt(string $content, array $option = [])
 </pre>
 вернет контент с замененными img на picture<br>
 $content - контент в котором необходимо заменить все img<br>
@@ -72,7 +72,7 @@ $option - необязательный массив параметров зам�
 <hr>
 <p>
 <pre>
-IS_PRO\img2picture\Cimg2picture\MakeWebp(string $src, array $option = [])
+IS_PRO\img2picture\Cimg2picture::MakeWebp(string $src, array $option = [])
 </pre>
 вернет ссылку на созданный webp<br>
 в случае не удачи вернет false<br>
@@ -82,7 +82,7 @@ $option - необязательный массив параметров зам�
 <hr>
 <p>
 <pre>
-IS_PRO\img2picture\Cimg2picture\GetOptions()
+IS_PRO\img2picture\Cimg2picture::GetOptions()
 </pre>
 вернет параметры модуля
 </p>
