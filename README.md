@@ -41,7 +41,7 @@
 ------
 # После установки модуля доступны следующие функции:
 
-	IS_PRO\img2picture\doIt(string $content, array $option = [])
+	IS_PRO\img2picture::doIt(string $content, array $option = [])
 
 вернет контент с замененными img на picture
 
@@ -51,7 +51,7 @@ $option - необязательный массив параметров зам�
 
 ---
 
-	IS_PRO\img2picture\MakeWebp(string $src, array $option = [])
+	IS_PRO\img2picture::MakeWebp(string $src, array $option = [])
 
 вернет ссылку на созданный webp
 
@@ -64,7 +64,7 @@ $option - необязательный массив
 
 ---
 
-	IS_PRO\img2picture\GetOptions()
+	IS_PRO\img2picture::GetOptions()
 
 вернет параметры модуля
 
