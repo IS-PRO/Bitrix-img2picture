@@ -716,11 +716,13 @@ class CImageManupulator extends CSimpleImage
 				str_replace(
 					[
 						$img['bg'],
-						' style'
+						' style',
+						"\t".'style'
 					],
 					[
 						'',
-						' data-i2p="'.$arResult['md5key'].'"  style'
+						' data-i2p="'.$arResult['md5key'].'"  style',
+						"\t".'data-i2p="'.$arResult['md5key'].'"  style',
 					],
 					$img['tag']
 				);
