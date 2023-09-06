@@ -717,12 +717,14 @@ class CImageManupulator extends CSimpleImage
 					[
 						$img['bg'],
 						' style',
-						"\t".'style'
+						"\t".'style',
+						"\n".'style',
 					],
 					[
 						'',
 						' data-i2p="'.$arResult['md5key'].'"  style',
 						"\t".'data-i2p="'.$arResult['md5key'].'"  style',
+						"\n".'data-i2p="'.$arResult['md5key'].'"  style',
 					],
 					$img['tag']
 				);
