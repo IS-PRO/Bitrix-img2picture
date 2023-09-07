@@ -110,6 +110,15 @@ class Cimg2picture
 		return $img2picture->ConvertImg2webp($src);
 	}
 
+	public static function MakeAvif(string $src, array $option = [])
+	{
+		if (count($option) == 0) {
+			$option = self::GetOptions();
+		}
+		$img2picture = new CImageManupulator($option);
+		return $img2picture->ConvertImg2avif($src);
+	}
+
 	public static function GetOptions() {
 		include(__DIR__ . "/../../install/module.cfg.php");
 		$options_list = $arModuleCfg['options_list'];

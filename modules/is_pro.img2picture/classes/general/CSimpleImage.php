@@ -29,6 +29,8 @@ class CSimpleImage
 			$this->image = imagecreatefrompng($filename);
 		} elseif ($this->image_type == IMAGETYPE_WEBP) {
 			$this->image = imagecreatefromwebp($filename);
+		} elseif ($this->image_type == IMAGETYPE_AVIF) {
+			$this->image = imagecreatefromavif($filename);
 		} else {
 			$this->image_type = false;
 			return false;
@@ -67,6 +69,8 @@ class CSimpleImage
 			imagepng($this->image, $filename);
 		} elseif ($image_type == IMAGETYPE_WEBP) {
 			imagewebp($this->image, $filename, $compression);
+		} elseif ($image_type == IMAGETYPE_AVIF) {
+			imageavif($this->image, $filename, $compression);
 		} else {
 			return false;
 		};
@@ -95,6 +99,8 @@ class CSimpleImage
 			imagepng($this->image);
 		} elseif ($image_type == IMAGETYPE_WEBP) {
 			imagewebp($this->image);
+		} elseif ($image_type == IMAGETYPE_AVIF) {
+			imageavif($this->image);
 		} else {
 			return false;
 		}

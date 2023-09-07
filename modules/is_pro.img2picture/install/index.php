@@ -24,7 +24,6 @@ Class is_pro_img2picture extends CModule
 			$this->PARTNER_NAME 	   = Loc::getMessage("ISPRO_IMG2PICTURE_PARTNER_NAME");
 			$this->PARTNER_URI  	   = Loc::getMessage("ISPRO_IMG2PICTURE_PARTNER_URI");
 		}
-		return false;
 	}
 
 

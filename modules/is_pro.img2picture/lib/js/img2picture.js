@@ -1,40 +1,54 @@
 document.addEventListener('DOMContentLoaded', function () {
 
 	let webpEnable = false;
-	let webp = {
-		lossy: {
-			src: 'data:image/webp;base64,UklGRiIAAABXR'+
-				 'UJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA',
+	let avifEnable = false;
+	let imgformat = {
+		webplossy: {
+			src: 'data:image/webp;base64,UklGRiIAAABXR' +
+				'UJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA',
 			support: null
 		},
-		lossless: {
-			src: 'data:image/webp;base64,UklGRhoAAABXRUJQVlA'+
-				 '4TA0AAAAvAAAAEAcQERGIiP4HAA==',
+		webplossless: {
+			src: 'data:image/webp;base64,UklGRhoAAABXRUJQVlA' +
+				'4TA0AAAAvAAAAEAcQERGIiP4HAA==',
+			support: null
+		},
+		avif: {
+			src: 'data:image/avif;base64,AAAAFGZ0eXBhdmlmAAAA' +
+				'AG1pZjEAAACgbWV0YQAAAAAAAAAOcGl0bQAAAAAAAQA' +
+				'AAB5pbG9jAAAAAEQAAAEAAQAAAAEAAAC8AAAAGwAAAC' +
+				'NpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAA' +
+				'AAARWlwcnAAAAAoaXBjbwAAABRpc3BlAAAAAAAAAAQA' +
+				'AAAEAAAADGF2MUOBAAAAAAAAFWlwbWEAAAAAAAAAAQA' +
+				'BAgECAAAAI21kYXQSAAoIP8R8hAQ0BUAyDWeeUy0JG+QAACANEkA=',
 			support: null
 		}
 	};
-	for (var i in webp) {
-		webp[i].img=new Image();
-		webp[i].img.id=i;
-		webp[i].img.onload=function(event) {
-			event=event || window.event;
-			var el=event.target || event.srcElement;
-			webp[el.id].support=(el.width>0 && el.height>0);
+	for (var i in imgformat) {
+		imgformat[i].img = new Image();
+		imgformat[i].img.id = i;
+		imgformat[i].img.onload = function (event) {
+			event = event || window.event;
+			var el = event.target || event.srcElement;
+			imgformat[el.id].support = (el.width > 0 && el.height > 0);
 		};
-		webp[i].img.onerror=function(event) {
-			event=event || window.event;
-			var el=event.target || event.srcElement;
-			webp[el.id].support=false;
+		imgformat[i].img.onerror = function (event) {
+			event = event || window.event;
+			var el = event.target || event.srcElement;
+			imgformat[el.id].support = false;
 		};
-		webp[i].img.src=webp[i].src;
+		imgformat[i].img.src = imgformat[i].src;
 	};
 
 	const doc = document.querySelector('body');
-    const MutationObserver    = window.MutationObserver;
-    const myObserver = new MutationObserver(InitI2Plazyload);
-    const obsConfig = { childList: true, subtree: true };
-    myObserver.observe (doc, obsConfig);
-    InitI2Plazyload();
+	const MutationObserver = window.MutationObserver;
+	const myObserver = new MutationObserver(InitI2Plazyload);
+	const obsConfig = {
+		childList: true,
+		subtree: true
+	};
+	myObserver.observe(doc, obsConfig);
+	InitI2Plazyload();
 
 
 	function InitI2Plazyload() {
@@ -44,22 +58,26 @@ document.addEventListener('DOMContentLoaded', function () {
 			el.classList.add('i2p');
 		});
 
-		setTimeout(function() {
-			webpEnable = (webp.lossy.support && webp.lossless.support);
-
-			if (webpEnable) {
+		setTimeout(function () {
+			webpEnable = (imgformat.webplossy.support && imgformat.webplossless.support);
+			avifEnable = imgformat.avif.support;
+			if (webpEnable || avifEnable) {
 				elements.forEach(el => {
-					el.classList.add('webp')
+					if (webpEnable) {
+						el.classList.add('webp');
+					}
+					if (avifEnable) {
+						el.classList.add('avif');
+					}
 				})
 			}
 		}, 500);
 
 		const observer = lozad(elements, {
-			loaded: function(el) {
+			loaded: function (el) {
 				el.classList.add('loaded');
 				if ((el.nodeName.toLowerCase() === 'img') &&
-					(el.parentNode.nodeName.toLowerCase() === 'picture'))
-				{
+					(el.parentNode.nodeName.toLowerCase() === 'picture')) {
 					const sourses = el.parentNode.querySelectorAll('source');
 					if (sourses) {
 						sourses.forEach(source => {
@@ -73,4 +91,3 @@ document.addEventListener('DOMContentLoaded', function () {
 	}
 
 })
-

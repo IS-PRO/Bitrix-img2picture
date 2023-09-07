@@ -10,6 +10,7 @@ $MESS['ISPRO_IMG2PICTURE_MAX_SCREEN_WIDTH'] = 'Максимальная шири
 $MESS['ISPRO_IMG2PICTURE_MAX_IMG_WIDTH'] = 'Ширина изображения px';
 
 $MESS['ISPRO_IMG2PICTURE_USE_WEBP'] = 'Применить конвертацию изображений в webp';
+$MESS['ISPRO_IMG2PICTURE_USE_AVIF'] = 'Применить конвертацию изображений в avif';
 $MESS['ISPRO_IMG2PICTURE_LAZYLOAD'] = 'Использовать ленивую загрузку изображений (lazyload)';
 $MESS['ISPRO_IMG2PICTURE_ATTR_SRC'] = 'В каких аттрибутах тега img искать ссылку на изображение *<br> (по умолчанию src)';
 $MESS['ISPRO_IMG2PICTURE_ATTR_SRC_ERROR'] = 'Поле является обязательным для заполнения (по умолчанию "src")';
@@ -72,9 +73,10 @@ $option - необязательный массив параметров зам�
 <hr>
 <p>
 <pre>
-IS_PRO\img2picture\Cimg2picture::MakeWebp(string $src, array $option = [])
+IS_PRO\img2picture\Cimg2picture::MakeWebp(string $src, array $option = []);
+IS_PRO\img2picture\Cimg2picture::MakeAvif(string $src, array $option = []);
 </pre>
-вернет ссылку на созданный webp<br>
+вернет ссылку на созданный webp/avif соответвенное<br>
 в случае не удачи вернет false<br>
 $src - ссылка на изображение<br>
 $option - необязательный массив параметров замены
@@ -122,6 +124,5 @@ $arResult["place"] - содержит результирующий тег
 
 <h2>Поблагодарить</h2>
 <p>На <a href="https://boosty.to/ispro" target="_blank">bossty</a></p>
-<p>Присоединиться к сбору в Сбере <a href="https://www.sberbank.com/ru/person/dl/jc?linkname=jGTzsJPtWFkAxVW2S" target="_blank">ссылке</a></p>
 
 ';

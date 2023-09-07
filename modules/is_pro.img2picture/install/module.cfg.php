@@ -51,6 +51,12 @@ $arModuleCfg = [
 			'default' => 'Y'
 		],
 
+		/* Использовать avif Y/N */
+		'USE_AVIF' => [
+			'type'=>'checkbox',
+			'default' => 'Y'
+		],
+
 		/* Степень сжатия картинок */
 		'IMG_COMPRESSION' => [
 			'type' => 'text',

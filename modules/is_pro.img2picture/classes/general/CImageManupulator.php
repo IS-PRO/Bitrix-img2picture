@@ -12,12 +12,13 @@ if (class_exists('\IS_PRO\img2picture\CImageManupulator')) {
 class CImageManupulator extends CSimpleImage
 {
 	const
-			DIR = '/upload/img2picture/',
-	 		max_width = 99999,
-	 		cachePath  = 'img2picture',
-	 		smallWidth = 100,
-			onePXpng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
-			onePXwebp = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA';
+		DIR = '/upload/img2picture/',
+		max_width = 99999,
+		cachePath  = 'img2picture',
+		smallWidth = 100,
+		onePXpng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+		onePXwebp = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA',
+		onePXavif = 'data:image/avif;base64,AAAAFGZ0eXBhdmlmAAAAAG1pZjEAAACgbWV0YQAAAAAAAAAOcGl0bQAAAAAAAQAAAB5pbG9jAAAAAEQAAAEAAQAAAAEAAAC8AAAAGwAAACNpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAARWlwcnAAAAAoaXBjbwAAABRpc3BlAAAAAAAAAAQAAAAEAAAADGF2MUOBAAAAAAAAFWlwbWEAAAAAAAAAAQABAgECAAAAI21kYXQSAAoIP8R8hAQ0BUAyDWeeUy0JG+QAACANEkA=';
 
 	var $arParams = array();
 
@@ -109,7 +110,7 @@ class CImageManupulator extends CSimpleImage
 	{
 		$arParams = $this->arParams;
 		if ($arParams['DEBUG'] == 'Y') {
-			\Bitrix\Main\Diag\Debug::writeToFile(['ReplaceImg_'.date('Y.M.d H:i:s') => 'start' ]);
+			\Bitrix\Main\Diag\Debug::writeToFile(['ReplaceImg_' . date('Y.M.d H:i:s') => 'start']);
 		};
 
 		$this->ReplaceImg($content);
@@ -117,7 +118,7 @@ class CImageManupulator extends CSimpleImage
 		if ($arParams['BACKGROUNDS'] == 'Y') {
 
 			if ($arParams['DEBUG'] == 'Y') {
-				\Bitrix\Main\Diag\Debug::writeToFile(['ReplaceBackground_'.date('Y.M.d H:i:s') => 'start']);
+				\Bitrix\Main\Diag\Debug::writeToFile(['ReplaceBackground_' . date('Y.M.d H:i:s') => 'start']);
 			};
 
 			$this->ReplaceBackground($content);
@@ -145,7 +146,7 @@ class CImageManupulator extends CSimpleImage
 			$arAllreadyReplaced = [];
 
 
-			foreach ($matches[$tagkey] as $key=>$tag) {
+			foreach ($matches[$tagkey] as $key => $tag) {
 				if ($arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['FOUND background el' => $tag]);
 				};
@@ -206,7 +207,7 @@ class CImageManupulator extends CSimpleImage
 					};
 				};
 				$arResult['place'] = $cachedPlace;
-				if ((trim($arResult['place']) != '') && (mb_strpos($arResult['place'],'</style>'))) {
+				if ((trim($arResult['place']) != '') && (mb_strpos($arResult['place'], '</style>'))) {
 					list($tohead, $newtag) = explode('</style>', $arResult['place']);
 					$tohead .= '</style></head>';
 					$arAllreadyReplaced[] = $img['tag'];
@@ -217,9 +218,9 @@ class CImageManupulator extends CSimpleImage
 					);
 					if ($arParams['DEBUG'] == 'Y') {
 						\Bitrix\Main\Diag\Debug::writeToFile([
-								'REPLACED_FROM' => $img['tag'],
-								'REPLACED_TO' => $arResult['place']
-							]);
+							'REPLACED_FROM' => $img['tag'],
+							'REPLACED_TO' => $arResult['place']
+						]);
 					};
 				};
 			};
@@ -323,9 +324,9 @@ class CImageManupulator extends CSimpleImage
 				$content = str_replace($img['tag'], $arResult['place'], $content);
 				if ($arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile([
-							'REPLACED_FROM' => $img['tag'],
-							'REPLACED_TO' => $arResult['place']
-						]);
+						'REPLACED_FROM' => $img['tag'],
+						'REPLACED_TO' => $arResult['place']
+					]);
 				};
 			};
 		};
@@ -381,6 +382,12 @@ class CImageManupulator extends CSimpleImage
 			$webpSrc = $this->ConvertImg2webp($src);
 			if ($webpSrc) {
 				$arResult['webp'] = $webpSrc;
+			};
+		};
+		if ($arParams['USE_AVIF'] == 'Y') {
+			$avifSrc = $this->ConvertImg2avif($src);
+			if ($avifSrc) {
+				$arResult['avif'] = $avifSrc;
 			};
 		};
 		return $arResult;
@@ -442,63 +449,113 @@ class CImageManupulator extends CSimpleImage
 					unset($arResult[$width]['src']);
 				}
 			} else {
-				if (in_array(filesize($filename),[0, 4096]))  {
+				if (in_array(filesize($filename), [0, 4096])) {
 					unset($arResult[$width]['src']);
 				}
 			}
-			if ($this->arParams['USE_WEBP'] !== 'Y') {
-				continue;
-			};
 
-			/* подготовим webp */
-			$filename = $doc_root . $newsrc . '.webp';
-			$arResult[$width]['webp'] = $newsrc . '.webp';
-			if ((!file_exists($filename)) ||
-				(in_array(
-					$this->arParams['CLEAR_CACHE'],
-					[
-						'Y',
-						$doc_root . $src,
-						$src,
-						$filename,
-						$newsrc
-					]
-				))
-			) {
-				if (!$loaded) {
-					if (!$this->load($doc_root . $src)) {
-						return false;
-					};
-					$loaded = true;
-				};
-				if ($loaded) {
-					if (!$resized) {
-						$resized = $this->smallTo($width, $height);
-					}
-					if ($resized) {
-						$this->CreateDir($filename, true);
-						if (!$this->save($filename, IMAGETYPE_WEBP, $this->arParams['IMG_COMPRESSION'])) {
-							unset($arResult[$width]['webp']);
+			if ($this->arParams['USE_WEBP'] == 'Y') {
+
+				/* подготовим webp */
+				$filename = $doc_root . $newsrc . '.webp';
+				$arResult[$width]['webp'] = $newsrc . '.webp';
+				if ((!file_exists($filename)) ||
+					(in_array(
+						$this->arParams['CLEAR_CACHE'],
+						[
+							'Y',
+							$doc_root . $src,
+							$src,
+							$filename,
+							$newsrc
+						]
+					))
+				) {
+					if (!$loaded) {
+						if (!$this->load($doc_root . $src)) {
+							return false;
 						};
-						if (in_array(filesize($filename),[0, 4096]))  {
+						$loaded = true;
+					};
+					if ($loaded) {
+						if (!$resized) {
+							$resized = $this->smallTo($width, $height);
+						}
+						if ($resized) {
+							$this->CreateDir($filename, true);
+							if (!$this->save($filename, IMAGETYPE_WEBP, $this->arParams['IMG_COMPRESSION'])) {
+								unset($arResult[$width]['webp']);
+							};
+							if (in_array(filesize($filename), [0, 4096])) {
+								unset($arResult[$width]['webp']);
+							}
+						} else {
 							unset($arResult[$width]['webp']);
 						}
 					} else {
 						unset($arResult[$width]['webp']);
 					}
 				} else {
-					unset($arResult[$width]['webp']);
+					if (in_array(filesize($filename), [0, 4096])) {
+						unset($arResult[$width]['webp']);
+					}
 				}
-			} else {
-				if (in_array(filesize($filename),[0, 4096]))  {
-					unset($arResult[$width]['webp']);
+			}
+
+			if ($this->arParams['USE_AVIF'] == 'Y') {
+				/* подготовим avif */
+				$filename = $doc_root . $newsrc . '.avif';
+				$arResult[$width]['avif'] = $newsrc . '.avif';
+				if (
+					(!file_exists($filename)) ||
+					(in_array(
+							$this->arParams['CLEAR_CACHE'],
+							[
+								'Y',
+								$doc_root . $src,
+								$src,
+								$filename,
+								$newsrc
+							]
+						)
+					)
+				) {
+					if (!$loaded) {
+						if (!$this->load($doc_root . $src)) {
+							return false;
+						};
+						$loaded = true;
+					};
+					if ($loaded) {
+						if (!$resized) {
+							$resized = $this->smallTo($width, $height);
+						}
+						if ($resized) {
+							$this->CreateDir($filename, true);
+							if (!$this->save($filename, IMAGETYPE_AVIF, $this->arParams['IMG_COMPRESSION'])) {
+								unset($arResult[$width]['avif']);
+							};
+							if (in_array(filesize($filename), [0, 4096])) {
+								unset($arResult[$width]['avif']);
+							}
+						} else {
+							unset($arResult[$width]['avif']);
+						}
+					} else {
+						unset($arResult[$width]['avif']);
+					}
+				} else {
+					if (in_array(filesize($filename), [0, 4096])) {
+						unset($arResult[$width]['avif']);
+					}
 				}
 			}
 		}
 		return $arResult;
 	}
 
-	public function PrepareResultImg($img, $attr_src, $arParams) {
+	public function PrepareResultImg($img, $attr_src, $arParams)
+	{
 		$arResult['img'] = $img;
 		$arResult['sources'] = [];
 
@@ -516,20 +573,28 @@ class CImageManupulator extends CSimpleImage
 				if (!is_array($arResult['FILES'][$val['width']])) {
 					continue;
 				};
-				if (count($arResult['FILES'][$val['width']])==0) {
+				if (count($arResult['FILES'][$val['width']]) == 0) {
 					continue;
 				};
 				$addsourse = ['', ''];
-				$addsourseLazy= ['', ''];
+				$addsourseLazy = ['', ''];
 				foreach ($arResult['FILES'][$val['width']] as $file_type => $file_src) {
-					if ($file_type == 'webp') {
-						$type = 'type="image/webp"';
-						if (!empty($arResult['FILES'][self::smallWidth]['webp'])) {
-							$lazy = 'srcset="'.$arResult['FILES'][self::smallWidth]['webp'].'"';
+					if ($file_type == 'avif') {
+						$type = 'type="image/avif"';
+						if (!empty($arResult['FILES'][self::smallWidth]['avif'])) {
+							$lazy = 'srcset="' . $arResult['FILES'][self::smallWidth]['avif'] . '"';
 						} else {
-							$lazy = 'srcset="'.self::onePXwebp.'"';
+							$lazy = 'srcset="' . self::onePXavif . '"';
 						}
 						$index = 0;
+					} else if ($file_type == 'webp') {
+						$type = 'type="image/webp"';
+						if (!empty($arResult['FILES'][self::smallWidth]['webp'])) {
+							$lazy = 'srcset="' . $arResult['FILES'][self::smallWidth]['webp'] . '"';
+						} else {
+							$lazy = 'srcset="' . self::onePXwebp . '"';
+						}
+						$index = 1;
 					} else {
 						$ext = substr(strrchr($file_src, '.'), 1);
 						if ($ext == 'jpg') {
@@ -537,11 +602,11 @@ class CImageManupulator extends CSimpleImage
 						}
 						$type = 'type="image/' . $ext . '"';
 						if (!empty($arResult['FILES'][self::smallWidth]['src'])) {
-							$lazy = 'srcset="'.$arResult['FILES'][self::smallWidth]['src'].'"';
+							$lazy = 'srcset="' . $arResult['FILES'][self::smallWidth]['src'] . '"';
 						} else {
-							$lazy = 'srcset="'.self::onePXpng.'"';
+							$lazy = 'srcset="' . self::onePXpng . '"';
 						}
-						$index = 1;
+						$index = 3;
 					};
 					$media = 'media="';
 					$mediaand = '';
@@ -556,32 +621,43 @@ class CImageManupulator extends CSimpleImage
 
 					$media .= '"';
 					$addsourse[$index] = '<source srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
-					$addsourseLazy[$index] = '<source '.$lazy.' data-i2p="Y" data-srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
+					$addsourseLazy[$index] = '<source ' . $lazy . ' data-i2p="Y" data-srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
 				};
-				if ($addsourse[0] != '') {
-					$arResult['sources'][] = $addsourse[0];
+				ksort($addsourse);
+				foreach ($addsourse as $oneaddsourse) {
+					if ($oneaddsourse != '') {
+						$arResult['sources'][] = $oneaddsourse;
+					}
 				}
-				if ($addsourse[1] != '') {
-					$arResult['sources'][] = $addsourse[1];
-				}
-				if ($addsourseLazy[0] != '') {
-					$arResult['sources_lazy'][] = $addsourseLazy[0];
-				}
-				if ($addsourseLazy[1] != '') {
-					$arResult['sources_lazy'][] = $addsourseLazy[1];
+				ksort($addsourseLazy);
+				foreach ($addsourseLazy as $oneaddsourselazy) {
+					if ($oneaddsourselazy != '') {
+						$arResult['sources_lazy'][] = $oneaddsourselazy;
+					}
 				}
 			};
 		};
 
 		$arResult['FILES']['original'] = $PreparedOriginal;
+
+		if ($arResult['FILES']['original']['avif']) {
+			if (!empty($arResult['FILES'][self::smallWidth]['avif'])) {
+				$lazy = 'srcset="' . $arResult['FILES'][self::smallWidth]['avif'] . '"';
+			} else {
+				$lazy = 'srcset="' . self::onePXavif . '"';
+			}
+			$arResult['sources'][] = '<source srcset="' . $arResult['FILES']['original']['avif'] . '"  type="image/avif">';
+			$arResult['sources_lazy'][] = '<source ' . $lazy . '  data-i2p="Y" data-srcset="' . $arResult['FILES']['original']['avif'] . '"  type="image/avif">';
+		};
+
 		if ($arResult['FILES']['original']['webp']) {
 			if (!empty($arResult['FILES'][self::smallWidth]['webp'])) {
-				$lazy = 'srcset="'.$arResult['FILES'][self::smallWidth]['webp'].'"';
+				$lazy = 'srcset="' . $arResult['FILES'][self::smallWidth]['webp'] . '"';
 			} else {
-				$lazy = 'srcset="'.self::onePXwebp.'"';
+				$lazy = 'srcset="' . self::onePXwebp . '"';
 			}
 			$arResult['sources'][] = '<source srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
-			$arResult['sources_lazy'][] = '<source '.$lazy.'  data-i2p="Y" data-srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
+			$arResult['sources_lazy'][] = '<source ' . $lazy . '  data-i2p="Y" data-srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
 		};
 
 		if ($arParams['DEBUG'] == 'Y') {
@@ -589,17 +665,17 @@ class CImageManupulator extends CSimpleImage
 		};
 
 		$arResult["img_lazy"]["tag"] = '<img ';
-		foreach ($arResult["img"] as $attr_name=>$attr_val) {
+		foreach ($arResult["img"] as $attr_name => $attr_val) {
 			if ($attr_name != 'tag') {
 				if ($attr_name == 'src') {
-					$arResult["img_lazy"]["tag"] .= ' data-i2p="Y" data-srcset="'.$attr_val.'"';
+					$arResult["img_lazy"]["tag"] .= ' data-i2p="Y" data-srcset="' . $attr_val . '"';
 					if (!empty($arResult['FILES'][self::smallWidth]['src'])) {
-						$arResult["img_lazy"]["tag"] .= ' srcset="'.$arResult['FILES'][self::smallWidth]['src'].'"';
+						$arResult["img_lazy"]["tag"] .= ' srcset="' . $arResult['FILES'][self::smallWidth]['src'] . '"';
 					} else {
-						$arResult["img_lazy"]["tag"] .= ' srcset="'.self::onePXpng.'"';
+						$arResult["img_lazy"]["tag"] .= ' srcset="' . self::onePXpng . '"';
 					}
 				}
-				$arResult["img_lazy"]["tag"] .= ' '.$attr_name.'="'.$attr_val.'"';
+				$arResult["img_lazy"]["tag"] .= ' ' . $attr_name . '="' . $attr_val . '"';
 			}
 		}
 		$arResult["img_lazy"]["tag"] .= '>';
@@ -607,7 +683,7 @@ class CImageManupulator extends CSimpleImage
 		if ($arParams['LAZYLOAD'] != "Y") {
 			if ((isset($arResult["sources"])) && (count($arResult["sources"]) > 0)) {
 				$arResult['place'] = '<picture>';
-				foreach ($arResult["sources"] as $source){
+				foreach ($arResult["sources"] as $source) {
 					$arResult['place'] .= $source;
 				};
 				$arResult['place'] .= $arResult["img"]["tag"];
@@ -618,7 +694,7 @@ class CImageManupulator extends CSimpleImage
 		} else {
 			if ((isset($arResult["sources_lazy"])) && (count($arResult["sources_lazy"]) > 0)) {
 				$arResult['place'] = '<picture  data-i2p="Y">';
-				foreach ($arResult["sources_lazy"] as $source){
+				foreach ($arResult["sources_lazy"] as $source) {
 					$arResult['place'] .= $source;
 				};
 				$arResult['place'] .= $arResult["img_lazy"]["tag"];
@@ -631,7 +707,8 @@ class CImageManupulator extends CSimpleImage
 	}
 
 
-	public function PrepareResultBackground($img, $arParams) {
+	public function PrepareResultBackground($img, $arParams)
+	{
 		$arResult['img'] = $img;
 		$arResult['md5key'] = md5($img['tag']);
 		$files = $this->PrepareResponsive($img['src'], $arParams['WIDTH']);
@@ -645,14 +722,14 @@ class CImageManupulator extends CSimpleImage
 			if ($arParams['DEBUG'] == 'Y') {
 				\Bitrix\Main\Diag\Debug::writeToFile(['TAG FILES' => $arResult['FILES']]);
 			};
-			$arResult['cssSelector'] = '[data-i2p="'.$arResult['md5key'].'"]';
+			$arResult['cssSelector'] = '[data-i2p="' . $arResult['md5key'] . '"]';
 			$arResult['style'] = '<style>';
-			$arResult['style'] .= '*'.$arResult['cssSelector'].'{background-image:url("'.$arResult['FILES'][self::smallWidth]['src'].'")}';
+			$arResult['style'] .= '*' . $arResult['cssSelector'] . '{background-image:url("' . $arResult['FILES'][self::smallWidth]['src'] . '")}';
 			foreach ($arParams['RESPONSIVE_VALUE'] as $key => $val) {
 				if (!is_array($arResult['FILES'][$val['width']])) {
 					continue;
 				};
-				if (count($arResult['FILES'][$val['width']])==0) {
+				if (count($arResult['FILES'][$val['width']]) == 0) {
 					continue;
 				};
 				$haveFiles = false;
@@ -661,14 +738,18 @@ class CImageManupulator extends CSimpleImage
 				$minmax = 0;
 
 				foreach ($arResult['FILES'][$val['width']] as $file_type => $file_src) {
-					if ($file_type == 'webp') {
+					if ($file_type == 'avif') {
 						$haveFiles = true;
-						$addsourse[1] = '.webp'.$arResult['cssSelector'].'{background-image:url("'. $file_src.'")}';
-						$addsourseLazy[1] = '.webp.loaded'.$arResult['cssSelector'].'{background-image:url("'. $file_src.'")}';
+						$addsourse[2] = '.avif' . $arResult['cssSelector'] . '{background-image:url("' . $file_src . '")}';
+						$addsourseLazy[2] = '.avif.loaded' . $arResult['cssSelector'] . '{background-image:url("' . $file_src . '")}';
+					} else if ($file_type == 'webp') {
+						$haveFiles = true;
+						$addsourse[1] = '.webp' . $arResult['cssSelector'] . '{background-image:url("' . $file_src . '")}';
+						$addsourseLazy[1] = '.webp.loaded' . $arResult['cssSelector'] . '{background-image:url("' . $file_src . '")}';
 					} else {
 						$haveFiles = true;
-						$addsourse[0] = '*'.$arResult['cssSelector'].'{background-image:url("'. $file_src.'")}';
-						$addsourseLazy[0] = '.loaded'.$arResult['cssSelector'].'{background-image:url("'. $file_src.'")}';
+						$addsourse[0] = '*' . $arResult['cssSelector'] . '{background-image:url("' . $file_src . '")}';
+						$addsourseLazy[0] = '.loaded' . $arResult['cssSelector'] . '{background-image:url("' . $file_src . '")}';
 					};
 				}
 				if ($haveFiles) {
@@ -689,42 +770,54 @@ class CImageManupulator extends CSimpleImage
 					};
 					$arResult['style'] .= '{';
 					if ($arParams['LAZYLOAD'] != "Y") {
-						$arResult['style'] .= $addsourse[0].$addsourse[1];
+						ksort($addsourse);
+						foreach ($addsourse as $oneaddsourse) {
+							$arResult['style'] .= $oneaddsourse;
+						}
 					} else {
-						$arResult['style'] .= $addsourseLazy[0].$addsourseLazy[1];
+						ksort($addsourseLazy);
+						foreach ($addsourseLazy as $oneaddsourseLazy) {
+							$arResult['style'] .= $oneaddsourseLazy;
+						}
 					}
 					$arResult['style'] .= '}';
 				}
 			}
 			$arResult['FILES']['original'] = $PreparedOriginal;
-			$arResult['style'] .= '@media (min-width: '.(int) $minmax.'px) {';
+			$arResult['style'] .= '@media (min-width: ' . (int) $minmax . 'px) {';
 			if ($arParams['LAZYLOAD'] != "Y") {
-				$arResult['style'] .= '*'.$arResult['cssSelector'].'{background-image:url("'.$arResult['FILES']['original']['src'].'")}';
+				$arResult['style'] .= '*' . $arResult['cssSelector'] . '{background-image:url("' . $arResult['FILES']['original']['src'] . '")}';
+				if ($arResult['FILES']['original']['avif'] != '') {
+					$arResult['style'] .= '.avif' . $arResult['cssSelector'] . '{background-image:url("' . $arResult['FILES']['original']['avif'] . '")}';
+				}
 				if ($arResult['FILES']['original']['webp'] != '') {
-					$arResult['style'] .= '.webp'.$arResult['cssSelector'].'{background-image:url("'.$arResult['FILES']['original']['webp'].'")}';
+					$arResult['style'] .= '.webp' . $arResult['cssSelector'] . '{background-image:url("' . $arResult['FILES']['original']['webp'] . '")}';
 				}
 			} else {
-				$arResult['style'] .= '.loaded'.$arResult['cssSelector'].'{background-image:url("'.$arResult['FILES']['original']['src'].'")}';
+				$arResult['style'] .= '.loaded' . $arResult['cssSelector'] . '{background-image:url("' . $arResult['FILES']['original']['src'] . '")}';
+				if ($arResult['FILES']['original']['avif'] != '') {
+					$arResult['style'] .= '.avif.loaded' . $arResult['cssSelector'] . '{background-image:url("' . $arResult['FILES']['original']['avif'] . '")}';
+				}
 				if ($arResult['FILES']['original']['webp'] != '') {
-					$arResult['style'] .= '.webp.loaded'.$arResult['cssSelector'].'{background-image:url("'.$arResult['FILES']['original']['webp'].'")}';
+					$arResult['style'] .= '.webp.loaded' . $arResult['cssSelector'] . '{background-image:url("' . $arResult['FILES']['original']['webp'] . '")}';
 				}
 			}
 			$arResult['style'] .= '}';
 			$arResult['style'] .= '</style>';
 
-			$arResult['place'] = $arResult['style'].
+			$arResult['place'] = $arResult['style'] .
 				str_replace(
 					[
 						$img['bg'],
 						' style',
-						"\t".'style',
-						"\n".'style',
+						"\t" . 'style',
+						"\n" . 'style',
 					],
 					[
 						'',
-						' data-i2p="'.$arResult['md5key'].'"  style',
-						"\t".'data-i2p="'.$arResult['md5key'].'"  style',
-						"\n".'data-i2p="'.$arResult['md5key'].'"  style',
+						' data-i2p="' . $arResult['md5key'] . '"  style',
+						"\t" . 'data-i2p="' . $arResult['md5key'] . '"  style',
+						"\n" . 'data-i2p="' . $arResult['md5key'] . '"  style',
 					],
 					$img['tag']
 				);
@@ -757,7 +850,7 @@ class CImageManupulator extends CSimpleImage
 		) {
 			$need = true;
 		} else {
-			if (in_array(filesize($filename),[0, 4096]))  {
+			if (in_array(filesize($filename), [0, 4096])) {
 				return false;
 			};
 		};
@@ -772,7 +865,7 @@ class CImageManupulator extends CSimpleImage
 			if (!$this->load($doc_root . $src)) {
 
 				if ($this->arParams['DEBUG'] == 'Y') {
-					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO WEBP' => 'NOT LOAD: '.$doc_root . $src]);
+					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO WEBP' => 'NOT LOAD: ' . $doc_root . $src]);
 				};
 
 				return false;
@@ -780,7 +873,7 @@ class CImageManupulator extends CSimpleImage
 			if (!$this->save($filename, IMAGETYPE_WEBP, $this->arParams['IMG_COMPRESSION'])) {
 
 				if ($this->arParams['DEBUG'] == 'Y') {
-					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO WEBP' => 'NOT SAVE: '.$filename]);
+					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO WEBP' => 'NOT SAVE: ' . $filename]);
 				};
 
 				return false;
@@ -788,7 +881,7 @@ class CImageManupulator extends CSimpleImage
 			if (filesize($filename) == 0) {
 
 				if ($this->arParams['DEBUG'] == 'Y') {
-					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO WEBP' => 'SAVED FILE IS EMPTY: '.$filename]);
+					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO WEBP' => 'SAVED FILE IS EMPTY: ' . $filename]);
 				};
 
 				return false;
@@ -800,6 +893,76 @@ class CImageManupulator extends CSimpleImage
 		};
 
 		return $webp;
+	}
+
+	public function ConvertImg2avif(string $src)
+	{
+		if ($this->arParams['DEBUG'] == 'Y') {
+			\Bitrix\Main\Diag\Debug::writeToFile(['TRY CONVERT TO AVIF' => $src]);
+		};
+		$need = false;
+		$doc_root = $this->arParams['DOCUMENT_ROOT'];
+		$avif = self::DIR . $src . '.avif';
+		$avif = str_replace('//', '/', $avif);
+		$filename = $doc_root . $avif;
+
+		if ((!file_exists($filename)) ||
+			(in_array(
+				$this->arParams['CLEAR_CACHE'],
+				[
+					'Y',
+					$doc_root . $src,
+					$src,
+					$filename,
+					$avif
+				]
+			))
+		) {
+			$need = true;
+		} else {
+			if (in_array(filesize($filename), [0, 4096])) {
+				return false;
+			};
+		};
+
+		if ($this->arParams['DEBUG'] == 'Y') {
+			\Bitrix\Main\Diag\Debug::writeToFile(['NEED CONVERT TO AVIF' => $need]);
+		};
+
+		if ($need) {
+
+			$this->CreateDir($filename, true);
+			if (!$this->load($doc_root . $src)) {
+
+				if ($this->arParams['DEBUG'] == 'Y') {
+					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO AVIF' => 'NOT LOAD: ' . $doc_root . $src]);
+				};
+
+				return false;
+			};
+			if (!$this->save($filename, IMAGETYPE_AVIF, $this->arParams['IMG_COMPRESSION'])) {
+
+				if ($this->arParams['DEBUG'] == 'Y') {
+					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO AVIF' => 'NOT SAVE: ' . $filename]);
+				};
+
+				return false;
+			};
+			if (filesize($filename) == 0) {
+
+				if ($this->arParams['DEBUG'] == 'Y') {
+					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO AVIF' => 'SAVED FILE IS EMPTY: ' . $filename]);
+				};
+
+				return false;
+			};
+		};
+
+		if ($this->arParams['DEBUG'] == 'Y') {
+			\Bitrix\Main\Diag\Debug::writeToFile(['RESULT CONVERT TO AVIF' => $avif]);
+		};
+
+		return $avif;
 	}
 
 	public function ClearDirCache()
