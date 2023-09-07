@@ -14,13 +14,7 @@ document.addEventListener('DOMContentLoaded', function () {
 			support: null
 		},
 		avif: {
-			src: 'data:image/avif;base64,AAAAFGZ0eXBhdmlmAAAA' +
-				'AG1pZjEAAACgbWV0YQAAAAAAAAAOcGl0bQAAAAAAAQA' +
-				'AAB5pbG9jAAAAAEQAAAEAAQAAAAEAAAC8AAAAGwAAAC' +
-				'NpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAA' +
-				'AAARWlwcnAAAAAoaXBjbwAAABRpc3BlAAAAAAAAAAQA' +
-				'AAAEAAAADGF2MUOBAAAAAAAAFWlwbWEAAAAAAAAAAQA' +
-				'BAgECAAAAI21kYXQSAAoIP8R8hAQ0BUAyDWeeUy0JG+QAACANEkA=',
+			src: 'data:image/avif;base64,AAAAIGZ0eXBhdmlmAAAAAGF2aWZtaWYxbWlhZk1BMUIAAADybWV0YQAAAAAAAAAoaGRscgAAAAAAAAAAcGljdAAAAAAAAAAAAAAAAGxpYmF2aWYAAAAADnBpdG0AAAAAAAEAAAAeaWxvYwAAAABEAAABAAEAAAABAAABGgAAAB0AAAAoaWluZgAAAAAAAQAAABppbmZlAgAAAAABAABhdjAxQ29sb3IAAAAAamlwcnAAAABLaXBjbwAAABRpc3BlAAAAAAAAAAIAAAACAAAAEHBpeGkAAAAAAwgICAAAAAxhdjFDgQ0MAAAAABNjb2xybmNseAACAAIAAYAAAAAXaXBtYQAAAAAAAAABAAEEAQKDBAAAACVtZGF0EgAKCBgANogQEAwgMg8f8D///8WfhwB8+ErK42A=',
 			support: null
 		}
 	};
@@ -61,6 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
 		setTimeout(function () {
 			webpEnable = (imgformat.webplossy.support && imgformat.webplossless.support);
 			avifEnable = imgformat.avif.support;
+			console.log(imgformat);
 			if (webpEnable || avifEnable) {
 				elements.forEach(el => {
 					if (webpEnable) {
