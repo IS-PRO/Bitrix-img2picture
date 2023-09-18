@@ -1,10 +1,10 @@
 <?php
 if (!defined('IMAGETYPE_WEBP')) {
-	define('IMAGETYPE_WEBP', null);
+	define('IMAGETYPE_WEBP', 18);
 }
 
 if (!defined('IMAGETYPE_AVIF')) {
-	define('IMAGETYPE_AVIF', null);
+	define('IMAGETYPE_AVIF', 19);
 }
 
 if (!function_exists('imagewebp')) {
@@ -18,7 +18,6 @@ if (!function_exists('imagecreatefromavif')) {
 	{
 		return false;
 	}
-
 }
 
 

@@ -57,6 +57,12 @@ $arModuleCfg = [
 			'default' => 'Y'
 		],
 
+		/* Использовать Imagick Y/N */
+		'USE_IMAGICK' => [
+			'type'=>'checkbox',
+			'default' => 'Y'
+		],
+
 		/* Степень сжатия картинок */
 		'IMG_COMPRESSION' => [
 			'type' => 'text',

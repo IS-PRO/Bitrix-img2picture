@@ -20,18 +20,18 @@ class CImageManupulator extends CSimpleImage
 		onePXwebp = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA',
 		onePXavif = 'data:image/avif;base64,AAAAFGZ0eXBhdmlmAAAAAG1pZjEAAACgbWV0YQAAAAAAAAAOcGl0bQAAAAAAAQAAAB5pbG9jAAAAAEQAAAEAAQAAAAEAAAC8AAAAGwAAACNpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAARWlwcnAAAAAoaXBjbwAAABRpc3BlAAAAAAAAAAQAAAAEAAAADGF2MUOBAAAAAAAAFWlwbWEAAAAAAAAAAQABAgECAAAAI21kYXQSAAoIP8R8hAQ0BUAyDWeeUy0JG+QAACANEkA=';
 
-	var $arParams = array();
+	private $arParams = array();
 
 	public function __construct($arParams)
 	{
 		/* DOCUMENT_ROOT */
-		if (empty($arParams['DOCUMENT_ROOT'])) {
+		if ((!isset($arParams['DOCUMENT_ROOT'])) || (empty($arParams['DOCUMENT_ROOT']))) {
 			$arParams['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
 		};
 
 		/* ATTR_SRC_VALUES */
 		$arParams['ATTR_SRC_VALUES'] = [];
-		if (!empty($arParams['ATTR_SRC'])) {
+		if ((isset($arParams['ATTR_SRC'])) && (!empty($arParams['ATTR_SRC']))) {
 			$arAttrs = [];
 			$arAttrs = explode("\n", $arParams['ATTR_SRC']);
 			if (is_array($arAttrs)) {
@@ -48,7 +48,7 @@ class CImageManupulator extends CSimpleImage
 		};
 
 		/* EXCEPTIONS_SRC_REG */
-		if (!empty($arParams['EXCEPTIONS_SRC'])) {
+		if ((isset($arParams['EXCEPTIONS_SRC'])) && (!empty($arParams['EXCEPTIONS_SRC']))) {
 			$arParams['EXCEPTIONS_SRC_REG'] = [];
 			$arExceptions = [];
 			$arExceptions = explode("\n", $arParams['EXCEPTIONS_SRC']);
@@ -60,10 +60,13 @@ class CImageManupulator extends CSimpleImage
 					$arParams['EXCEPTIONS_SRC_REG'][] = '|' . trim($v) . '|';
 				};
 			};
+		} else {
+			$arParams['EXCEPTIONS_SRC'] = '';
+			$arParams['EXCEPTIONS_SRC_REG'] = [];
 		};
 
 		/* EXCEPTIONS_TAG_REG */
-		if (!empty($arParams['EXCEPTIONS_TAG'])) {
+		if ((isset($arParams['EXCEPTIONS_TAG'])) && (!empty($arParams['EXCEPTIONS_TAG']))) {
 			$arParams['EXCEPTIONS_TAG_REG'] = [];
 			$arExceptions = [];
 			$arExceptions = explode("\n", $arParams['EXCEPTIONS_TAG']);
@@ -75,32 +78,43 @@ class CImageManupulator extends CSimpleImage
 					$arParams['EXCEPTIONS_TAG_REG'][] = '|' . trim($v) . '|';
 				};
 			};
+		} else {
+			$arParams['EXCEPTIONS_TAG'] = '';
+			$arParams['EXCEPTIONS_TAG_REG'] = [];
 		};
 
 		/* IMG_COMPRESSION */
-		if ((int) $arParams['IMG_COMPRESSION'] == 0) {
+		if ((!isset($arParams['IMG_COMPRESSION'])) || ((int) $arParams['IMG_COMPRESSION'] == 0)) {
 			$arParams['IMG_COMPRESSION'] = 75;
 		};
 
 		/* WIDTH */
-		if (is_array($arParams['RESPONSIVE_VALUE'])) {
+		if ((isset($arParams['RESPONSIVE_VALUE'])) && (is_array($arParams['RESPONSIVE_VALUE']))) {
 			foreach ($arParams['RESPONSIVE_VALUE'] as $key => $val) {
 				$arParams['WIDTH'][] = $val['width'];
 			};
 			$arParams['WIDTH'][] = self::smallWidth;
 			rsort($arParams['WIDTH']);
 		} else {
-			unset($arParams['RESPONSIVE_VALUE']);
+			$arParams['RESPONSIVE_VALUE'] = [];
 		};
 
 		/* LAZYLOAD */
-		if (empty($arParams['LAZYLOAD'])) {
+		if ((!isset($arParams['LAZYLOAD'])) || ($arParams['LAZYLOAD'] != 'N')) {
 			$arParams['LAZYLOAD'] = 'Y';
+		} else {
+			$arParams['LAZYLOAD'] = 'N';
 		}
 
 		/* CACHE_TTL */
 		if ((int) $arParams['CACHE_TTL'] == 0) {
 			$arParams['CACHE_TTL'] = 2592000; /* 30 дней */
+		};
+
+		if ((isset($arParams['USE_IMAGICK'])) && ($arParams['USE_IMAGICK'] == 'Y')) {
+			$this->use_imagick = true;
+		} else {
+			$arParams['USE_IMAGICK'] = 'N';
 		};
 
 		$this->arParams = $arParams;

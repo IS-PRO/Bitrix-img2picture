@@ -11,6 +11,11 @@ $MESS['ISPRO_IMG2PICTURE_MAX_IMG_WIDTH'] = 'Ширина изображения 
 
 $MESS['ISPRO_IMG2PICTURE_USE_WEBP'] = 'Применить конвертацию изображений в webp';
 $MESS['ISPRO_IMG2PICTURE_USE_AVIF'] = 'Применить конвертацию изображений в avif';
+$MESS['ISPRO_IMG2PICTURE_USE_IMAGICK'] = 'Использовать Imagick (Если версия php меньше 8.1, или не формируются avif файлы)';
+if (!class_exists('Imagick')) {
+	$MESS['ISPRO_IMG2PICTURE_USE_IMAGICK'] .= ' <b>(Не применимо, так как не утановлен Imagick)</b>';
+};
+
 $MESS['ISPRO_IMG2PICTURE_LAZYLOAD'] = 'Использовать ленивую загрузку изображений (lazyload)';
 $MESS['ISPRO_IMG2PICTURE_ATTR_SRC'] = 'В каких аттрибутах тега img искать ссылку на изображение *<br> (по умолчанию src)';
 $MESS['ISPRO_IMG2PICTURE_ATTR_SRC_ERROR'] = 'Поле является обязательным для заполнения (по умолчанию "src")';

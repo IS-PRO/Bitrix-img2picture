@@ -9,8 +9,9 @@ if (class_exists('\IS_PRO\img2picture\CSimpleImage')) {
 class CSimpleImage
 {
 
-	var $image;
-	var $image_type = false;
+	private $image,
+			$image_type = false,
+			$use_imagick = false;
 
 	/**
 	 *   Load image (Загрузит картинку)
@@ -19,26 +20,37 @@ class CSimpleImage
 	 */
 	public function load($filename)
 	{
+
 		$image_info = getimagesize($filename);
 		$this->image_type = $image_info[2];
-		if ($this->image_type == IMAGETYPE_JPEG) {
-			$this->image = imagecreatefromjpeg($filename);
-		} elseif ($this->image_type == IMAGETYPE_GIF) {
-			$this->image = imagecreatefromgif($filename);
-		} elseif ($this->image_type == IMAGETYPE_PNG) {
-			$this->image = imagecreatefrompng($filename);
-		} elseif ($this->image_type == IMAGETYPE_WEBP) {
-			$this->image = imagecreatefromwebp($filename);
-		} elseif ($this->image_type == IMAGETYPE_AVIF) {
-			$this->image = imagecreatefromavif($filename);
+
+		if (($this->use_imagick) && (class_exists('Imagick'))) {
+			$this->image = new Imagick($filename);
+			if (!$this->image) {
+				$this->image_type = false;
+				return false;
+			};
+			return true;
 		} else {
-			$this->image_type = false;
-			return false;
+			if ($this->image_type == IMAGETYPE_JPEG) {
+				$this->image = imagecreatefromjpeg($filename);
+			} elseif ($this->image_type == IMAGETYPE_GIF) {
+				$this->image = imagecreatefromgif($filename);
+			} elseif ($this->image_type == IMAGETYPE_PNG) {
+				$this->image = imagecreatefrompng($filename);
+			} elseif ($this->image_type == IMAGETYPE_WEBP) {
+				$this->image = imagecreatefromwebp($filename);
+			} elseif ($this->image_type == IMAGETYPE_AVIF) {
+				$this->image = imagecreatefromavif($filename);
+			} else {
+				$this->image_type = false;
+				return false;
+			};
+			imagepalettetotruecolor($this->image);
+			imagealphablending($this->image, false);
+			imagesavealpha($this->image, true);
+			return true;
 		}
-		imagepalettetotruecolor($this->image);
-		imagealphablending($this->image, false);
-		imagesavealpha($this->image, true);
-		return true;
 	}
 
 	/**
@@ -61,19 +73,49 @@ class CSimpleImage
 	 */
 	public function save($filename, $image_type = IMAGETYPE_JPEG, $compression = 75, $permissions = null)
 	{
-		if ($image_type == IMAGETYPE_JPEG) {
-			imagejpeg($this->image, $filename, $compression);
-		} elseif ($image_type == IMAGETYPE_GIF) {
-			imagegif($this->image, $filename);
-		} elseif ($image_type == IMAGETYPE_PNG) {
-			imagepng($this->image, $filename);
-		} elseif ($image_type == IMAGETYPE_WEBP) {
-			imagewebp($this->image, $filename, $compression);
-		} elseif ($image_type == IMAGETYPE_AVIF) {
-			imageavif($this->image, $filename, $compression);
-		} else {
+		if (!$this->image) {
 			return false;
+		}
+
+		if (($this->use_imagick) && (class_exists('Imagick'))) {
+			if ($image_type == IMAGETYPE_JPEG) {
+				$this->image->setImageFormat('jpeg');
+				$this->image->setImageCompressionQuality($compression);
+				$this->image->writeToFile($filename);
+			} elseif ($image_type == IMAGETYPE_GIF) {
+				$this->image->setImageFormat('gif');
+				$this->image->writeToFile($filename);
+			} elseif ($image_type == IMAGETYPE_PNG) {
+				$this->image->setImageFormat('png');
+				$this->image->setImageCompressionQuality($compression);
+				$this->image->writeToFile($filename);
+			} elseif ($image_type == IMAGETYPE_WEBP) {
+				$this->image->setImageFormat('webp');
+				$this->image->setImageCompressionQuality($compression);
+				$this->image->writeToFile($filename);
+			} elseif ($image_type == IMAGETYPE_AVIF) {
+				$this->image->setImageFormat('avif');
+				$this->image->setImageCompressionQuality($compression);
+				$this->image->writeToFile($filename);
+			} else {
+				return false;
+			};
+		} else {
+			if ($image_type == IMAGETYPE_JPEG) {
+				imagejpeg($this->image, $filename, $compression);
+			} elseif ($image_type == IMAGETYPE_GIF) {
+				imagegif($this->image, $filename);
+			} elseif ($image_type == IMAGETYPE_PNG) {
+				imagepng($this->image, $filename);
+			} elseif ($image_type == IMAGETYPE_WEBP) {
+				imagewebp($this->image, $filename, $compression);
+			} elseif ($image_type == IMAGETYPE_AVIF) {
+				imageavif($this->image, $filename, $compression);
+			} else {
+				return false;
+			};
 		};
+
 		if (file_exists($filename)) {
 			if ($permissions != null) {
 				chmod($filename, $permissions);
@@ -81,7 +123,8 @@ class CSimpleImage
 			if (filesize($filename) > 0) {
 				return true;
 			}
-		}
+		};
+
 		return false;
 	}
 
@@ -91,20 +134,27 @@ class CSimpleImage
 	 */
 	public function output($image_type = IMAGETYPE_JPEG)
 	{
-		if ($image_type == IMAGETYPE_JPEG) {
-			imagejpeg($this->image);
-		} elseif ($image_type == IMAGETYPE_GIF) {
-			imagegif($this->image);
-		} elseif ($image_type == IMAGETYPE_PNG) {
-			imagepng($this->image);
-		} elseif ($image_type == IMAGETYPE_WEBP) {
-			imagewebp($this->image);
-		} elseif ($image_type == IMAGETYPE_AVIF) {
-			imageavif($this->image);
-		} else {
+		if (!$this->image) {
 			return false;
+		};
+		if (($this->use_imagick) && (class_exists('Imagick'))) {
+			echo $this->image;
+		} else {
+			if ($image_type == IMAGETYPE_JPEG) {
+				imagejpeg($this->image);
+			} elseif ($image_type == IMAGETYPE_GIF) {
+				imagegif($this->image);
+			} elseif ($image_type == IMAGETYPE_PNG) {
+				imagepng($this->image);
+			} elseif ($image_type == IMAGETYPE_WEBP) {
+				imagewebp($this->image);
+			} elseif ($image_type == IMAGETYPE_AVIF) {
+				imageavif($this->image);
+			} else {
+				return false;
+			}
+			return true;
 		}
-		return true;
 	}
 
 	/**
@@ -113,10 +163,14 @@ class CSimpleImage
 	 */
 	public function getWidth()
 	{
-		if (!$this->image_type) {
+		if (!$this->image) {
 			return false;
 		};
-		return imagesx($this->image);
+		if (($this->use_imagick) && (class_exists('Imagick'))) {
+			return $this->image->getImageWidth();
+		} else {
+			return imagesx($this->image);
+		}
 	}
 
 	/**
@@ -125,10 +179,14 @@ class CSimpleImage
 	 */
 	public function getHeight()
 	{
-		if (!$this->image_type) {
+		if (!$this->image) {
 			return false;
 		};
-		return imagesy($this->image);
+		if (($this->use_imagick) && (class_exists('Imagick'))) {
+			return $this->image->getImageHeight();
+		} else {
+			return imagesy($this->image);
+		}
 	}
 
 	/**
@@ -138,12 +196,16 @@ class CSimpleImage
 	 */
 	public function resizeToHeight($height)
 	{
-		if (!$this->image_type) {
+		if (!$this->image) {
 			return false;
 		};
-		$ratio = $height / $this->getHeight();
-		$width = $this->getWidth() * $ratio;
-		return $this->resize($width, $height);
+		if (($this->use_imagick) && (class_exists('Imagick'))) {
+			return  $this->image->resizeImage(0, $height);
+		} else {
+			$ratio = $height / $this->getHeight();
+			$width = $this->getWidth() * $ratio;
+			return $this->resize($width, $height);
+		}
 	}
 
 	/**
@@ -153,12 +215,16 @@ class CSimpleImage
 	 */
 	public function resizeToWidth($width)
 	{
-		if (!$this->image_type) {
+		if (!$this->image) {
 			return false;
 		};
-		$ratio = $width / $this->getWidth();
-		$height = $this->getheight() * $ratio;
-		return $this->resize($width, $height);
+		if (($this->use_imagick) && (class_exists('Imagick'))) {
+			return  $this->image->resizeImage($width, 0);
+		} else {
+			$ratio  = $width / $this->getWidth();
+			$height = $this->getheight() * $ratio;
+			return $this->resize($width, $height);
+		}
 	}
 
 	/**
@@ -168,12 +234,17 @@ class CSimpleImage
 	 */
 	public function scale($scale)
 	{
-		if (!$this->image_type) {
+		if (!$this->image) {
 			return false;
 		};
 		$width = $this->getWidth() * $scale / 100;
 		$height = $this->getheight() * $scale / 100;
-		return $this->resize($width, $height);
+
+		if (($this->use_imagick) && (class_exists('Imagick'))) {
+			return $this->image->resizeImage($width, $height);
+		} else {
+			return $this->resize($width, $height);
+		}
 	}
 
 	/**
@@ -184,15 +255,19 @@ class CSimpleImage
 	 */
 	public function resize($width, $height)
 	{
-		if (!$this->image_type) {
+		if (!$this->image) {
 			return false;
 		};
-		$new_image = imagecreatetruecolor($width, $height);
-		imagealphablending($new_image, false);
-		imagesavealpha($new_image, true);
-		imagecopyresampled($new_image, $this->image, 0, 0, 0, 0, $width, $height, $this->getWidth(), $this->getHeight());
-		$this->image = $new_image;
-		return  true;
+		if (($this->use_imagick) && (class_exists('Imagick'))) {
+			return $this->image->resizeImage($width, $height);
+		} else {
+			$new_image = imagecreatetruecolor($width, $height);
+			imagealphablending($new_image, false);
+			imagesavealpha($new_image, true);
+			imagecopyresampled($new_image, $this->image, 0, 0, 0, 0, $width, $height, $this->getWidth(), $this->getHeight());
+			$this->image = $new_image;
+			return true;
+		}
 	}
 
 	/**
@@ -203,9 +278,10 @@ class CSimpleImage
 	 */
 	public function cover($width, $height)
 	{
-		if (!$this->image_type) {
+		if (!$this->image) {
 			return false;
 		};
+
 		$w = $this->getWidth();
 		if ($width != $w) {
 			$this->resizeToWidth($width);
@@ -215,6 +291,7 @@ class CSimpleImage
 			$this->resizeToHeight($height);
 		}
 		return $this->wrapInTo($width, $height);
+
 	}
 
 	/**
@@ -225,41 +302,58 @@ class CSimpleImage
 	 */
 	public function wrapInTo($width, $height)
 	{
-		if (!$this->image_type) {
+		if (!$this->image) {
 			return false;
 		};
-		$new_image = imagecreatetruecolor($width, $height);
-		$w = $this->getWidth();
-		$h = $this->getHeight();
-		if ($width > $w) {
-			$dst_x = round(($width - $w) / 2);
-			$src_x = 0;
-			$dst_w = $w;
-			$src_w = $w;
+		if (($this->use_imagick) && (class_exists('Imagick'))) {
+			$w = $this->getWidth();
+			$h = $this->getHeight();
+			if ($width > $w) {
+				$x = round(($width - $w) / 2);
+			} else {
+				$x = 0;
+			}
+			if ($height > $h) {
+				$y = round(($height - $h) / 2);
+			} else {
+				$y = 0;
+			}
+			return $this->image->cropImage($w, $h, $x, $y);
 		} else {
-			$dst_x = 0;
-			$src_x = round(($w - $width) / 2);
-			$dst_w = $width;
-			$src_w = $width;
+
+			$new_image = imagecreatetruecolor($width, $height);
+			$w         = $this->getWidth();
+			$h         = $this->getHeight();
+			if ($width > $w) {
+				$dst_x = round(($width - $w) / 2);
+				$src_x = 0;
+				$dst_w = $w;
+				$src_w = $w;
+			} else {
+				$dst_x = 0;
+				$src_x = round(($w - $width) / 2);
+				$dst_w = $width;
+				$src_w = $width;
+			}
+			if ($height > $h) {
+				$dst_y = round(($height - $h) / 2);
+				$src_y = 0;
+				$dst_h = $h;
+				$src_h = $h;
+			} else {
+				$dst_y = 0;
+				$src_y = round(($h - $height) / 2);
+				$dst_h = $height;
+				$src_h = $height;
+			}
+			imagealphablending($new_image, false);
+			imagesavealpha($new_image, true);
+			$transparentindex = imagecolorallocatealpha($new_image, 255, 255, 255, 127);
+			imagefill($new_image, 0, 0, $transparentindex);
+			imagecopyresampled($new_image, $this->image, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h);
+			$this->image = $new_image;
+			return true;
 		}
-		if ($height > $h) {
-			$dst_y = round(($height - $h) / 2);
-			$src_y = 0;
-			$dst_h = $h;
-			$src_h = $h;
-		} else {
-			$dst_y = 0;
-			$src_y = round(($h - $height) / 2);
-			$dst_h = $height;
-			$src_h = $height;
-		}
-		imagealphablending($new_image, false);
-		imagesavealpha($new_image, true);
-		$transparentindex = imagecolorallocatealpha($new_image, 255, 255, 255, 127);
-		imagefill($new_image, 0, 0, $transparentindex);
-		imagecopyresampled($new_image, $this->image, $dst_x, $dst_y, $src_x, $src_y, $dst_w, $dst_h, $src_w, $src_h);
-		$this->image = $new_image;
-		return true;
 	}
 
 	/**
@@ -270,13 +364,15 @@ class CSimpleImage
 	 */
 	public function resizeInTo($width, $height)
 	{
-		if (!$this->image_type) {
+		if (!$this->image) {
 			return false;
 		};
+
 		$ratiow = $width / $this->getWidth() * 100;
 		$ratioh = $height / $this->getHeight() * 100;
-		$ratio = min($ratiow, $ratioh);
+		$ratio  = min($ratiow, $ratioh);
 		return $this->scale($ratio);
+
 	}
 
 
@@ -288,15 +384,16 @@ class CSimpleImage
 	 */
 	public function smallTo($width, $height)
 	{
-		/* */
-		if (!$this->image_type) {
+		if (!$this->image) {
 			return false;
 		};
+
 		if (($this->getWidth() > $width) or ($this->getHeight() > $height)) {
 			return $this->resizeInTo($width, $height);
 		} else {
 			return false;
-		};
+		}
+
 	}
 
 	/**
@@ -306,18 +403,22 @@ class CSimpleImage
 	 */
 	public function crop($x1, $y1, $x2, $y2)
 	{
-		if (!$this->image_type) {
+		if (!$this->image) {
 			return false;
 		};
-		$w = abs($x2 - $x1);
-		$h = abs($y2 - $y1);
-		$x = min($x1, $x2);
-		$y = min($y1, $y2);
-		$new_image = imagecreatetruecolor($w, $h);
-		imagealphablending($new_image, false);
-		imagesavealpha($new_image, true);
-		imagecopy($new_image, $this->image, 0, 0, $x, $y, $w, $h);
-		$this->image = $new_image;
-		return true;
+		$w         = abs($x2 - $x1);
+		$h         = abs($y2 - $y1);
+		$x         = min($x1, $x2);
+		$y         = min($y1, $y2);
+		if (($this->use_imagick) && (class_exists('Imagick'))) {
+			return  $this->image->cropImage($w, $h, $x, $y);
+		} else {
+			$new_image = imagecreatetruecolor($w, $h);
+			imagealphablending($new_image, false);
+			imagesavealpha($new_image, true);
+			imagecopy($new_image, $this->image, 0, 0, $x, $y, $w, $h);
+			$this->image = $new_image;
+			return true;
+		}
 	}
 }
