@@ -720,7 +720,7 @@ class CImageManupulator extends CSimpleImage
 	{
 		$img['parse_tag'] = $this->get_tags('', $img['tag'], false);
 		$img['parse_tag'] = $img['parse_tag'][0];
-
+		/*
 		$arStyleParams = explode(';', $img['parse_tag']['style']);
 		if ((is_array($arStyleParams)) && (count($arStyleParams) > 0)) {
 			foreach ($arStyleParams as $strStyleParam) {
@@ -731,6 +731,7 @@ class CImageManupulator extends CSimpleImage
 				}
 			}
 		}
+		*/
 		$arResult['img'] = $img;
 		$arResult['md5key'] = md5($img['tag']);
 		$files = $this->PrepareResponsive($img['src'], $arParams['WIDTH']);
