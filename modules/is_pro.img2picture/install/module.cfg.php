@@ -57,6 +57,12 @@ $arModuleCfg = [
 			'default' => 'Y'
 		],
 
+		/* Использовать webp Y/N */
+		'USE_ONLY_WEBP_AVIF' => [
+			'type'=>'checkbox',
+			'default' => 'Y'
+		],
+
 		/* Использовать Imagick Y/N */
 		'USE_IMAGICK' => [
 			'type'=>'checkbox',

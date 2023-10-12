@@ -604,7 +604,7 @@ class CImageManupulator extends CSimpleImage
 							$lazy = 'srcset="' . self::onePXwebp . '"';
 						}
 						$index = 1;
-					} else {
+					} else if ($arParams['USE_ONLY_WEBP_AVIF'] != 'Y') {
 						$ext = substr(strrchr($file_src, '.'), 1);
 						if ($ext == 'jpg') {
 							$ext = 'jpeg';
@@ -769,7 +769,7 @@ class CImageManupulator extends CSimpleImage
 						$haveFiles = true;
 						$addsourse[1] = '.webp' . $arResult['cssSelector'] . '{'.str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']).'}';
 						$addsourseLazy[1] = '.loaded' . $addsourse[1];
-					} else {
+					} else if ($arParams['USE_ONLY_WEBP_AVIF'] != 'Y') {
 						$haveFiles = true;
 						$addsourse[0] = '' . $arResult['cssSelector'] . '{'.str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']).'}';
 						$addsourseLazy[0] = '.loaded' . $addsourse[0];
