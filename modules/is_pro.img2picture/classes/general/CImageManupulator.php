@@ -399,6 +399,13 @@ class CImageManupulator extends CSimpleImage
 				$arResult['avif'] = $avifSrc;
 			};
 		};
+		if ($arParams['USE_ONLY_WEBP_AVIF'] == 'Y') {
+			if (!empty($arResult['webp'])) {
+				$arResult['src'] = $arResult['webp'];
+			} else if (!empty($arResult['avif'])) {
+				$arResult['src'] = $arResult['avif'];
+			}
+		}
 		return $arResult;
 	}
 
@@ -557,6 +564,13 @@ class CImageManupulator extends CSimpleImage
 					if (in_array(filesize($filename), [0, 4096])) {
 						unset($arResult[$width]['avif']);
 					}
+				}
+			}
+			if ($this->arParams['USE_ONLY_WEBP_AVIF'] == 'Y') {
+				if (!empty($arResult[$width]['webp'])) {
+					$arResult[$width]['src'] = $arResult[$width]['webp'];
+				} else if (!empty($arResult[$width]['avif'])) {
+					$arResult[$width]['src'] = $arResult[$width]['avif'];
 				}
 			}
 		}
@@ -747,7 +761,9 @@ class CImageManupulator extends CSimpleImage
 			};
 			$arResult['cssSelector'] = '[data-i2p="' . $arResult['md5key'] . '"]';
 			$arResult['style'] = '<style>';
+
 			$arResult['style'] .= '*' . $arResult['cssSelector'] . '{'.str_replace($arResult['img']['src'], $arResult['FILES'][self::smallWidth]['src'], $arResult['img']['parse_tag']['style']).'}';
+
 			foreach ($arParams['RESPONSIVE_VALUE'] as $key => $val) {
 				if (!is_array($arResult['FILES'][$val['width']])) {
 					continue;
