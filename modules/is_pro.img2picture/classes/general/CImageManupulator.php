@@ -683,6 +683,11 @@ class CImageManupulator extends CSimpleImage
 			$arResult['sources_lazy'][] = '<source ' . $lazy . '  data-i2p="Y" data-srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
 		};
 
+		if ($arParams['USE_ONLY_WEBP_AVIF'] == 'Y') {
+			$arResult["img"]["src"] = $arResult['FILES']['original']['src'];
+			$arResult["img"]["tag"] = str_replace('"' . $arResult["img"]["src"] . '"', '"' . $arResult['FILES']['original']['src'] . '"', $arResult["img"]["tag"]);
+		}
+
 		if ($arParams['DEBUG'] == 'Y') {
 			\Bitrix\Main\Diag\Debug::writeToFile(['CREATED arResult' => $arResult]);
 		};
