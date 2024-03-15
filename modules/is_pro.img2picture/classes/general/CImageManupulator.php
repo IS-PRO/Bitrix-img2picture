@@ -684,8 +684,8 @@ class CImageManupulator extends CSimpleImage
 		};
 
 		if ($arParams['USE_ONLY_WEBP_AVIF'] == 'Y') {
-			$arResult["img"]["src"] = $arResult['FILES']['original']['src'];
 			$arResult["img"]["tag"] = str_replace('"' . $arResult["img"]["src"] . '"', '"' . $arResult['FILES']['original']['src'] . '"', $arResult["img"]["tag"]);
+			$arResult["img"]["src"] = $arResult['FILES']['original']['src'];
 		}
 
 		if ($arParams['DEBUG'] == 'Y') {
