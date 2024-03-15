@@ -55,7 +55,6 @@ document.addEventListener('DOMContentLoaded', function () {
 		setTimeout(function () {
 			webpEnable = (imgformat.webplossy.support && imgformat.webplossless.support);
 			avifEnable = imgformat.avif.support;
-			console.log(imgformat);
 			if (webpEnable || avifEnable) {
 				elements.forEach(el => {
 					if (webpEnable) {
@@ -84,5 +83,4 @@ document.addEventListener('DOMContentLoaded', function () {
 		});
 		observer.observe();
 	}
-
 })
