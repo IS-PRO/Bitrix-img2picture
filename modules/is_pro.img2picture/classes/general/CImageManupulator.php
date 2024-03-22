@@ -21,9 +21,12 @@ class CImageManupulator extends CSimpleImage
 		onePXavif = 'data:image/avif;base64,AAAAFGZ0eXBhdmlmAAAAAG1pZjEAAACgbWV0YQAAAAAAAAAOcGl0bQAAAAAAAQAAAB5pbG9jAAAAAEQAAAEAAQAAAAEAAAC8AAAAGwAAACNpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAARWlwcnAAAAAoaXBjbwAAABRpc3BlAAAAAAAAAAQAAAAEAAAADGF2MUOBAAAAAAAAFWlwbWEAAAAAAAAAAQABAgECAAAAI21kYXQSAAoIP8R8hAQ0BUAyDWeeUy0JG+QAACANEkA=';
 
 	private $arParams = array();
-
+	private $startTime = 0;
 	public function __construct($arParams)
 	{
+
+		$this->startTime = microtime(true);;
+
 		/* DOCUMENT_ROOT */
 		if ((!isset($arParams['DOCUMENT_ROOT'])) || (empty($arParams['DOCUMENT_ROOT']))) {
 			$arParams['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
@@ -120,6 +123,12 @@ class CImageManupulator extends CSimpleImage
 		$this->arParams = $arParams;
 	}
 
+	private function worktime()
+	{
+		$time_end = microtime(true);
+		return $time_end - $this->startTime;
+	}
+
 	public function doIt(&$content)
 	{
 		$arParams = $this->arParams;
@@ -146,93 +155,97 @@ class CImageManupulator extends CSimpleImage
 		$tagkey = 0;
 		$srckey = 3;
 
-		if (preg_match_all($preg, $content, $matches)) {
+		if (!preg_match_all($preg, $content, $matches)) {
+			return;
+		}
+
+		if ($arParams['DEBUG'] == 'Y') {
+			\Bitrix\Main\Diag\Debug::writeToFile(['FOUND background array' => $matches]);
+		};
+
+		$cache = \Bitrix\Main\Data\Cache::createInstance();
+		$cachePath = self::cachePath;
+		$cacheTtl = (int) $arParams['CACHE_TTL'];
+
+		$arAllreadyReplaced = [];
+
+		foreach ($matches[$tagkey] as $key => $tag) {
 			if ($arParams['DEBUG'] == 'Y') {
-				\Bitrix\Main\Diag\Debug::writeToFile(['FOUND background array' => $matches]);
+				\Bitrix\Main\Diag\Debug::writeToFile(['FOUND background el' => $tag]);
 			};
 
+			$need = true;
+			$img['tag'] = $matches[$tagkey][$key];
+			$img['src'] = trim($matches[$srckey][$key], '"' . "'");
 
-			$cache = \Bitrix\Main\Data\Cache::createInstance();
-			$cachePath = self::cachePath;
-			$cacheTtl = (int) $arParams['CACHE_TTL'];
-
-			$arAllreadyReplaced = [];
-
-			foreach ($matches[$tagkey] as $key => $tag) {
+			if ($arParams['DEBUG'] == 'Y') {
+				\Bitrix\Main\Diag\Debug::writeToFile(['FOUND background img' => $img]);
+			};
+			if (in_array($img['tag'], $arAllreadyReplaced)) {
+				$need = false;
 				if ($arParams['DEBUG'] == 'Y') {
-					\Bitrix\Main\Diag\Debug::writeToFile(['FOUND background el' => $tag]);
+					\Bitrix\Main\Diag\Debug::writeToFile(['TAG ALLREADY REPLACED']);
 				};
+			};
 
-				$need = true;
-				$img['tag'] = $matches[$tagkey][$key];
-				$img['src'] = trim($matches[$srckey][$key], '"'."'");
+			$cacheKey =  md5($img['tag']);
 
+			if (($cache->initCache($cacheTtl, $cacheKey, $cachePath)) && (empty($arParams['CLEAR_CACHE']))) {
+				$cachedPlace = $cache->getVars();
 				if ($arParams['DEBUG'] == 'Y') {
-					\Bitrix\Main\Diag\Debug::writeToFile(['FOUND background img' => $img]);
+					\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $cachedPlace]);
 				};
-				if (in_array($img['tag'], $arAllreadyReplaced)) {
+				if (is_array($cachedPlace)) {
+					$cachedPlace = $cachedPlace['place'];
+				}
+			} else {
+				$arResult = [];
+				$arResult['place'] = '';
+				if (mb_strpos($img['tag'], 'data-i2p')) {
 					$need = false;
 					if ($arParams['DEBUG'] == 'Y') {
-						\Bitrix\Main\Diag\Debug::writeToFile(['TAG ALLREADY REPLACED']);
+						\Bitrix\Main\Diag\Debug::writeToFile(['TAG IS HAVE data-i2p']);
 					};
 				};
 
-				$cacheKey =  md5($img['tag']);
+				if ($need) {
+					$need = $this->ExceptionBySrc($img['src']);
+				};
 
-				if (($cache->initCache($cacheTtl, $cacheKey, $cachePath)) && (empty($arParams['CLEAR_CACHE']))) {
-					$cachedPlace = $cache->getVars();
-					if ($arParams['DEBUG'] == 'Y') {
-						\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $cachedPlace]);
-					};
-					if (is_array($cachedPlace)) {
-						$cachedPlace = $cachedPlace['place'];
-					}
-				} else {
-					$arResult = [];
-					$arResult['place'] = '';
-					if (mb_strpos($img['tag'], 'data-i2p')) {
-						$need = false;
-						if ($arParams['DEBUG'] == 'Y') {
-							\Bitrix\Main\Diag\Debug::writeToFile(['TAG IS HAVE data-i2p']);
-						};
-					};
+				if ($need) {
+					$arResult = $this->PrepareResultBackground($img, $arParams);
+				};
 
-					if ($need) {
-						$need = $this->ExceptionBySrc($img['src']);
-					};
-
-					if ($need) {
-						$arResult = $this->PrepareResultBackground($img, $arParams);
-					};
-
-					if ($arParams['MODULE_CONFIG']['MODULE_ID'] != '') {
-						foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultBackground', true) as $arEvent) {
-							ExecuteModuleEventEx($arEvent, array(&$arResult));
-						};
-					};
-					$cachedPlace = $arResult['place'];
-					if ($cache->startDataCache()) {
-						$cache->endDataCache($cachedPlace);
+				if ($arParams['MODULE_CONFIG']['MODULE_ID'] != '') {
+					foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultBackground', true) as $arEvent) {
+						ExecuteModuleEventEx($arEvent, array(&$arResult));
 					};
 				};
-				$arResult['place'] = $cachedPlace;
-				if ((trim($arResult['place']) != '') && (mb_strpos($arResult['place'], '</style>'))) {
-					list($tohead, $newtag) = explode('</style>', $arResult['place']);
-					$tohead .= '</style></head>';
-					$arAllreadyReplaced[] = $img['tag'];
-					$content = str_replace(
-						['</head>', $img['tag']],
-						[$tohead, $newtag],
-						$content
-					);
-					if ($arParams['DEBUG'] == 'Y') {
-						\Bitrix\Main\Diag\Debug::writeToFile([
-							'REPLACED_FROM' => $img['tag'],
-							'REPLACED_TO' => $arResult['place']
-						]);
-					};
+				$cachedPlace = $arResult['place'];
+				if ($cache->startDataCache()) {
+					$cache->endDataCache($cachedPlace);
 				};
 			};
+			$arResult['place'] = $cachedPlace;
+			if ((trim($arResult['place']) != '') && (mb_strpos($arResult['place'], '</style>'))) {
+				list($tohead, $newtag) = explode('</style>', $arResult['place']);
+				$tohead .= '</style></head>';
+				$arAllreadyReplaced[] = $img['tag'];
+				$content = str_replace(
+					['</head>', $img['tag']],
+					[$tohead, $newtag],
+					$content
+				);
+				if ($arParams['DEBUG'] == 'Y') {
+					\Bitrix\Main\Diag\Debug::writeToFile([
+						'REPLACED_FROM' => $img['tag'],
+						'REPLACED_TO' => $arResult['place']
+					]);
+				};
+			};
+			if ($this->worktime() > 3) {
+				break;
+			}
 		};
 	}
 
@@ -338,6 +351,10 @@ class CImageManupulator extends CSimpleImage
 					]);
 				};
 			};
+
+			if ($this->worktime() > 3) {
+				break;
+			}
 		};
 	}
 
@@ -525,15 +542,15 @@ class CImageManupulator extends CSimpleImage
 				if (
 					(!file_exists($filename)) ||
 					(in_array(
-							$this->arParams['CLEAR_CACHE'],
-							[
-								'Y',
-								$doc_root . $src,
-								$src,
-								$filename,
-								$newsrc
-							]
-						)
+						$this->arParams['CLEAR_CACHE'],
+						[
+							'Y',
+							$doc_root . $src,
+							$src,
+							$filename,
+							$newsrc
+						]
+					)
 					)
 				) {
 					if (!$loaded) {
@@ -767,7 +784,7 @@ class CImageManupulator extends CSimpleImage
 			$arResult['cssSelector'] = '[data-i2p="' . $arResult['md5key'] . '"]';
 			$arResult['style'] = '<style>';
 
-			$arResult['style'] .= '*' . $arResult['cssSelector'] . '{'.str_replace($arResult['img']['src'], $arResult['FILES'][self::smallWidth]['src'], $arResult['img']['parse_tag']['style']).'}';
+			$arResult['style'] .= '*' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $arResult['FILES'][self::smallWidth]['src'], $arResult['img']['parse_tag']['style']) . '}';
 
 			foreach ($arParams['RESPONSIVE_VALUE'] as $key => $val) {
 				if (!is_array($arResult['FILES'][$val['width']])) {
@@ -784,15 +801,15 @@ class CImageManupulator extends CSimpleImage
 				foreach ($arResult['FILES'][$val['width']] as $file_type => $file_src) {
 					if ($file_type == 'avif') {
 						$haveFiles = true;
-						$addsourse[2] = '.avif' . $arResult['cssSelector'] . '{'.str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']).'}';
+						$addsourse[2] = '.avif' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']) . '}';
 						$addsourseLazy[2] = '.loaded' . $addsourse[2];
 					} else if ($file_type == 'webp') {
 						$haveFiles = true;
-						$addsourse[1] = '.webp' . $arResult['cssSelector'] . '{'.str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']).'}';
+						$addsourse[1] = '.webp' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']) . '}';
 						$addsourseLazy[1] = '.loaded' . $addsourse[1];
 					} else if ($arParams['USE_ONLY_WEBP_AVIF'] != 'Y') {
 						$haveFiles = true;
-						$addsourse[0] = '' . $arResult['cssSelector'] . '{'.str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']).'}';
+						$addsourse[0] = '' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']) . '}';
 						$addsourseLazy[0] = '.loaded' . $addsourse[0];
 					};
 				}
@@ -830,21 +847,20 @@ class CImageManupulator extends CSimpleImage
 			$arResult['FILES']['original'] = $PreparedOriginal;
 			$arResult['style'] .= '@media (min-width: ' . (int) $minmax . 'px) {';
 			if ($arParams['LAZYLOAD'] != "Y") {
-				$arResult['style'] .= '' . $arResult['cssSelector'] . '{'.str_replace($arResult['img']['src'], $arResult['FILES']['original']['src'], $arResult['img']['parse_tag']['style']).'}';
+				$arResult['style'] .= '' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $arResult['FILES']['original']['src'], $arResult['img']['parse_tag']['style']) . '}';
 				if ($arResult['FILES']['original']['avif'] != '') {
-					$arResult['style'] .= '.avif' . $arResult['cssSelector'] . '{'.str_replace($arResult['img']['src'], $arResult['FILES']['original']['avif'], $arResult['img']['parse_tag']['style']).'}';
-
+					$arResult['style'] .= '.avif' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $arResult['FILES']['original']['avif'], $arResult['img']['parse_tag']['style']) . '}';
 				}
 				if ($arResult['FILES']['original']['webp'] != '') {
-					$arResult['style'] .= '.webp' . $arResult['cssSelector'] . '{'.str_replace($arResult['img']['src'], $arResult['FILES']['original']['webp'], $arResult['img']['parse_tag']['style']).'}';
+					$arResult['style'] .= '.webp' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $arResult['FILES']['original']['webp'], $arResult['img']['parse_tag']['style']) . '}';
 				}
 			} else {
-				$arResult['style'] .= '.loaded' . $arResult['cssSelector'] . '{'.str_replace($arResult['img']['src'], $arResult['FILES']['original']['src'], $arResult['img']['parse_tag']['style']).'}';
+				$arResult['style'] .= '.loaded' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $arResult['FILES']['original']['src'], $arResult['img']['parse_tag']['style']) . '}';
 				if ($arResult['FILES']['original']['avif'] != '') {
-					$arResult['style'] .= '.avif.loaded' . $arResult['cssSelector'] . '{'.str_replace($arResult['img']['src'], $arResult['FILES']['original']['avif'], $arResult['img']['parse_tag']['style']).'}';
+					$arResult['style'] .= '.avif.loaded' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $arResult['FILES']['original']['avif'], $arResult['img']['parse_tag']['style']) . '}';
 				}
 				if ($arResult['FILES']['original']['webp'] != '') {
-					$arResult['style'] .= '.webp.loaded' . $arResult['cssSelector'] . '{'.str_replace($arResult['img']['src'], $arResult['FILES']['original']['webp'], $arResult['img']['parse_tag']['style']).'}';
+					$arResult['style'] .= '.webp.loaded' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $arResult['FILES']['original']['webp'], $arResult['img']['parse_tag']['style']) . '}';
 				}
 			}
 			$arResult['style'] .= '}';
