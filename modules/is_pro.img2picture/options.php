@@ -148,7 +148,14 @@ $tabList[] = [
 	'ICON' => 'ib_settings',
 	'TITLE' => Loc::getMessage('ISPRO_IMG2PICTURE_TAB_TITLE_DESC')
 ];
-
+/*
+$tabList[] = [
+	'DIV' => 'description',
+	'TAB' => Loc::getMessage('ISPRO_IMG2PICTURE_TAB_SET_IMGCONVERT'),
+	'ICON' => 'ib_settings',
+	'TITLE' => Loc::getMessage('ISPRO_IMG2PICTURE_TAB_TITLE_IMGCONVERT')
+];
+*/
 foreach ($siteIds as $sId => $sName) {
 	$tabList[] = [
 		'DIV' => 'setting' . $sId,
@@ -179,7 +186,16 @@ $tabControl = new CAdminTabControl(str_replace('.', '_', $arModuleCfg['MODULE_ID
 			<?= EndNote(); ?>
 		</td>
 	</tr>
-
+<? /*
+	<? $tabControl->BeginNextTab(); ?>
+	<tr>
+		<td colspan="2">
+			<?= BeginNote(); ?>
+				Тут будет сжатиеоригиналов
+			<?= EndNote(); ?>
+		</td>
+	</tr>
+*/?>
 	<? foreach ($siteIds as $sId => $sName) : ?>
 
 		<? $tabControl->BeginNextTab(); ?>
