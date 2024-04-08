@@ -12,7 +12,7 @@ if (class_exists('\IS_PRO\img2picture\CImageManupulator')) {
 class CImageManupulator extends CSimpleImage
 {
 	const
-		maxWorkTime = 3,
+		maxWorkTime = 20,
 		DIR = '/upload/img2picture/',
 		max_width = 99999,
 		cachePath  = 'img2picture',
@@ -128,7 +128,11 @@ class CImageManupulator extends CSimpleImage
 	{
 		$time_end = microtime(true);
 		$worktime = $time_end - $this->startTime;
-		return $worktime > self::maxWorkTime;
+
+		if (($this->arParams['DEBUG'] == 'Y') && ($worktime >= self::maxWorkTime)) {
+			\Bitrix\Main\Diag\Debug::writeToFile(['Stop by timeout' => $worktime]);
+		}
+		return $worktime < self::maxWorkTime;
 	}
 
 	public function doIt(&$content)
@@ -249,7 +253,7 @@ class CImageManupulator extends CSimpleImage
 					]);
 				}
 			}
-			if ($this->canContinue()) {
+			if (!$this->canContinue()) {
 				break;
 			}
 		};
@@ -356,7 +360,7 @@ class CImageManupulator extends CSimpleImage
 				}
 			}
 
-			if ($this->canContinue()) {
+			if (!$this->canContinue()) {
 				break;
 			}
 		}
@@ -450,11 +454,15 @@ class CImageManupulator extends CSimpleImage
 		$height = self::max_width;
 
 		/* проверим существует ли файл вообще */
-		if (!file_exists($doc_root . $src)) {
+		$fullPathFile = str_replace('//', '/', $doc_root . $src);
+		if (!file_exists($fullPathFile)) {
 			$src = urldecode($src);
 		}
-
-		if (!file_exists($doc_root . $src)) {
+		$fullPathFile = str_replace('//', '/', $doc_root . $src);
+		if (!file_exists($fullPathFile)) {
+			if ($this->arParams['DEBUG'] == 'Y') {
+				\Bitrix\Main\Diag\Debug::writeToFile(['FILE not found' => $fullPathFile]);
+			}
 			return false;
 		}
 
@@ -475,7 +483,7 @@ class CImageManupulator extends CSimpleImage
 					$this->arParams['CLEAR_CACHE'],
 					[
 						'Y',
-						$doc_root . $src,
+						$fullPathFile,
 						$src,
 						$filename,
 						$newsrc
@@ -784,7 +792,10 @@ class CImageManupulator extends CSimpleImage
 		$arResult['md5key'] = md5($img['tag']);
 		$files = $this->PrepareResponsive($img['src'], $arParams['WIDTH']);
 
-		if ($files) {
+		if (empty($files)) {
+			if ($arParams['DEBUG'] == 'Y') {
+				\Bitrix\Main\Diag\Debug::writeToFile(['FILES not ready' => $files]);
+			}
 			return false;
 		}
 		$PreparedOriginal = $this->PrepareOriginal($img['src']);
