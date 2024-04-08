@@ -30,7 +30,7 @@ if (!function_exists('imageavif')) {
 
 if (file_exists(__DIR__ . "/install/module.cfg.php")) {
 	include(__DIR__ . "/install/module.cfg.php");
-};
+}
 
 use Bitrix\Main\Loader;
 

@@ -29,7 +29,7 @@ class CSimpleImage
 			if (!$this->image) {
 				$this->image_type = false;
 				return false;
-			};
+			}
 			return true;
 		} else {
 			if ($this->image_type == IMAGETYPE_JPEG) {
@@ -45,7 +45,7 @@ class CSimpleImage
 			} else {
 				$this->image_type = false;
 				return false;
-			};
+			}
 			imagepalettetotruecolor($this->image);
 			imagealphablending($this->image, false);
 			imagesavealpha($this->image, true);
@@ -60,7 +60,7 @@ class CSimpleImage
 	{
 		if (!$this->image_type) {
 			return false;
-		};
+		}
 		return $this->image;
 	}
 
@@ -99,7 +99,7 @@ class CSimpleImage
 				$this->image->writeToFile($filename);
 			} else {
 				return false;
-			};
+			}
 		} else {
 			if ($image_type == IMAGETYPE_JPEG) {
 				imagejpeg($this->image, $filename, $compression);
@@ -113,8 +113,8 @@ class CSimpleImage
 				imageavif($this->image, $filename, $compression);
 			} else {
 				return false;
-			};
-		};
+			}
+		}
 
 		if (file_exists($filename)) {
 			if ($permissions != null) {
@@ -123,7 +123,7 @@ class CSimpleImage
 			if (filesize($filename) > 0) {
 				return true;
 			}
-		};
+		}
 
 		return false;
 	}
@@ -136,7 +136,7 @@ class CSimpleImage
 	{
 		if (!$this->image) {
 			return false;
-		};
+		}
 		if (($this->use_imagick) && (class_exists('Imagick'))) {
 			echo $this->image;
 		} else {
@@ -165,7 +165,7 @@ class CSimpleImage
 	{
 		if (!$this->image) {
 			return false;
-		};
+		}
 		if (($this->use_imagick) && (class_exists('Imagick'))) {
 			return $this->image->getImageWidth();
 		} else {
@@ -181,7 +181,7 @@ class CSimpleImage
 	{
 		if (!$this->image) {
 			return false;
-		};
+		}
 		if (($this->use_imagick) && (class_exists('Imagick'))) {
 			return $this->image->getImageHeight();
 		} else {
@@ -198,7 +198,7 @@ class CSimpleImage
 	{
 		if (!$this->image) {
 			return false;
-		};
+		}
 		if (($this->use_imagick) && (class_exists('Imagick'))) {
 			return  $this->image->resizeImage(0, $height);
 		} else {
@@ -217,7 +217,7 @@ class CSimpleImage
 	{
 		if (!$this->image) {
 			return false;
-		};
+		}
 		if (($this->use_imagick) && (class_exists('Imagick'))) {
 			return  $this->image->resizeImage($width, 0);
 		} else {
@@ -236,7 +236,7 @@ class CSimpleImage
 	{
 		if (!$this->image) {
 			return false;
-		};
+		}
 		$width = $this->getWidth() * $scale / 100;
 		$height = $this->getheight() * $scale / 100;
 
@@ -257,7 +257,7 @@ class CSimpleImage
 	{
 		if (!$this->image) {
 			return false;
-		};
+		}
 		if (($this->use_imagick) && (class_exists('Imagick'))) {
 			return $this->image->resizeImage($width, $height);
 		} else {
@@ -280,7 +280,7 @@ class CSimpleImage
 	{
 		if (!$this->image) {
 			return false;
-		};
+		}
 
 		$w = $this->getWidth();
 		if ($width != $w) {
@@ -304,7 +304,7 @@ class CSimpleImage
 	{
 		if (!$this->image) {
 			return false;
-		};
+		}
 		if (($this->use_imagick) && (class_exists('Imagick'))) {
 			$w = $this->getWidth();
 			$h = $this->getHeight();
@@ -366,7 +366,7 @@ class CSimpleImage
 	{
 		if (!$this->image) {
 			return false;
-		};
+		}
 
 		$ratiow = $width / $this->getWidth() * 100;
 		$ratioh = $height / $this->getHeight() * 100;
@@ -386,7 +386,7 @@ class CSimpleImage
 	{
 		if (!$this->image) {
 			return false;
-		};
+		}
 
 		if (($this->getWidth() > $width) or ($this->getHeight() > $height)) {
 			return $this->resizeInTo($width, $height);
@@ -405,7 +405,7 @@ class CSimpleImage
 	{
 		if (!$this->image) {
 			return false;
-		};
+		}
 		$w         = abs($x2 - $x1);
 		$h         = abs($y2 - $y1);
 		$x         = min($x1, $x2);

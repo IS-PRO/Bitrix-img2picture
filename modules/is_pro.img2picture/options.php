@@ -14,7 +14,7 @@ if (!$USER->IsAdmin()) {
 
 if (file_exists(__DIR__ . "/install/module.cfg.php")) {
 	include(__DIR__ . "/install/module.cfg.php");
-};
+}
 
 if (!Loader::includeModule($arModuleCfg['MODULE_ID'])) {
 	return;
@@ -89,37 +89,37 @@ foreach ($siteIds as $sId => $sName) {
 			if ($optionIsValid !== true) {
 				$options_list_error[$option_name] = $optionIsValid;
 				$eeror_message .= 'ERROR: ' . mb_substr(Loc::getMessage('ISPRO_IMG2PICTURE_' . $option_name_def), 0, 40) . PHP_EOL;
-			};
+			}
 			if ($option_name_def == 'RESPONSIVE') {
 				foreach ($option[$option_name] as $key => $val) {
 					if ((trim($val['width']) == '')) {
 						unset($option[$option_name][$key]);
-					};
-				};
-			};
+					}
+				}
+			}
 			if (is_array($option[$option_name])) {
 				$option[$option_name] = json_encode($option[$option_name]);
-			};
+			}
 		}
 		if ($setDefault) {
 			$option[$option_name] = $arOption['default'];
 			$optionIsValid = true;
-		};
+		}
 		if (($saveOption || $setDefault) && ($optionIsValid === true)) {
 			\Bitrix\Main\Config\Option::set($arModuleCfg['MODULE_ID'], $option_name_def, $option[$option_name], $sId);
 			$ok_message .= 'SAVED: ' . Loc::getMessage('ISPRO_IMG2PICTURE_' . $option_name_def).' ' . $option_name . '= '.$option[$option_name] . PHP_EOL;
-		};
+		}
 
 		$option[$option_name] = \Bitrix\Main\Config\Option::get($arModuleCfg['MODULE_ID'], $option_name_def,   $arOption['default'], $sId);
 		if ($arOption['type'] == 'json') {
 			$option[$option_name . '_VALUE'] = @json_decode($option[$option_name], true);
-		};
-	};
-};
+		}
+	}
+}
 
 if ($save == 'removefiles') {
 	Cimg2picture::ClearDirCache();
-};
+}
 
 if (($eeror_message == '') && ($ok_message != '')) {
 	$ok_message = 'Saved';
@@ -163,7 +163,7 @@ foreach ($siteIds as $sId => $sName) {
 		'ICON' => 'ib_settings',
 		'TITLE' => Loc::getMessage('ISPRO_IMG2PICTURE_TAB_TITLE_OPTION') . ' (' . $sName . ')'
 	];
-};
+}
 
 
 $tabControl = new CAdminTabControl(str_replace('.', '_', $arModuleCfg['MODULE_ID']) . '_options', $tabList);

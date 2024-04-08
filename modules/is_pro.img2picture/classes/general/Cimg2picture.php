@@ -15,25 +15,25 @@ class Cimg2picture
 		global $USER;
 		if ($USER->IsAdmin()) {
 			return;
-		};
+		}
 		if (\CSite::InDir('/bitrix/')) {
 			return;
-		};
+		}
 		$option = self::GetOptions();
 
 		if ($option['MODULE_MODE'] !== 'on') {
 			return;
-		};
+		}
 		if (trim($option['EXCEPTIONS_DIR'])) {
 			$dirs = explode("\n", $option['EXCEPTIONS_DIR']);
 			if (is_array($dirs)) {
 				foreach ($dirs as $dir) {
 					if (\CSite::InDir($dir)) {
 						return;
-					};
-				};
-			};
-		};
+					}
+				}
+			}
+		}
 		$jsPath = '';
 		$jsPathChanks = explode('/', str_replace("\\", '/' ,__DIR__));
 		$isPath = false;
@@ -60,10 +60,10 @@ class Cimg2picture
 		global $USER;
 		if ($USER->IsAdmin()) {
 			return;
-		};
+		}
 		if (\CSite::InDir('/bitrix/')) {
 			return;
-		};
+		}
 		if (strtoupper($_SERVER['REQUEST_METHOD']) == 'POST') {
 			return;
 		}
@@ -82,10 +82,10 @@ class Cimg2picture
 				foreach ($dirs as $dir) {
 					if (\CSite::InDir($dir)) {
 						return;
-					};
-				};
-			};
-		};
+					}
+				}
+			}
+		}
 		$content = self::doIt($content, $option);
 	}
 
@@ -134,15 +134,15 @@ class Cimg2picture
 			}
 			$option['MODULE_MODE'] = $_SESSION['img2picture'];
 			$option['DEBUG'] = 'Y';
-		};
+		}
 		if ($option['MODULE_MODE'] == 'on') {
 			if ($_GET['img2pictureDebug'] == 'Y') {
 				$option['DEBUG'] = 'Y';
-			};
+			}
 			if ($_GET['img2pictureClearCache'] != '') {
 				$option['CLEAR_CACHE'] = $_GET['img2pictureClearCache'];
-			};
-		};
+			}
+		}
 
 		$option['MODULE_CONFIG'] = $arModuleCfg;
 		$option['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();

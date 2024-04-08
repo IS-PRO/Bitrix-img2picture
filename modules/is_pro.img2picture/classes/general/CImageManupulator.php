@@ -12,6 +12,7 @@ if (class_exists('\IS_PRO\img2picture\CImageManupulator')) {
 class CImageManupulator extends CSimpleImage
 {
 	const
+		maxWorkTime = 3,
 		DIR = '/upload/img2picture/',
 		max_width = 99999,
 		cachePath  = 'img2picture',
@@ -30,7 +31,7 @@ class CImageManupulator extends CSimpleImage
 		/* DOCUMENT_ROOT */
 		if ((!isset($arParams['DOCUMENT_ROOT'])) || (empty($arParams['DOCUMENT_ROOT']))) {
 			$arParams['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
-		};
+		}
 
 		/* ATTR_SRC_VALUES */
 		$arParams['ATTR_SRC_VALUES'] = [];
@@ -41,14 +42,14 @@ class CImageManupulator extends CSimpleImage
 				foreach ($arAttrs as $k => $v) {
 					if (trim($v) == '') {
 						continue;
-					};
+					}
 					$arParams['ATTR_SRC_VALUES'][] = trim($v);
-				};
-			};
-		};
+				}
+			}
+		}
 		if (!isset($arParams['ATTR_SRC_VALUES']) || (count($arParams['ATTR_SRC_VALUES']) == 0)) {
 			$arParams['ATTR_SRC_VALUES'][] = 'src';
-		};
+		}
 
 		/* EXCEPTIONS_SRC_REG */
 		if ((isset($arParams['EXCEPTIONS_SRC'])) && (!empty($arParams['EXCEPTIONS_SRC']))) {
@@ -59,14 +60,14 @@ class CImageManupulator extends CSimpleImage
 				foreach ($arExceptions as $k => $v) {
 					if (trim($v) == '') {
 						continue;
-					};
+					}
 					$arParams['EXCEPTIONS_SRC_REG'][] = '|' . trim($v) . '|';
-				};
-			};
+				}
+			}
 		} else {
 			$arParams['EXCEPTIONS_SRC'] = '';
 			$arParams['EXCEPTIONS_SRC_REG'] = [];
-		};
+		}
 
 		/* EXCEPTIONS_TAG_REG */
 		if ((isset($arParams['EXCEPTIONS_TAG'])) && (!empty($arParams['EXCEPTIONS_TAG']))) {
@@ -77,30 +78,30 @@ class CImageManupulator extends CSimpleImage
 				foreach ($arExceptions as $k => $v) {
 					if (trim($v) == '') {
 						continue;
-					};
+					}
 					$arParams['EXCEPTIONS_TAG_REG'][] = '|' . trim($v) . '|';
-				};
-			};
+				}
+			}
 		} else {
 			$arParams['EXCEPTIONS_TAG'] = '';
 			$arParams['EXCEPTIONS_TAG_REG'] = [];
-		};
+		}
 
 		/* IMG_COMPRESSION */
 		if ((!isset($arParams['IMG_COMPRESSION'])) || ((int) $arParams['IMG_COMPRESSION'] == 0)) {
 			$arParams['IMG_COMPRESSION'] = 75;
-		};
+		}
 
 		/* WIDTH */
 		if ((isset($arParams['RESPONSIVE_VALUE'])) && (is_array($arParams['RESPONSIVE_VALUE']))) {
 			foreach ($arParams['RESPONSIVE_VALUE'] as $key => $val) {
 				$arParams['WIDTH'][] = $val['width'];
-			};
+			}
 			$arParams['WIDTH'][] = self::smallWidth;
 			rsort($arParams['WIDTH']);
 		} else {
 			$arParams['RESPONSIVE_VALUE'] = [];
-		};
+		}
 
 		/* LAZYLOAD */
 		if ((!isset($arParams['LAZYLOAD'])) || ($arParams['LAZYLOAD'] != 'N')) {
@@ -112,21 +113,22 @@ class CImageManupulator extends CSimpleImage
 		/* CACHE_TTL */
 		if ((int) $arParams['CACHE_TTL'] == 0) {
 			$arParams['CACHE_TTL'] = 2592000; /* 30 дней */
-		};
+		}
 
 		if ((isset($arParams['USE_IMAGICK'])) && ($arParams['USE_IMAGICK'] == 'Y')) {
 			$this->use_imagick = true;
 		} else {
 			$arParams['USE_IMAGICK'] = 'N';
-		};
+		}
 
 		$this->arParams = $arParams;
 	}
 
-	private function worktime()
+	private function canContinue()
 	{
 		$time_end = microtime(true);
-		return $time_end - $this->startTime;
+		$worktime = $time_end - $this->startTime;
+		return $worktime > self::maxWorkTime;
 	}
 
 	public function doIt(&$content)
@@ -134,15 +136,15 @@ class CImageManupulator extends CSimpleImage
 		$arParams = $this->arParams;
 		if ($arParams['DEBUG'] == 'Y') {
 			\Bitrix\Main\Diag\Debug::writeToFile(['ReplaceImg_' . date('Y.M.d H:i:s') => 'start']);
-		};
+		}
 
 		$this->ReplaceImg($content);
 
-		if ($arParams['BACKGROUNDS'] == 'Y') {
+		if ($arParams['BACKGROUNDS'] == 'Y' && $this->canContinue()) {
 
 			if ($arParams['DEBUG'] == 'Y') {
 				\Bitrix\Main\Diag\Debug::writeToFile(['ReplaceBackground_' . date('Y.M.d H:i:s') => 'start']);
-			};
+			}
 
 			$this->ReplaceBackground($content);
 		}
@@ -161,7 +163,7 @@ class CImageManupulator extends CSimpleImage
 
 		if ($arParams['DEBUG'] == 'Y') {
 			\Bitrix\Main\Diag\Debug::writeToFile(['FOUND background array' => $matches]);
-		};
+		}
 
 		$cache = \Bitrix\Main\Data\Cache::createInstance();
 		$cachePath = self::cachePath;
@@ -172,7 +174,7 @@ class CImageManupulator extends CSimpleImage
 		foreach ($matches[$tagkey] as $key => $tag) {
 			if ($arParams['DEBUG'] == 'Y') {
 				\Bitrix\Main\Diag\Debug::writeToFile(['FOUND background el' => $tag]);
-			};
+			}
 
 			$need = true;
 			$img['tag'] = $matches[$tagkey][$key];
@@ -180,13 +182,13 @@ class CImageManupulator extends CSimpleImage
 
 			if ($arParams['DEBUG'] == 'Y') {
 				\Bitrix\Main\Diag\Debug::writeToFile(['FOUND background img' => $img]);
-			};
+			}
 			if (in_array($img['tag'], $arAllreadyReplaced)) {
 				$need = false;
 				if ($arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['TAG ALLREADY REPLACED']);
-				};
-			};
+				}
+			}
 
 			$cacheKey =  md5($img['tag']);
 
@@ -194,7 +196,7 @@ class CImageManupulator extends CSimpleImage
 				$cachedPlace = $cache->getVars();
 				if ($arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $cachedPlace]);
-				};
+				}
 				if (is_array($cachedPlace)) {
 					$cachedPlace = $cachedPlace['place'];
 				}
@@ -205,16 +207,16 @@ class CImageManupulator extends CSimpleImage
 					$need = false;
 					if ($arParams['DEBUG'] == 'Y') {
 						\Bitrix\Main\Diag\Debug::writeToFile(['TAG IS HAVE data-i2p']);
-					};
-				};
+					}
+				}
 
 				if ($need) {
 					$need = $this->ExceptionBySrc($img['src']);
-				};
+				}
 
 				if ($need) {
 					$arResult = $this->PrepareResultBackground($img, $arParams);
-				};
+				}
 
 				if ($arResult === false) {
 					continue;
@@ -223,13 +225,13 @@ class CImageManupulator extends CSimpleImage
 				if ($arParams['MODULE_CONFIG']['MODULE_ID'] != '') {
 					foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultBackground', true) as $arEvent) {
 						ExecuteModuleEventEx($arEvent, array(&$arResult));
-					};
-				};
+					}
+				}
 				$cachedPlace = $arResult['place'];
 				if ($cache->startDataCache()) {
 					$cache->endDataCache($cachedPlace);
-				};
-			};
+				}
+			}
 			$arResult['place'] = $cachedPlace;
 			if ((trim($arResult['place']) != '') && (mb_strpos($arResult['place'], '</style>'))) {
 				list($tohead, $newtag) = explode('</style>', $arResult['place']);
@@ -245,9 +247,9 @@ class CImageManupulator extends CSimpleImage
 						'REPLACED_FROM' => $img['tag'],
 						'REPLACED_TO' => $arResult['place']
 					]);
-				};
-			};
-			if ($this->worktime() > 3) {
+				}
+			}
+			if ($this->canContinue()) {
 				break;
 			}
 		};
@@ -269,7 +271,7 @@ class CImageManupulator extends CSimpleImage
 			$need = true;
 			if ($arParams['DEBUG'] == 'Y') {
 				\Bitrix\Main\Diag\Debug::writeToFile(['FOUND_IMG' => $img]);
-			};
+			}
 
 			$found_src = false;
 			$attr_src = '';
@@ -282,16 +284,16 @@ class CImageManupulator extends CSimpleImage
 			if (!$found_src) {
 				if ($arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['IMG SRC IS EMPTY']);
-				};
+				}
 				continue;
-			};
+			}
 
 			if (in_array($img['tag'], $arAllreadyReplaced)) {
 				if ($arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['IMG ALLREADY REPLACED']);
-				};
+				}
 				continue;
-			};
+			}
 
 			$cacheKey =  md5($img['tag']);;
 
@@ -299,13 +301,13 @@ class CImageManupulator extends CSimpleImage
 				$cachedPlace = $cache->getVars();
 				if ($arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['GET_FROM_CACHE' => $cachedPlace]);
-				};
+				}
 			} else {
 				/* проверим на исключения */
 				$need = $this->ExceptionBySrc($img[$attr_src]);
 				if ($need) {
 					$need = $this->ExceptionByTag($img['tag']);
-				};
+				}
 
 				if ($need) {
 					/* Проверим есть ли наше изображение уже в picture */
@@ -315,18 +317,18 @@ class CImageManupulator extends CSimpleImage
 								$need = false;
 								if ($arParams['DEBUG'] == 'Y') {
 									\Bitrix\Main\Diag\Debug::writeToFile(['EXCEPTIONS BY ALLREADY IN PICTURE' => $picture['tag']]);
-								};
+								}
 								break;
-							};
-						};
-					};
-				};
+							}
+						}
+					}
+				}
 
 				$arResult = false;
 
 				if ($need) {
 					$arResult = $this->PrepareResultImg($img, $attr_src, $arParams);
-				};
+				}
 
 				if ($arResult === false) {
 					continue;
@@ -335,13 +337,13 @@ class CImageManupulator extends CSimpleImage
 				if ($arParams['MODULE_CONFIG']['MODULE_ID'] != '') {
 					foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultImg', true) as $arEvent) {
 						ExecuteModuleEventEx($arEvent, array(&$arResult));
-					};
+					}
 				}
 				$cachedPlace = $arResult['place'];
 				if ($cache->startDataCache()) {
 					$cache->endDataCache($cachedPlace);
 				}
-			};
+			}
 			$arResult['place'] = $cachedPlace;
 			if (!empty($arResult['place'])) {
 				$arAllreadyReplaced[] = $img['tag'];
@@ -349,15 +351,15 @@ class CImageManupulator extends CSimpleImage
 				if ($arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile([
 						'REPLACED_FROM' => $img['tag'],
-						'REPLACED_TO' => $arResult['place']
+						'REPLACED_TO'   => $arResult['place']
 					]);
-				};
-			};
+				}
+			}
 
-			if ($this->worktime() > 3) {
+			if ($this->canContinue()) {
 				break;
 			}
-		};
+		}
 	}
 
 	function ExceptionBySrc($src)
@@ -370,11 +372,11 @@ class CImageManupulator extends CSimpleImage
 					$result = false;
 					if ($arParams['DEBUG'] == 'Y') {
 						\Bitrix\Main\Diag\Debug::writeToFile(['EXCEPTIONS_SRC_REG' => $exception]);
-					};
+					}
 					break;
-				};
-			};
-		};
+				}
+			}
+		}
 		return $result;
 	}
 
@@ -388,11 +390,11 @@ class CImageManupulator extends CSimpleImage
 					$result = false;
 					if ($arParams['DEBUG'] == 'Y') {
 						\Bitrix\Main\Diag\Debug::writeToFile(['EXCEPTIONS_TAG_REG' => $exception]);
-					};
+					}
 					break;
-				};
-			};
-		};
+				}
+			}
+		}
 		return $result;
 	}
 
@@ -404,7 +406,7 @@ class CImageManupulator extends CSimpleImage
 		$ext = substr(strrchr($src, '.'), 1);
 		if ($ext == 'jpg') {
 			$ext = 'jpeg';
-		};
+		}
 		$arResult['type'] = 'image/' . $ext;
 
 		/* проверим существует ли файл вообще */
@@ -414,20 +416,20 @@ class CImageManupulator extends CSimpleImage
 
 		if (!file_exists($doc_root . $src)) {
 			return false;
-		};
+		}
 
 		if ($arParams['USE_WEBP'] == 'Y') {
 			$webpSrc = $this->ConvertImg2webp($src);
 			if ($webpSrc) {
 				$arResult['webp'] = $webpSrc;
-			};
-		};
+			}
+		}
 		if ($arParams['USE_AVIF'] == 'Y') {
 			$avifSrc = $this->ConvertImg2avif($src);
 			if ($avifSrc) {
 				$arResult['avif'] = $avifSrc;
-			};
-		};
+			}
+		}
 		if ($arParams['USE_ONLY_WEBP_AVIF'] == 'Y') {
 			if (!empty($arResult['webp'])) {
 				$arResult['src'] = $arResult['webp'];
@@ -454,7 +456,7 @@ class CImageManupulator extends CSimpleImage
 
 		if (!file_exists($doc_root . $src)) {
 			return false;
-		};
+		}
 
 		$arResult = [];
 
@@ -483,16 +485,16 @@ class CImageManupulator extends CSimpleImage
 				if (!$loaded) {
 					if (!$this->load($doc_root . $src)) {
 						return false;
-					};
+					}
 					$loaded = true;
-				};
+				}
 				if ($loaded) {
 					$resized = $this->smallTo($width, $height);
 					if ($resized) {
 						$this->CreateDir($filename, true);
 						if (!$this->save($filename, $this->image_type, $this->arParams['IMG_COMPRESSION'])) {
 							unset($arResult[$width]['src']);
-						};
+						}
 					} else {
 						unset($arResult[$width]['src']);
 					}
@@ -525,9 +527,9 @@ class CImageManupulator extends CSimpleImage
 					if (!$loaded) {
 						if (!$this->load($doc_root . $src)) {
 							return false;
-						};
+						}
 						$loaded = true;
-					};
+					}
 					if ($loaded) {
 						if (!$resized) {
 							$resized = $this->smallTo($width, $height);
@@ -574,9 +576,9 @@ class CImageManupulator extends CSimpleImage
 					if (!$loaded) {
 						if (!$this->load($doc_root . $src)) {
 							return false;
-						};
+						}
 						$loaded = true;
-					};
+					}
 					if ($loaded) {
 						if (!$resized) {
 							$resized = $this->smallTo($width, $height);
@@ -621,22 +623,22 @@ class CImageManupulator extends CSimpleImage
 
 		if ($files === false) {
 			return false;
-		};
+		}
 
 		$PreparedOriginal = $this->PrepareOriginal($img[$attr_src]);
 		$arResult['FILES'] =  $files;
 
 		if ($arParams['DEBUG'] == 'Y') {
 			\Bitrix\Main\Diag\Debug::writeToFile(['CREATE_FILES' => $arResult['FILES']]);
-		};
+		}
 
 		foreach ($arParams['RESPONSIVE_VALUE'] as $key => $val) {
 			if (!is_array($arResult['FILES'][$val['width']])) {
 				continue;
-			};
+			}
 			if (count($arResult['FILES'][$val['width']]) == 0) {
 				continue;
-			};
+			}
 			$addsourse = ['', ''];
 			$addsourseLazy = ['', ''];
 			foreach ($arResult['FILES'][$val['width']] as $file_type => $file_src) {
@@ -668,22 +670,22 @@ class CImageManupulator extends CSimpleImage
 						$lazy = 'srcset="' . self::onePXpng . '"';
 					}
 					$index = 3;
-				};
+				}
 				$media = 'media="';
 				$mediaand = '';
 				if ((int) $val['min'] >= 0) {
 					$media .= $mediaand . '(min-width: ' . $val['min'] . 'px)';
 					$mediaand = ' and ';
-				};
+				}
 
 				if ((int) $val['max'] > (int) $val['min']) {
 					$media .= $mediaand . '(max-width: ' . $val['max'] . 'px)';
-				};
+				}
 
 				$media .= '"';
 				$addsourse[$index] = '<source srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
 				$addsourseLazy[$index] = '<source ' . $lazy . ' data-i2p="Y" data-srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
-			};
+			}
 			ksort($addsourse);
 			foreach ($addsourse as $oneaddsourse) {
 				if ($oneaddsourse != '') {
@@ -696,7 +698,7 @@ class CImageManupulator extends CSimpleImage
 					$arResult['sources_lazy'][] = $oneaddsourselazy;
 				}
 			}
-		};
+		}
 
 
 		$arResult['FILES']['original'] = $PreparedOriginal;
@@ -709,7 +711,7 @@ class CImageManupulator extends CSimpleImage
 			}
 			$arResult['sources'][] = '<source srcset="' . $arResult['FILES']['original']['avif'] . '"  type="image/avif">';
 			$arResult['sources_lazy'][] = '<source ' . $lazy . '  data-i2p="Y" data-srcset="' . $arResult['FILES']['original']['avif'] . '"  type="image/avif">';
-		};
+		}
 
 		if (!empty($arResult['FILES']['original']['webp'])) {
 			if (!empty($arResult['FILES'][self::smallWidth]['webp'])) {
@@ -719,7 +721,7 @@ class CImageManupulator extends CSimpleImage
 			}
 			$arResult['sources'][] = '<source srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
 			$arResult['sources_lazy'][] = '<source ' . $lazy . '  data-i2p="Y" data-srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
-		};
+		}
 
 		if ($arParams['USE_ONLY_WEBP_AVIF'] == 'Y') {
 			$arResult["img"]["tag"] = str_replace('"' . $arResult["img"]["src"] . '"', '"' . $arResult['FILES']['original']['src'] . '"', $arResult["img"]["tag"]);
@@ -728,7 +730,7 @@ class CImageManupulator extends CSimpleImage
 
 		if ($arParams['DEBUG'] == 'Y') {
 			\Bitrix\Main\Diag\Debug::writeToFile(['CREATED arResult' => $arResult]);
-		};
+		}
 
 		$arResult["img_lazy"]["tag"] = '<img ';
 		foreach ($arResult["img"] as $attr_name => $attr_val) {
@@ -751,7 +753,7 @@ class CImageManupulator extends CSimpleImage
 				$arResult['place'] = '<picture>';
 				foreach ($arResult["sources"] as $source) {
 					$arResult['place'] .= $source;
-				};
+				}
 				$arResult['place'] .= $arResult["img"]["tag"];
 				$arResult['place'] .= '</picture>';
 			} else {
@@ -762,13 +764,13 @@ class CImageManupulator extends CSimpleImage
 				$arResult['place'] = '<picture  data-i2p="Y">';
 				foreach ($arResult["sources_lazy"] as $source) {
 					$arResult['place'] .= $source;
-				};
+				}
 				$arResult['place'] .= $arResult["img_lazy"]["tag"];
 				$arResult['place'] .= '</picture>';
 			} else {
 				$arResult['place'] = $arResult["img_lazy"]["tag"];
 			}
-		};
+		}
 		return $arResult;
 	}
 
@@ -793,7 +795,7 @@ class CImageManupulator extends CSimpleImage
 		$arResult['FILES']['original'] = $PreparedOriginal;
 		if ($arParams['DEBUG'] == 'Y') {
 			\Bitrix\Main\Diag\Debug::writeToFile(['TAG FILES' => $arResult['FILES']]);
-		};
+		}
 		$arResult['cssSelector'] = '[data-i2p="' . $arResult['md5key'] . '"]';
 		$arResult['style'] = '<style>';
 
@@ -802,10 +804,10 @@ class CImageManupulator extends CSimpleImage
 		foreach ($arParams['RESPONSIVE_VALUE'] as $key => $val) {
 			if (!is_array($arResult['FILES'][$val['width']])) {
 				continue;
-			};
+			}
 			if (count($arResult['FILES'][$val['width']]) == 0) {
 				continue;
-			};
+			}
 			$haveFiles = false;
 			$addsourse  = ['', ''];
 			$addsourseLazy  = ['', ''];
@@ -824,7 +826,7 @@ class CImageManupulator extends CSimpleImage
 					$haveFiles = true;
 					$addsourse[0] = '' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']) . '}';
 					$addsourseLazy[0] = '.loaded' . $addsourse[0];
-				};
+				}
 			}
 			if ($haveFiles) {
 				$arResult['style'] .= '@media ';
@@ -834,14 +836,14 @@ class CImageManupulator extends CSimpleImage
 					$styleand = ' and ';
 					if ($minmax < $val['min']) {
 						$minmax = $val['min'];
-					};
-				};
+					}
+				}
 				if ((int) $val['max'] > (int) $val['min']) {
 					$arResult['style'] .= $styleand . '(max-width: ' . $val['max'] . 'px)';
 					if ($minmax < $val['max']) {
 						$minmax = $val['max'];
-					};
-				};
+					}
+				}
 				$arResult['style'] .= '{';
 				if ($arParams['LAZYLOAD'] != "Y") {
 					ksort($addsourse);
@@ -895,7 +897,7 @@ class CImageManupulator extends CSimpleImage
 			);
 		if ($arParams['DEBUG'] == 'Y') {
 			\Bitrix\Main\Diag\Debug::writeToFile(['CREATED arResult' => $arResult]);
-		};
+		}
 		return $arResult;
 	}
 
@@ -903,7 +905,7 @@ class CImageManupulator extends CSimpleImage
 	{
 		if ($this->arParams['DEBUG'] == 'Y') {
 			\Bitrix\Main\Diag\Debug::writeToFile(['TRY CONVERT TO WEBP' => $src]);
-		};
+		}
 		$need = false;
 		$doc_root = $this->arParams['DOCUMENT_ROOT'];
 		$webp = self::DIR . $src . '.webp';
@@ -926,12 +928,12 @@ class CImageManupulator extends CSimpleImage
 		} else {
 			if (in_array(filesize($filename), [0, 4096])) {
 				return false;
-			};
-		};
+			}
+		}
 
 		if ($this->arParams['DEBUG'] == 'Y') {
 			\Bitrix\Main\Diag\Debug::writeToFile(['NEED CONVERT TO WEBP' => $need]);
-		};
+		}
 
 		if ($need) {
 
@@ -940,31 +942,31 @@ class CImageManupulator extends CSimpleImage
 
 				if ($this->arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO WEBP' => 'NOT LOAD: ' . $doc_root . $src]);
-				};
+				}
 
 				return false;
-			};
+			}
 			if (!$this->save($filename, IMAGETYPE_WEBP, $this->arParams['IMG_COMPRESSION'])) {
 
 				if ($this->arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO WEBP' => 'NOT SAVE: ' . $filename]);
-				};
+				}
 
 				return false;
-			};
+			}
 			if (filesize($filename) == 0) {
 
 				if ($this->arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO WEBP' => 'SAVED FILE IS EMPTY: ' . $filename]);
-				};
+				}
 
 				return false;
-			};
-		};
+			}
+		}
 
 		if ($this->arParams['DEBUG'] == 'Y') {
 			\Bitrix\Main\Diag\Debug::writeToFile(['RESULT CONVERT TO WEBP' => $webp]);
-		};
+		}
 
 		return $webp;
 	}
@@ -973,7 +975,7 @@ class CImageManupulator extends CSimpleImage
 	{
 		if ($this->arParams['DEBUG'] == 'Y') {
 			\Bitrix\Main\Diag\Debug::writeToFile(['TRY CONVERT TO AVIF' => $src]);
-		};
+		}
 		$need = false;
 		$doc_root = $this->arParams['DOCUMENT_ROOT'];
 		$avif = self::DIR . $src . '.avif';
@@ -996,12 +998,12 @@ class CImageManupulator extends CSimpleImage
 		} else {
 			if (in_array(filesize($filename), [0, 4096])) {
 				return false;
-			};
-		};
+			}
+		}
 
 		if ($this->arParams['DEBUG'] == 'Y') {
 			\Bitrix\Main\Diag\Debug::writeToFile(['NEED CONVERT TO AVIF' => $need]);
-		};
+		}
 
 		if ($need) {
 
@@ -1010,31 +1012,31 @@ class CImageManupulator extends CSimpleImage
 
 				if ($this->arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO AVIF' => 'NOT LOAD: ' . $doc_root . $src]);
-				};
+				}
 
 				return false;
-			};
+			}
 			if (!$this->save($filename, IMAGETYPE_AVIF, $this->arParams['IMG_COMPRESSION'])) {
 
 				if ($this->arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO AVIF' => 'NOT SAVE: ' . $filename]);
-				};
+				}
 
 				return false;
-			};
+			}
 			if (filesize($filename) == 0) {
 
 				if ($this->arParams['DEBUG'] == 'Y') {
 					\Bitrix\Main\Diag\Debug::writeToFile(['ERROR CONVERT TO AVIF' => 'SAVED FILE IS EMPTY: ' . $filename]);
-				};
+				}
 
 				return false;
-			};
-		};
+			}
+		}
 
 		if ($this->arParams['DEBUG'] == 'Y') {
 			\Bitrix\Main\Diag\Debug::writeToFile(['RESULT CONVERT TO AVIF' => $avif]);
-		};
+		}
 
 		return $avif;
 	}
@@ -1053,15 +1055,15 @@ class CImageManupulator extends CSimpleImage
 		$dirs = explode('/', $path);
 		if ($lastIsFile) {
 			unset($dirs[count($dirs) - 1]);
-		};
+		}
 		$resultdir = '';
 		foreach ($dirs as $dir) {
 			$resultdir .= $dir;
 			if ($dir != '') {
 				@mkdir($resultdir);
-			};
+			}
 			$resultdir .= '/';
-		};
+		}
 		return $resultdir;
 	}
 
@@ -1072,8 +1074,8 @@ class CImageManupulator extends CSimpleImage
 		if ($files) {
 			foreach ($files as $file) {
 				is_dir($file) ? self::RemoveDir($file) : @unlink($file);
-			};
-		};
+			}
+		}
 		@rmdir($path);
 
 		return;
@@ -1085,7 +1087,7 @@ class CImageManupulator extends CSimpleImage
 			$arTag['tag'] = '/(<' . $tag . '[^>]*>)(.*)<\/' . $tag . '>/ismuU';;
 		} else {
 			$arTag['tag'] = '/(<' . $tag . '[^>]*>)/ismuU';
-		};
+		}
 		$arTag['attr'][0] = '/\s+([a-zA-Z-]+)\s*=\s*"([^"]*)"/ismuU';
 		$arTag['attr'][] = str_replace('"', "'", $arTag['attr'][0]);
 		$result = array();
@@ -1100,16 +1102,16 @@ class CImageManupulator extends CSimpleImage
 						if (is_array($attr_matches[1])) {
 							foreach ($attr_matches[1] as $key => $val) {
 								$res_tag[$val] = $attr_matches[2][$key];
-							};
-						};
-					};
-				};
+							}
+						}
+					}
+				}
 				if (isset($matches[2][$k])) {
 					$res_tag['text'] = $matches[2][$k];
-				};
+				}
 				$result[] = $res_tag;
-			};
-		};
+			}
+		}
 		return $result;
 	}
 }
