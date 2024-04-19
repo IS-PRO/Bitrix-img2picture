@@ -230,6 +230,8 @@ class CImageManupulator extends CSimpleImage
 					foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultBackground', true) as $arEvent) {
 						ExecuteModuleEventEx($arEvent, array(&$arResult));
 					}
+					$event = new \Bitrix\Main\Event($arParams['MODULE_CONFIG']['MODULE_ID'], "OnPrepareResultBackground", [&$arResult]);
+					$event->send();
 				}
 				$cachedPlace = $arResult['place'];
 				if ($cache->startDataCache()) {
@@ -339,9 +341,11 @@ class CImageManupulator extends CSimpleImage
 				}
 
 				if ($arParams['MODULE_CONFIG']['MODULE_ID'] != '') {
-					foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultImg', true) as $arEvent) {
-						ExecuteModuleEventEx($arEvent, array(&$arResult));
-					}
+					// foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultImg', true) as $arEvent) {
+					// 	ExecuteModuleEventEx($arEvent, array(&$arResult));
+					// }
+					$event = new \Bitrix\Main\Event($arParams['MODULE_CONFIG']['MODULE_ID'], "OnPrepareResultImg", [&$arResult]);
+					$event->send();
 				}
 				$cachedPlace = $arResult['place'];
 				if ($cache->startDataCache()) {
