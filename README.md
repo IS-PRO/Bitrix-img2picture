@@ -73,19 +73,25 @@ $option - необязательный массив
 Можно перехватить и кастомизировать замену
 
 	/* Для перехвата замены img */
-	AddEventHandler("is_pro.img2picture", "OnPrepareResultImg", "MyPicture");
+	$eventManager = \Bitrix\Main\EventManager::getInstance();
+	$eventManager->addEventHandler("is_pro.img2picture", "OnPrepareResultImg", "MyPicture");
 
-	function MyPicture(&$arResult)
+	function MyPicture(\Bitrix\Main\Event $event)
 	{
+		$arParam = $event->getParameters();
+		$arResult = &$arParam[0];
 		/* Какой-то код меняющий $arResult */
 		/* $arResult["place"] - содержит результирующий тег */
 	}
 
 	/* Для перехвата замены backgropunds */
-	AddEventHandler("is_pro.img2picture", "OnPrepareResultBackground", "MyBackground");
+	$eventManager = \Bitrix\Main\EventManager::getInstance();
+	$eventManager->addEventHandler("is_pro.img2picture", "OnPrepareResultBackground", "MyBackground");
 
-	function MyBackground(&$arResult)
+	function MyBackground(\Bitrix\Main\Event $event)
 	{
+		$arParam = $event->getParameters();
+		$arResult = &$arParam[0];
 		/* Какой-то код меняющий $arResult */
 		/* $arResult["place"] - содержит результирующий тег */
 	}
