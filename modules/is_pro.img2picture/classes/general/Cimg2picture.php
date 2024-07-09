@@ -58,7 +58,7 @@ class Cimg2picture
 	public static function img2picture(&$content)
 	{
 		global $USER;
-		if ($USER->IsAdmin()) {
+		if (isset($USER) && $USER->IsAdmin()) {
 			return;
 		}
 		if (\CSite::InDir('/bitrix/')) {
