@@ -13,7 +13,7 @@ class Cimg2picture
 	public static function SetParamsJS()
 	{
 		global $USER;
-		if ($USER->IsAdmin()) {
+		if (isset($USER) && $USER->IsAdmin()) {
 			return;
 		}
 		if (\CSite::InDir('/bitrix/')) {
