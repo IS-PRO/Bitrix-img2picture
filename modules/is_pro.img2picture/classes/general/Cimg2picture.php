@@ -48,6 +48,10 @@ class Cimg2picture
 
 	public static function img2picture(&$content)
 	{
+		if (php_sapi_name() == 'cli') {
+			return;
+		}
+
 		global $USER;
 		if (isset($USER) && $USER->IsAdmin()) {
 			return;
