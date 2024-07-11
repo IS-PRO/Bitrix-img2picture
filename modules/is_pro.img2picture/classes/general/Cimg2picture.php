@@ -34,23 +34,14 @@ class Cimg2picture
 				}
 			}
 		}
-		$jsPath = '';
-		$jsPathChanks = explode('/', str_replace("\\", '/' ,__DIR__));
-		$isPath = false;
-		if (is_array($jsPathChanks)) {
-			foreach ($jsPathChanks as $Chank) {
-				if (in_array($Chank, array('bitrix', 'local'))) {
-					$isPath = true;
-				}
-				if ($isPath) {
-					$jsPath	.= '/'.$Chank;
-				}
-				if ($Chank == 'is_pro.img2picture') {
-					$jsPath .= '/lib/js/';
-					break;
-				}
-			}
-		}
+
+		$docRoot  = Application::getInstance()->getContext()->getServer()->getDocumentRoot();
+		$jsPath   = str_replace(
+			[$docRoot, 'classes/general'],
+			['', 'lib/js/'],
+			__DIR__
+		);
+
 		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'lozad.min.js');
 		\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'img2picture.min.js');
 	}
