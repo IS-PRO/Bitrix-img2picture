@@ -12,6 +12,10 @@ class Cimg2picture
 
 	public static function SetParamsJS()
 	{
+		if (php_sapi_name() == 'cli') {
+			return;
+		}
+
 		global $USER;
 		if (isset($USER) && $USER->IsAdmin()) {
 			return;
@@ -35,9 +39,8 @@ class Cimg2picture
 			}
 		}
 
-		$docRoot  = Application::getInstance()->getContext()->getServer()->getDocumentRoot();
 		$jsPath   = str_replace(
-			[$docRoot, 'classes/general'],
+			[$option['DOCUMENT_ROOT'], 'classes/general'],
 			['', 'lib/js/'],
 			__DIR__
 		);
@@ -89,8 +92,9 @@ class Cimg2picture
 		if (count($option) == 0) {
 			$option = self::GetOptions();
 		}
-
-		$option['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
+		if (empty($option['DOCUMENT_ROOT'])) {
+			$option['DOCUMENT_ROOT'] = \Bitrix\Main\Application::getDocumentRoot();
+		}
 		$img2picture = new CImageManupulator($option);
 		$img2picture->doIt($content);
 		return $content;
@@ -124,18 +128,21 @@ class Cimg2picture
 			}
 		}
 		if ($option['MODULE_MODE'] == 'test') {
-			if ($_GET['img2picture']) {
-				$_SESSION['img2picture'] = $_GET['img2picture'];
+			$img2picture = \Bitrix\Main\Application::getInstance()->getContext()->getRequest()->get('img2picture');
+			if ($img2picture) {
+				$_SESSION['img2picture'] = $img2picture;
 			}
 			$option['MODULE_MODE'] = $_SESSION['img2picture'];
 			$option['DEBUG'] = 'Y';
 		}
 		if ($option['MODULE_MODE'] == 'on') {
-			if ($_GET['img2pictureDebug'] == 'Y') {
+			$img2pictureDebug = \Bitrix\Main\Application::getInstance()->getContext()->getRequest()->get('img2picture');
+			$img2pictureClearCache = \Bitrix\Main\Application::getInstance()->getContext()->getRequest()->get('img2picture');
+			if ($img2pictureDebug == 'Y') {
 				$option['DEBUG'] = 'Y';
 			}
-			if ($_GET['img2pictureClearCache'] != '') {
-				$option['CLEAR_CACHE'] = $_GET['img2pictureClearCache'];
+			if ($img2pictureClearCache != '') {
+				$option['CLEAR_CACHE'] = $img2pictureClearCache];
 			}
 		}
 
