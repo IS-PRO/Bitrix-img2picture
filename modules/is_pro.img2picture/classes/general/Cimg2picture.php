@@ -142,7 +142,7 @@ class Cimg2picture
 				$option['DEBUG'] = 'Y';
 			}
 			if ($img2pictureClearCache != '') {
-				$option['CLEAR_CACHE'] = $img2pictureClearCache];
+				$option['CLEAR_CACHE'] = $img2pictureClearCache;
 			}
 		}
 
