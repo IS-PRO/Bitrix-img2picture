@@ -139,6 +139,6 @@ $arResult["place"] - содержит результирующий тег
 
 
 <h2>Поблагодарить</h2>
-<p>На <a href="https://boosty.to/ispro" target="_blank">bossty</a></p>
+<iframe src="https://yoomoney.ru/quickpay/shop-widget?writer=seller&default-sum=1000&button-text=11&payment-type-choice=on&mobile-payment-type-choice=on&successURL=&quickpay=shop&account=410011713559173&targets=Перевод%20по%20кнопке&"></iframe>
 
 ';

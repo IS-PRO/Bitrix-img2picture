@@ -108,11 +108,3 @@ $option - необязательный массив
 отчистить кеш и переконвертировать изображений на странице ?img2pictureClearCache=Y
 
 отчистить кеш и переконвертировать отдельного изображения на странице ?img2pictureClearCache=[SRC картинки]
-
-
-
-# Поблагодарить
-
-На boosty https://boosty.to/ispro
-
-Можно пройдя по ссылке https://www.sberbank.com/ru/person/dl/jc?linkname=jGTzsJPtWFkAxVW2S
