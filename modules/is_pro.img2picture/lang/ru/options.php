@@ -38,16 +38,15 @@ $MESS['ISPRO_IMG2PICTURE_MODULE_MODE_test'] = 'Тестирование';
 $MESS['ISPRO_IMG2PICTURE_MODULE_MODE_on'] = 'Включен';
 
 $jsPath   = str_replace(
-	[$option['DOCUMENT_ROOT'], 'lang/ru'],
+	[$_SERVER['DOCUMENT_ROOT'], 'lang/ru'],
 	['', 'lib/js/'],
 	__DIR__
 );
 
-$MESS['ISPRO_IMG2PICTURE_CUSTOM_JS'] = "не подключать JS в модуле<br/>
-<pre>
-{jsPath}lozad.min.js
-
-{jsPath}img2picture.min.js
+$MESS['ISPRO_IMG2PICTURE_CUSTOM_JS'] = "Не подключать JS в модуле<br/>
+<pre style=\"overflow-x: scroll; max-width: 200px\" >
+{$jsPath}lozad.min.js
+{$jsPath}img2picture.min.js
 </pre>
 ";
 
