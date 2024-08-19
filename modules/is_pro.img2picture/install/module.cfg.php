@@ -117,5 +117,11 @@ $arModuleCfg = [
 			'type' => 'text',
 			'default' => '2592000' /* 30 дней */
 		],
+
+		/* Не подключать JS модуля Y/N */
+		'CUSTOM_JS' => [
+			'type'=>'checkbox',
+			'default' => 'N'
+		],
 	]
 ];

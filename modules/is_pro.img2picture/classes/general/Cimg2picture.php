@@ -28,6 +28,11 @@ class Cimg2picture
 		if ($option['MODULE_MODE'] !== 'on') {
 			return;
 		}
+
+		if ($option['CUSTOM_JS'] === 'Y') {
+			return;
+		}
+
 		if (trim($option['EXCEPTIONS_DIR'])) {
 			$dirs = explode("\n", $option['EXCEPTIONS_DIR']);
 			if (is_array($dirs)) {

@@ -36,6 +36,21 @@ $MESS['ISPRO_IMG2PICTURE_MODULE_MODE'] = 'Режим работы модуля';
 $MESS['ISPRO_IMG2PICTURE_MODULE_MODE_off'] = 'Выключен';
 $MESS['ISPRO_IMG2PICTURE_MODULE_MODE_test'] = 'Тестирование';
 $MESS['ISPRO_IMG2PICTURE_MODULE_MODE_on'] = 'Включен';
+
+$jsPath   = str_replace(
+	[$option['DOCUMENT_ROOT'], 'lang/ru'],
+	['', 'lib/js/'],
+	__DIR__
+);
+
+$MESS['ISPRO_IMG2PICTURE_CUSTOM_JS'] = "не подключать JS в модуле<br/>
+<pre>
+{jsPath}lozad.min.js
+
+{jsPath}img2picture.min.js
+</pre>
+";
+
 $MESS['ISPRO_IMG2PICTURE_SAVE'] = 'Сохранить';
 $MESS['ISPRO_IMG2PICTURE_DEFAULT'] = 'Сбросить все настройки по умолчанию';
 $MESS['ISPRO_IMG2PICTURE_REMOVE_FILES'] = 'Отчистить кеш модуля и созданные файлы';
