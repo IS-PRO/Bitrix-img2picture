@@ -141,7 +141,7 @@ class CImageManupulator extends CSimpleImage
 		}
 
 		/* EXCEPTIONS_TAG_REG */
-		if ((isset($arParams['EXCEPTIONS_TAG'])) && (!empty($arParams['EXCEPTIONS_TAG']))) {
+		if (isset($arParams['EXCEPTIONS_TAG']) && !empty($arParams['EXCEPTIONS_TAG'])) {
 			$arParams['EXCEPTIONS_TAG_REG'] = [];
 			$arExceptions = [];
 			$arExceptions = explode("\n", $arParams['EXCEPTIONS_TAG']);
@@ -161,7 +161,7 @@ class CImageManupulator extends CSimpleImage
 
 		/* TAGS_ATTR_VALUES */
 		$arParams['TAGS_ATTR_VALUES'] = [];
-		if ((isset($arParams['TAGS_ATTR'])) && (!empty($arParams['TAGS_ATTR']))) {
+		if (isset($arParams['TAGS_ATTR']) && !empty($arParams['TAGS_ATTR'])) {
 			$arAttrs = [];
 			$arAttrs = explode("\n", $arParams['TAGS_ATTR']);
 			if (is_array($arAttrs)) {
@@ -179,12 +179,12 @@ class CImageManupulator extends CSimpleImage
 		}
 
 		/* IMG_COMPRESSION */
-		if ((!isset($arParams['IMG_COMPRESSION'])) || ((int) $arParams['IMG_COMPRESSION'] == 0)) {
+		if (!isset($arParams['IMG_COMPRESSION']) || ((int) $arParams['IMG_COMPRESSION'] == 0)) {
 			$arParams['IMG_COMPRESSION'] = 75;
 		}
 
 		/* WIDTH */
-		if ((isset($arParams['RESPONSIVE_VALUE'])) && (is_array($arParams['RESPONSIVE_VALUE']))) {
+		if (isset($arParams['RESPONSIVE_VALUE']) && (is_array($arParams['RESPONSIVE_VALUE']))) {
 			foreach ($arParams['RESPONSIVE_VALUE'] as $key => $val) {
 				$arParams['WIDTH'][] = $val['width'];
 			}
@@ -639,6 +639,13 @@ class CImageManupulator extends CSimpleImage
 			return false;
 		}
 
+		if (!$this->load($doc_root . $src)) {
+				return false;
+		}
+
+		$arResult['width'] = $this->getWidth();
+		$arResult['height'] = $this->getHeight();
+
 		if ($arParams['USE_WEBP'] == 'Y') {
 			$webpSrc = $this->ConvertImg2webp($src);
 			if ($webpSrc) {
@@ -968,9 +975,22 @@ class CImageManupulator extends CSimpleImage
 						$arResult["img_lazy"]["tag"] .= ' srcset="' . self::onePXpng . '"';
 					}
 				}
+				if ($attr_name == 'width') {
+					unset($arResult['FILES']['original']['width']);
+				}
+				if ($attr_name == 'height') {
+					unset($arResult['FILES']['original']['height']);
+				}
 				$arResult["img_lazy"]["tag"] .= ' ' . $attr_name . '="' . $attr_val . '"';
 			}
 		}
+		if (!empty($arResult['FILES']['original']['width'])) {
+			$arResult["img_lazy"]["tag"] .= ' width="'.$arResult['FILES']['original']['width'].'px" ';
+		}
+		if (!empty($arResult['FILES']['original']['height'])) {
+			$arResult["img_lazy"]["tag"] .= ' height="'.$arResult['FILES']['original']['height'].'px" ';
+		}
+
 		$arResult["img_lazy"]["tag"] .= '>';
 
 		if ($arParams['LAZYLOAD'] != "Y") {
