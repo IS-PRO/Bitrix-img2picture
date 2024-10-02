@@ -20,9 +20,20 @@ class Cimg2picture
 		if (isset($USER) && $USER->IsAdmin()) {
 			return;
 		}
+
 		if (\CSite::InDir('/bitrix/')) {
 			return;
 		}
+
+		$context = \Bitrix\Main\Context::getCurrent();
+		$request = $context->getRequest();
+		if ($request->isPost()
+		    || $request->isAjaxRequest()
+		    || $request->isJson()
+		) {
+			return;
+		}
+
 		$option = self::GetOptions();
 
 		if ($option['MODULE_MODE'] !== 'on') {

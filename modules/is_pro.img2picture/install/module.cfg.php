@@ -87,12 +87,23 @@ $arModuleCfg = [
 			'default' => 'Y'
 		],
 
-
 		/* в каких аттрибутах тега img искать ссылку на картинку */
 		'ATTR_SRC' => [
 			'type'=>'textarea',
 			'default' => 'src',
 		],
+
+		/* Обрабатывать картинки в атрибутах тегов Y/N */
+		'TAGS_ATTR' => [
+			'type'=>'textarea',
+			'default' => "a:href\n"
+		],
+
+		/* Заменять ссылки измененные на изображения на всей странице */
+		// 'REPLACE_ALL_LINK_IMG' => [
+		// 	'type'=>'checkbox',
+		// 	'default' => 'Y'
+		// ],
 
 		/* Исключения картинок по src*/
 		'EXCEPTIONS_SRC' => [
