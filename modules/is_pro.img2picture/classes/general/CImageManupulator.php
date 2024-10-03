@@ -313,11 +313,14 @@ class CImageManupulator extends CSimpleImage
 
 				if ($arParams['MODULE_CONFIG']['MODULE_ID'] != '') {
 					if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
-						// foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultBackground', true) as $arEvent) {
-						// 	ExecuteModuleEventEx($arEvent, array(&$arResult));
-						// }
-						$event = new \Bitrix\Main\Event($arParams['MODULE_CONFIG']['MODULE_ID'], "OnPrepareResultBackground", [&$arResult]);
-						$event->send();
+						if ($arParams['COMPATIBLE_MODE'] == 'Y') {
+							foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultBackground', true) as $arEvent) {
+								ExecuteModuleEventEx($arEvent, array(&$arResult));
+							}
+						} else {
+							$event = new \Bitrix\Main\Event($arParams['MODULE_CONFIG']['MODULE_ID'], "OnPrepareResultBackground", [&$arResult]);
+							$event->send();
+						}
 					}
 				}
 				$cachedPlace = $arResult['place'];
@@ -422,11 +425,16 @@ class CImageManupulator extends CSimpleImage
 				}
 
 				if ($arParams['MODULE_CONFIG']['MODULE_ID'] != '') {
-					// foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultImg', true) as $arEvent) {
-					// 	ExecuteModuleEventEx($arEvent, array(&$arResult));
-					// }
-					$event = new \Bitrix\Main\Event($arParams['MODULE_CONFIG']['MODULE_ID'], "OnPrepareResultImg", [&$arResult]);
-					$event->send();
+					if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
+						if ($arParams['COMPATIBLE_MODE'] == 'Y') {
+							foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultImg', true) as $arEvent) {
+								ExecuteModuleEventEx($arEvent, array(&$arResult));
+							}
+						} else {
+							$event = new \Bitrix\Main\Event($arParams['MODULE_CONFIG']['MODULE_ID'], "OnPrepareResultImg", [&$arResult]);
+							$event->send();
+						}
+					}
 				}
 				$cachedPlace = $arResult['place'];
 				$this->CacheSave($cachedPlace);
@@ -453,9 +461,15 @@ class CImageManupulator extends CSimpleImage
 	public function ReplaceTagsAttr(&$content)
 	{
 		$arParams = $this->arParams;
+		if ($arParams['DEBUG'] == 'Y') {
+			self::__debug(['ReplaceTagsAttrParams' => $arParams['TAGS_ATTR_VALUES']]);
+		}
 		if (!empty($arParams['TAGS_ATTR_VALUES']) && count($arParams['TAGS_ATTR_VALUES']) > 0) {
 			foreach ($arParams['TAGS_ATTR_VALUES'] as $tagsAttr) {
 				[$tag, $attr] = explode(':', $tagsAttr);
+				if ($arParams['DEBUG'] == 'Y') {
+					self::__debug(['tag' => $tag, 'attr' => $attr]);
+				}
 				if (!empty($tag) && !empty($attr)) {
 					$this->ReplaceTag($content, $tag, $attr);
 				}
@@ -510,6 +524,9 @@ class CImageManupulator extends CSimpleImage
 
 				if ($need) {
 					$arImgPrepared =  $this->PrepareOriginal($img[$attr_src]);
+					if ($arParams['DEBUG'] == 'Y') {
+						self::__debug(['Try generate WEBP/AVIF' => $arImgPrepared]);
+					}
 				}
 
 				if ($arImgPrepared === false) {
@@ -523,7 +540,7 @@ class CImageManupulator extends CSimpleImage
 				$newSrc = false;
 				if (!empty($arImgPrepared['avif'])) {
 					$newSrc = $arImgPrepared['avif'];
-				} else if (!empty($arImgPrepard['webp'])) {
+				} else if (!empty($arImgPrepared['webp'])) {
 					$newSrc = $arImgPrepared['webp'];
 				}
 
@@ -543,11 +560,16 @@ class CImageManupulator extends CSimpleImage
 
 
 				if ($arParams['MODULE_CONFIG']['MODULE_ID'] != '') {
-					// foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultImg', true) as $arEvent) {
-					// 	ExecuteModuleEventEx($arEvent, array(&$arResult));
-					// }
-					$event = new \Bitrix\Main\Event($arParams['MODULE_CONFIG']['MODULE_ID'], "OnPrepareResultTag", [&$arResult]);
-					$event->send();
+					if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
+						if ($arParams['COMPATIBLE_MODE'] == 'Y') {
+							foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultTagsAttr', true) as $arEvent) {
+								ExecuteModuleEventEx($arEvent, array(&$arResult));
+							}
+						} else {
+							$event = new \Bitrix\Main\Event($arParams['MODULE_CONFIG']['MODULE_ID'], "OnPrepareResultTagsAttr", [&$arResult]);
+							$event->send();
+						}
+					}
 				}
 				$cachedPlace = $arResult['place'];
 				$this->CacheSave($cachedPlace);
@@ -612,6 +634,7 @@ class CImageManupulator extends CSimpleImage
 		if (mb_strpos($src, '.') === false) {
 			return false;
 		}
+		$src = explode('?', $src)[0];
 		$ext = mb_strtolower(substr(strrchr($src, '.'), 1));
 		if (in_array($ext, ['jpg', 'jpeg', 'png', 'bmp', 'gif'])) {
 			return true;
@@ -1331,17 +1354,64 @@ class CImageManupulator extends CSimpleImage
 
 	function get_tags($tag, $content, $haveClosedTag = true)
 	{
-		if ($haveClosedTag) {
+		preg_match_all('/^([a-zA-Z]+)/', $tag, $seletorTag);
+		preg_match_all('/#([a-zA-Z0-9-_]+)*/', $tag, $seletorIds);
+		preg_match_all('/\.([a-zA-Z0-9-_]+)*/', $tag, $seletorClass);
+		preg_match_all('/\[(.*)\]/', $tag, $seletorParams);
+		if (!empty($seletorParams[1][0])) {
+			$strParams = ' ' . str_replace(',', ' ', $seletorParams[1][0]);
+			preg_match_all('/\s+([a-zA-Z-]+)\s*=\s*"([^"]*)"/ismuU', $strParams, $seletorParams);
+		} else {
+			$seletorParams = [];
+		}
+		if (!empty($seletorTag[1][0])) {
+			$tag = $seletorTag[1][0];
+		} else {
+			$tag = '';
+		}
+		$arFilter = [];
+		if (!empty($seletorIds[1])) {
+			$arFilter['id'] = $seletorIds[1];
+		}
+		if (!empty($seletorClass[1])) {
+			$arFilter['class'] = $seletorClass[1];
+		}
+		if (is_array($seletorParams[1])) {
+			foreach ($seletorParams[1] as $key => $val) {
+				$arFilter[$val][] = $seletorParams[2][$key];
+			};
+		}
+		$notClosedTags = [
+			'araa',
+			'base',
+			'br',
+			'col',
+			'command',
+			'embed',
+			'hr',
+			'img',
+			'input',
+			'keygen',
+			'link',
+			'meta',
+			'param',
+			'source',
+			'track',
+			'wbr',
+		];
+
+		if (!in_array($tag, $notClosedTags) && $haveClosedTag) {
 			$arTag['tag'] = '/(<' . $tag . '[^>]*>)(.*)<\/' . $tag . '>/ismuU';;
 		} else {
 			$arTag['tag'] = '/(<' . $tag . '[^>]*>)/ismuU';
-		}
+		};
+
 		$arTag['attr'][0] = '/\s+([a-zA-Z-]+)\s*=\s*"([^"]*)"/ismuU';
 		$arTag['attr'][] = str_replace('"', "'", $arTag['attr'][0]);
-		$result = array();
+		$result = [];
 		if (preg_match_all($arTag['tag'], $content, $matches)) {
 			foreach ($matches[0] as $k => $match) {
-				$res_tag = array();
+				$res_tag = [];
 				$res_tag['tag'] = $match;
 				if (isset($matches[1][$k])) {
 					foreach ($arTag['attr'] as $arTagAttr) {
@@ -1357,7 +1427,28 @@ class CImageManupulator extends CSimpleImage
 				if (isset($matches[2][$k])) {
 					$res_tag['text'] = $matches[2][$k];
 				}
-				$result[] = $res_tag;
+				$ok = true;
+				if (!empty($arFilter)) {
+					foreach ($arFilter as $attrkey => $arValues) {
+						if (!isset($res_tag[$attrkey])) {
+							$ok = false;
+							break;
+						}
+						if (!is_array($arValues)) {
+							continue;
+						}
+						$arCurValues = explode(' ', $res_tag[$attrkey]);
+						foreach ($arValues as $searchValue) {
+							if (!in_array($searchValue, $arCurValues)) {
+								$ok = false;
+								break 2;
+							}
+						}
+					}
+				}
+				if ($ok) {
+					$result[] = $res_tag;
+				}
 			}
 		}
 		return $result;

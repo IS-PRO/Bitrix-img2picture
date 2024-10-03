@@ -134,5 +134,11 @@ $arModuleCfg = [
 			'type'=>'checkbox',
 			'default' => 'N'
 		],
+
+		/* Режим совместимости */
+		'COMPATIBLE_MODE' => [
+			'type'=>'checkbox',
+			'default' => 'N'
+		],
 	]
 ];

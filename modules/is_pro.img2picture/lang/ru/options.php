@@ -26,6 +26,8 @@ $MESS['ISPRO_IMG2PICTURE_ATTR_SRC'] = 'В каких аттрибутах тег
 $MESS['ISPRO_IMG2PICTURE_ATTR_SRC_ERROR'] = 'Поле является обязательным для заполнения (по умолчанию "src")';
 $MESS['ISPRO_IMG2PICTURE_CACHE_TTL'] = 'Время хранения кеша<br>(по умолчанию 2592000 - 30 дней)';
 
+
+
 $MESS['ISPRO_IMG2PICTURE_BACKGROUNDS'] = 'Обрабатывать изображения в style="background..."';
 $MESS['ISPRO_IMG2PICTURE_TAGS_ATTR'] = 'Обрабатывать изображения в аттрибутах тегов:<br/>{тег}:{Аттрибут с изображением}<br>a:href';
 $MESS['ISPRO_IMG2PICTURE_IMG_COMPRESSION'] = 'Качество сохряняемых изображений (0-100)';
@@ -50,6 +52,8 @@ $MESS['ISPRO_IMG2PICTURE_CUSTOM_JS'] = "Не подключать JS в моду
 {$jsPath}img2picture.min.js
 </pre>
 ";
+
+$MESS['ISPRO_IMG2PICTURE_COMPATIBLE_MODE'] = 'Режим совместимости<br>(используюстя старый вызов событий для изменения $arResult)';
 
 $MESS['ISPRO_IMG2PICTURE_SAVE'] = 'Сохранить';
 $MESS['ISPRO_IMG2PICTURE_DEFAULT'] = 'Сбросить все настройки по умолчанию';
@@ -135,6 +139,17 @@ $eventManager = \Bitrix\Main\EventManager::getInstance();
 $eventManager->addEventHandler("is_pro.img2picture", "OnPrepareResultBackground", "MyBackground");
 
 function MyBackground(\Bitrix\Main\Event $event)
+{
+	$arParam = $event->getParameters();
+	$arResult = &$arParam[0];
+	/* Какой-то код меняющий $arResult */
+}
+
+/* Для перехвата замены значений аттрибутов тегов */
+$eventManager = \Bitrix\Main\EventManager::getInstance();
+$eventManager->addEventHandler("is_pro.img2picture", "OnPrepareResultTagsAttr", "MyTagsAttr");
+
+function MyTagsAttr(\Bitrix\Main\Event $event)
 {
 	$arParam = $event->getParameters();
 	$arResult = &$arParam[0];
