@@ -99,6 +99,16 @@ $arModuleCfg = [
 			'default' => "a:href\n"
 		],
 
+		'ADD_WIDTH' => [
+			'type'=>'checkbox',
+			'default' => 'Y'
+		],
+
+		'ADD_HEIGHT' => [
+			'type'=>'checkbox',
+			'default' => 'N'
+		],
+
 		/* Заменять ссылки измененные на изображения на всей странице */
 		// 'REPLACE_ALL_LINK_IMG' => [
 		// 	'type'=>'checkbox',
