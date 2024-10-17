@@ -642,7 +642,7 @@ class CImageManupulator extends CSimpleImage
 		return false;
 	}
 
-	function PrepareOriginal($src):array|bool
+	function PrepareOriginal($src)
 	{
 		$doc_root = $this->arParams['DOCUMENT_ROOT'];
 		$arParams = $this->arParams;
