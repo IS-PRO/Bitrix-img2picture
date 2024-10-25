@@ -60,12 +60,15 @@ class Cimg2picture
 			['', 'lib/js/'],
 			__DIR__
 		);
-		$jsLozad       = file_get_contents($option['DOCUMENT_ROOT'] . $jsPath . 'lozad.min.js');
-		$jsImg2picture = file_get_contents($option['DOCUMENT_ROOT'] . $jsPath . 'img2picture.min.js');
-		$jsInline      = "<script>{$jsLozad};{}$jsImg2picture</script>";
-		\Bitrix\Main\Page\Asset::getInstance()->addString($jsInline);
-		// \Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'lozad.min.js');
-		// \Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'img2picture.min.js');
+		if ($option['JS_INLINE'] === 'Y') {
+			$jsLozad       = file_get_contents($option['DOCUMENT_ROOT'] . $jsPath . 'lozad.min.js');
+			$jsImg2picture = file_get_contents($option['DOCUMENT_ROOT'] . $jsPath . 'img2picture.min.js');
+			$jsInline      = "<script>{$jsLozad};{}$jsImg2picture</script>";
+			\Bitrix\Main\Page\Asset::getInstance()->addString($jsInline);
+		} else {
+			\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'lozad.min.js');
+			\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'img2picture.min.js');
+		}
 	}
 
 	public static function img2picture(&$content)

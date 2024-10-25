@@ -145,6 +145,12 @@ $arModuleCfg = [
 			'default' => 'N'
 		],
 
+		/* подключать JS inline строчкой в HEAD */
+		'JS_INLINE' => [
+			'type'=>'checkbox',
+			'default' => 'N'
+		],
+
 		/* Режим совместимости */
 		'COMPATIBLE_MODE' => [
 			'type'=>'checkbox',

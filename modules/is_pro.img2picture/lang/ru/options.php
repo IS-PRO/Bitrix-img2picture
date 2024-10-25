@@ -52,7 +52,7 @@ $MESS['ISPRO_IMG2PICTURE_CUSTOM_JS'] = "Не подключать JS в моду
 {$jsPath}img2picture.min.js
 </pre>
 ";
-
+$MESS['ISPRO_IMG2PICTURE_JS_INLINE'] = 'Подключать JS inline строкой в head';
 $MESS['ISPRO_IMG2PICTURE_COMPATIBLE_MODE'] = 'Режим совместимости<br>(используюстя старый вызов событий для изменения $arResult)';
 $MESS['ISPRO_IMG2PICTURE_ADD_WIDTH'] = 'Добавлять аттрибут width оригинального изображения';
 $MESS['ISPRO_IMG2PICTURE_ADD_HEIGHT'] = 'Добавлять аттрибут height оригинального изображения';
