@@ -1004,7 +1004,16 @@ class CImageManupulator extends CSimpleImage
 						$arResult["img_lazy"]["tag"] .= ' srcset="' . self::onePXpng . '"';
 					}
 				}
-				if (in_array($attr_name, ['width', 'height'])) {
+				if 	(
+						in_array($attr_name, ['width', 'height'])
+						|| (
+							$attr_name == 'style'
+							&& (
+								mb_strpos($attr_val, 'width') !== false
+								|| mb_strpos($attr_val, 'height') !== false
+							)
+						)
+					) {
 					unset($arResult['FILES']['original']['width']);
 					unset($arResult['FILES']['original']['height']);
 				}
