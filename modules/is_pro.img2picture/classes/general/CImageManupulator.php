@@ -31,7 +31,7 @@ class CImageManupulator extends CSimpleImage
 		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
 			\Bitrix\Main\Diag\Debug::writeToFile($arr);
 		} else {
-			file_put_contents($_SERVER['DOCUMENT_ROOT'].'/img2picture.log', print_r($arr, true), FILE_APPEND);
+			file_put_contents($_SERVER['DOCUMENT_ROOT'] . '/img2picture.log', print_r($arr, true), FILE_APPEND);
 		}
 	}
 
@@ -58,11 +58,11 @@ class CImageManupulator extends CSimpleImage
 			}
 		} else {
 			$curDate = time();
-			$fileCache = $_SERVER['DOCUMENT_ROOT'].self::DIR.'cache/'.$cacheKey;
+			$fileCache = $_SERVER['DOCUMENT_ROOT'] . self::DIR . 'cache/' . $cacheKey;
 			$this->cache = $fileCache;
 			if (file_exists($fileCache)) {
 				$lastUpdate = filemtime($fileCache);
-				if (!empty($arParams['CACHE_TTL']) && ($curDate - $lastUpdate) < (int) $arParams['CACHE_TTL'] ) {
+				if (!empty($arParams['CACHE_TTL']) && ($curDate - $lastUpdate) < (int) $arParams['CACHE_TTL']) {
 					$var = file_get_contents($fileCache);
 					$result = unserialize($var);
 					return $result;
@@ -241,7 +241,6 @@ class CImageManupulator extends CSimpleImage
 		}
 
 		$this->ReplaceTagsAttr($content);
-
 	}
 
 	public function ReplaceBackground(&$content)
@@ -280,7 +279,7 @@ class CImageManupulator extends CSimpleImage
 				}
 			}
 
-			$cacheKey =  md5($img['tag']);
+			$cacheKey    = $this->GenerateCacheKey($img);
 			$cachedPlace = $this->CacheInitCheck($cacheKey);
 			if (($cachedPlace !== false) && empty($arParams['CLEAR_CACHE'])) {
 				if ($arParams['DEBUG'] == 'Y') {
@@ -379,14 +378,8 @@ class CImageManupulator extends CSimpleImage
 				continue;
 			}
 
-			if (in_array($img['tag'], $arAllreadyReplaced)) {
-				if ($arParams['DEBUG'] == 'Y') {
-					self::__debug(['IMG ALLREADY REPLACED']);
-				}
-				continue;
-			}
 
-			$cacheKey =  md5($img['tag']);
+			$cacheKey    = $this->GenerateCacheKey($img, $attr_src);
 			$cachedPlace = $this->CacheInitCheck($cacheKey);
 			if (($cachedPlace !== false) && (empty($arParams['CLEAR_CACHE']))) {
 				if ($arParams['DEBUG'] == 'Y') {
@@ -507,7 +500,7 @@ class CImageManupulator extends CSimpleImage
 				continue;
 			}
 
-			$cacheKey =  md5($img['tag']);
+			$cacheKey    = $this->GenerateCacheKey($img, $attr_src);
 			$cachedPlace = $this->CacheInitCheck($cacheKey);
 			if (($cachedPlace !== false) && (empty($arParams['CLEAR_CACHE']))) {
 				if ($arParams['DEBUG'] == 'Y') {
@@ -629,6 +622,19 @@ class CImageManupulator extends CSimpleImage
 		return $result;
 	}
 
+	function GenerateCacheKey($img, $attr_src = 'src')
+	{
+		$doc_root = $this->arParams['DOCUMENT_ROOT'];
+		if (file_exists($doc_root . $img[$attr_src])) {
+			$img['LAST_MODIFIED'] = filemtime($doc_root . $img[$attr_src]);
+			$img['SIZE']          = filesize($doc_root . $img[$attr_src]);
+		}
+		if ($this->arParams['DEBUG'] == 'Y') {
+			self::__debug(['GenerateCacheKey by' => $img]);
+		}
+		return md5(print_r($img, true));
+	}
+
 	public static function isImg($src): bool
 	{
 		if (mb_strpos($src, '.') === false) {
@@ -663,7 +669,7 @@ class CImageManupulator extends CSimpleImage
 		}
 
 		if (!$this->load($doc_root . $src)) {
-				return false;
+			return false;
 		}
 
 		$arResult['width'] = $this->getWidth();
@@ -998,20 +1004,16 @@ class CImageManupulator extends CSimpleImage
 						$arResult["img_lazy"]["tag"] .= ' srcset="' . self::onePXpng . '"';
 					}
 				}
-				if ($attr_name == 'width') {
+				if (in_array($attr_name, ['width', 'height'])) {
 					unset($arResult['FILES']['original']['width']);
-				}
-				if ($attr_name == 'height') {
 					unset($arResult['FILES']['original']['height']);
 				}
 				$arResult["img_lazy"]["tag"] .= ' ' . $attr_name . '="' . $attr_val . '"';
 			}
 		}
-		if (($arParams['ADD_WIDTH'] == "Y") && !empty($arResult['FILES']['original']['width'])) {
-			$arResult["img_lazy"]["tag"] .= ' width="'.$arResult['FILES']['original']['width'].'px" ';
-		}
-		if (($arParams['ADD_HEIGHT'] == "Y") && !empty($arResult['FILES']['original']['height'])) {
-			$arResult["img_lazy"]["tag"] .= ' height="'.$arResult['FILES']['original']['height'].'px" ';
+		if (($arParams['ADD_WIDTH'] == "Y") && !empty($arResult['FILES']['original']['width']) && !empty($arResult['FILES']['original']['height'])) {
+			$arResult["img_lazy"]["tag"] .= ' width="' . $arResult['FILES']['original']['width'] . 'px" ';
+			$arResult["img_lazy"]["tag"] .= ' height="' . $arResult['FILES']['original']['height'] . 'px" ';
 		}
 
 		$arResult["img_lazy"]["tag"] .= '>';
@@ -1197,8 +1199,19 @@ class CImageManupulator extends CSimpleImage
 		) {
 			$need = true;
 		} else {
-			if (in_array(filesize($filename), [0, 4096])) {
+			$fileSize = filesize($filename);
+
+			if (in_array($fileSize, [0, 4096])) {
 				return false;
+			}
+
+			$srcModified = filemtime($doc_root . $src);
+			$fileModified = filemtime($filename);
+			if ($this->arParams['DEBUG'] == 'Y') {
+				self::__debug(['Check files modification' => [$filename => $fileModified, $doc_root . $src => $srcModified]]);
+			}
+			if ($srcModified > $fileModified) {
+				$need = true;
 			}
 		}
 
@@ -1270,6 +1283,17 @@ class CImageManupulator extends CSimpleImage
 			if (in_array(filesize($filename), [0, 4096])) {
 				return false;
 			}
+
+			$srcModified = filemtime($doc_root . $src);
+			$fileModified = filemtime($filename);
+			if ($this->arParams['DEBUG'] == 'Y') {
+				self::__debug(['Check files modification' => [$filename => $fileModified, $doc_root . $src => $srcModified]]);
+			}
+
+			if ($srcModified > $fileModified) {
+				$need = true;
+			}
+
 		}
 
 		if ($this->arParams['DEBUG'] == 'Y') {

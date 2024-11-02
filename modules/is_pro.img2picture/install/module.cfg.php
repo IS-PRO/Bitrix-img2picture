@@ -104,10 +104,6 @@ $arModuleCfg = [
 			'default' => 'Y'
 		],
 
-		'ADD_HEIGHT' => [
-			'type'=>'checkbox',
-			'default' => 'N'
-		],
 
 		/* Заменять ссылки измененные на изображения на всей странице */
 		// 'REPLACE_ALL_LINK_IMG' => [

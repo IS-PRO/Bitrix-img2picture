@@ -158,8 +158,8 @@ class Cimg2picture
 			$option['DEBUG'] = 'Y';
 		}
 		if ($option['MODULE_MODE'] == 'on') {
-			$img2pictureDebug = \Bitrix\Main\Application::getInstance()->getContext()->getRequest()->get('img2picture');
-			$img2pictureClearCache = \Bitrix\Main\Application::getInstance()->getContext()->getRequest()->get('img2picture');
+			$img2pictureDebug = \Bitrix\Main\Application::getInstance()->getContext()->getRequest()->get('img2pictureDebug');
+			$img2pictureClearCache = \Bitrix\Main\Application::getInstance()->getContext()->getRequest()->get('img2pictureClearCache');
 			if ($img2pictureDebug == 'Y') {
 				$option['DEBUG'] = 'Y';
 			}
