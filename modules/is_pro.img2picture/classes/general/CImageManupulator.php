@@ -1021,8 +1021,8 @@ class CImageManupulator extends CSimpleImage
 			}
 		}
 		if (($arParams['ADD_WIDTH'] == "Y") && !empty($arResult['FILES']['original']['width']) && !empty($arResult['FILES']['original']['height'])) {
-			$arResult["img_lazy"]["tag"] .= ' width="' . $arResult['FILES']['original']['width'] . 'px" ';
-			$arResult["img_lazy"]["tag"] .= ' height="' . $arResult['FILES']['original']['height'] . 'px" ';
+			$arResult["img_lazy"]["tag"] .= ' width="' . $arResult['FILES']['original']['width'] . '" ';
+			$arResult["img_lazy"]["tag"] .= ' height="' . $arResult['FILES']['original']['height'] . '" ';
 		}
 
 		$arResult["img_lazy"]["tag"] .= '>';
