@@ -1,4 +1,4 @@
-# Bitrix-img2picture-modile
+# Bitrix-img2picture-module
 
 
 Модуль для оптимизации изображений на сайте.
