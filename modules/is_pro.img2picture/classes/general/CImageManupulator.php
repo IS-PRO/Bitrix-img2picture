@@ -16,7 +16,7 @@ class CImageManupulator extends CSimpleImage
 		DIR = '/upload/img2picture/',
 		max_width = 99999,
 		cachePath  = 'img2picture',
-		smallWidth = 100,
+		smallWidth = 30,
 		onePXpng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
 		onePXwebp = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA',
 		onePXavif = 'data:image/avif;base64,AAAAFGZ0eXBhdmlmAAAAAG1pZjEAAACgbWV0YQAAAAAAAAAOcGl0bQAAAAAAAQAAAB5pbG9jAAAAAEQAAAEAAQAAAAEAAAC8AAAAGwAAACNpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAARWlwcnAAAAAoaXBjbwAAABRpc3BlAAAAAAAAAAQAAAAEAAAADGF2MUOBAAAAAAAAFWlwbWEAAAAAAAAAAQABAgECAAAAI21kYXQSAAoIP8R8hAQ0BUAyDWeeUy0JG+QAACANEkA=';
@@ -24,73 +24,6 @@ class CImageManupulator extends CSimpleImage
 	private $arParams = array();
 	private $startTime = 0;
 	private $cache;
-
-	public static function __debug($arr)
-	{
-		/* функция дебага, даже если класс используется не в Битрикс */
-		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
-			\Bitrix\Main\Diag\Debug::writeToFile($arr);
-		} else {
-			file_put_contents($_SERVER['DOCUMENT_ROOT'] . '/img2picture.log', print_r($arr, true), FILE_APPEND);
-		}
-	}
-
-	public static function DOC_ROOT(): string
-	{
-		/* функция получения DOCUMENT_ROOT, даже если класс используется не в Битрикс */
-		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
-			return \Bitrix\Main\Application::getDocumentRoot();
-		} else {
-			return $_SERVER['DOCUMENT_ROOT'];
-		}
-	}
-
-	private function CacheInitCheck($cacheKey)
-	{
-		/* функция инициализации и проверки кеша, даже если класс используется не в Битрикс */
-		$arParams = $this->arParams;
-		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
-			$this->cache = \Bitrix\Main\Data\Cache::createInstance();
-			$cachePath = self::cachePath;
-			$cacheTtl = (int) $arParams['CACHE_TTL'];
-			if ($this->cache->initCache($cacheTtl, $cacheKey, $cachePath)) {
-				return $this->cache->getVars();
-			}
-		} else {
-			$curDate = time();
-			$fileCache = $_SERVER['DOCUMENT_ROOT'] . self::DIR . 'cache/' . $cacheKey;
-			$this->cache = $fileCache;
-			if (file_exists($fileCache)) {
-				$lastUpdate = filemtime($fileCache);
-				if (!empty($arParams['CACHE_TTL']) && ($curDate - $lastUpdate) < (int) $arParams['CACHE_TTL']) {
-					$var = file_get_contents($fileCache);
-					$result = unserialize($var);
-					return $result;
-				}
-			}
-		}
-		return false;
-	}
-
-	private function CacheSave($cached)
-	{
-		$arParams = $this->arParams;
-		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
-			if (!empty($this->cache)) {
-				if ($this->cache->startDataCache()) {
-					$this->cache->endDataCache($cached);
-					return true;
-				}
-			}
-		} else {
-			if (!empty($this->cache)) {
-				$data = serialize($cached);
-				file_put_contents($this->cache, $data);
-				return true;
-			}
-		}
-		return false;
-	}
 
 	public function __construct($arParams)
 	{
@@ -208,8 +141,101 @@ class CImageManupulator extends CSimpleImage
 			$arParams['USE_IMAGICK'] = 'N';
 		}
 
+		if (!isset($arParams['CLEAR_CACHE'])) {
+			$arParams['CLEAR_CACHE'] = '';
+		}
+
+		if (!isset($arParams['DEBUG'])) {
+			$arParams['DEBUG'] = '';
+		}
+
 		$this->arParams = $arParams;
 	}
+
+	public static function __debug($arr)
+	{
+		/* функция дебага, даже если класс используется не в Битрикс */
+		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
+			\Bitrix\Main\Diag\Debug::writeToFile($arr);
+		} else {
+			file_put_contents($this->arParams['DOCUMENT_ROOT'] . '/img2picture.log', print_r($arr, true), FILE_APPEND);
+		}
+	}
+
+	public static function DOC_ROOT(): string
+	{
+		/* функция получения DOCUMENT_ROOT, даже если класс используется не в Битрикс */
+		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
+			return \Bitrix\Main\Application::getDocumentRoot();
+		} else {
+			return $_SERVER['DOCUMENT_ROOT'];
+		}
+	}
+
+	private function CacheInitCheck($cacheKey)
+	{
+		/* функция инициализации и проверки кеша, даже если класс используется не в Битрикс */
+		$arParams = $this->arParams;
+		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
+			$this->cache = \Bitrix\Main\Data\Cache::createInstance();
+			$cachePath = self::cachePath;
+			$cacheTtl = (int) $arParams['CACHE_TTL'];
+			if ($this->cache->initCache($cacheTtl, $cacheKey, $cachePath)) {
+				return $this->cache->getVars();
+			}
+		} else {
+			$curDate = time();
+			$fileCache = $this->arParams['DOCUMENT_ROOT'] . self::DIR . 'cache/' . $cacheKey;
+			$this->cache = $fileCache;
+			if (file_exists($fileCache)) {
+				$lastUpdate = filemtime($fileCache);
+				if (!empty($arParams['CACHE_TTL']) && ($curDate - $lastUpdate) < (int) $arParams['CACHE_TTL']) {
+					$var = file_get_contents($fileCache);
+					$result = unserialize($var);
+					return $result;
+				}
+			}
+		}
+		return false;
+	}
+
+	private function CacheAbort()
+	{
+		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
+			if (!empty($this->cache)) {
+				$this->cache->abortDataCache();
+			}
+		}
+	}
+
+	private function CacheSave($cached)
+	{
+		$arParams = $this->arParams;
+		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
+			if (!empty($this->cache) && is_object($this->cache)) {
+				if ($this->cache->startDataCache()) {
+					$this->cache->endDataCache($cached);
+					return true;
+				}
+
+			}
+		} else {
+			if (!empty($this->cache)) {
+				$data = serialize($cached);
+				$this->CreateDir($this->cache, true);
+				file_put_contents($this->cache, $data);
+				if ($arParams['DEBUG'] == 'Y') {
+					self::__debug(['CacheSave OK'  => $this->cache]);
+				}
+				return true;
+			}
+		}
+		if ($arParams['DEBUG'] == 'Y') {
+			self::__debug(['CacheSave FALSE'  => __LINE__]);
+		}
+		return false;
+	}
+
 
 	private function canContinue()
 	{
@@ -306,7 +332,8 @@ class CImageManupulator extends CSimpleImage
 					$arResult = $this->PrepareResultBackground($img, $arParams);
 				}
 
-				if ($arResult === false) {
+				if ($arResult === false || empty($arResult)) {
+					$this->CacheAbort();
 					continue;
 				}
 
@@ -413,11 +440,12 @@ class CImageManupulator extends CSimpleImage
 					$arResult = $this->PrepareResultImg($img, $attr_src, $arParams);
 				}
 
-				if ($arResult === false) {
+				if ($arResult === false || empty($arResult)) {
+					$this->CacheAbort();
 					continue;
 				}
 
-				if ($arParams['MODULE_CONFIG']['MODULE_ID'] != '') {
+				if (isset($arParams['MODULE_CONFIG']['MODULE_ID']) && $arParams['MODULE_CONFIG']['MODULE_ID'] != '') {
 					if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
 						if ($arParams['COMPATIBLE_MODE'] == 'Y') {
 							foreach (GetModuleEvents($arParams['MODULE_CONFIG']['MODULE_ID'], 'OnPrepareResultImg', true) as $arEvent) {
@@ -526,6 +554,7 @@ class CImageManupulator extends CSimpleImage
 					if ($arParams['DEBUG'] == 'Y') {
 						self::__debug(['CANt prepare img to  WEBP/AVIF']);
 					}
+					$this->CacheAbort();
 					continue;
 				}
 
@@ -541,6 +570,7 @@ class CImageManupulator extends CSimpleImage
 					if ($arParams['DEBUG'] == 'Y') {
 						self::__debug(['CANt found WEBP/AVIF']);
 					}
+					$this->CacheAbort();
 					continue;
 				}
 
@@ -870,6 +900,14 @@ class CImageManupulator extends CSimpleImage
 				} else if (!empty($arResult[$width]['avif'])) {
 					$arResult[$width]['src'] = $arResult[$width]['avif'];
 				}
+			}
+		}
+		if (isset($arResult[self::smallWidth]) && is_array($arResult[self::smallWidth])) {
+			foreach ($arResult[self::smallWidth] as $type_origin => $file) {
+				$filename = str_replace('//', '/', $this->arParams['DOCUMENT_ROOT'] . '/' . $file);
+				$type = pathinfo($filename, PATHINFO_EXTENSION);
+				$data = file_get_contents($filename);
+				$arResult[self::smallWidth][$type_origin] = 'data:image/' . $type . ';base64,' . base64_encode($data);
 			}
 		}
 		return $arResult;
