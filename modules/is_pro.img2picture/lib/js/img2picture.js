@@ -44,23 +44,10 @@ document.addEventListener('DOMContentLoaded', function () {
 	myObserver.observe(doc, obsConfig);
 	InitI2Plazyload();
 
-	function is_cached(src) {
-		var image = new Image();
-		image.src = src;
-		return image.complete;
-	}
 
 	function InitI2Plazyload() {
 		let elements = document.querySelectorAll('*[data-i2p]:not(.i2p)');
 
-		elements.forEach(el => {
-			if (el.hasAttribute('data-srcset') && is_cached(el.getAttribute('data-srcset'))) {
-				el.setAttribute('srcset', el.getAttribute('data-srcset'));
-				el.removeAttribute("data-i2p");
-				el.classList.add('loaded');
-			}
-		});
-		elements = document.querySelectorAll('*[data-i2p]:not(.i2p)');
 		elements.forEach(el => {
 			el.classList.add('i2p');
 		});
