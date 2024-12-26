@@ -60,14 +60,24 @@ class Cimg2picture
 			['', 'lib/js/'],
 			__DIR__
 		);
+		$cssPath   = str_replace(
+			[$option['DOCUMENT_ROOT'], 'classes/general'],
+			['', 'lib/css/'],
+			__DIR__
+		);
 		if ($option['JS_INLINE'] === 'Y') {
 			$jsLozad       = file_get_contents($option['DOCUMENT_ROOT'] . $jsPath . 'lozad.min.js');
 			$jsImg2picture = file_get_contents($option['DOCUMENT_ROOT'] . $jsPath . 'img2picture.min.js');
-			$jsInline      = "<script>{$jsLozad};{}$jsImg2picture</script>";
+			$jsInline      = "<script>{$jsLozad};{$jsImg2picture};</script>";
 			\Bitrix\Main\Page\Asset::getInstance()->addString($jsInline);
 		} else {
 			\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'lozad.min.js');
 			\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'img2picture.min.js');
+
+		}
+
+		if ($option['ADD_CSS_FIX'] === 'Y') {
+			\Bitrix\Main\Page\Asset::getInstance()->addCss($cssPath.'img2picture.css');
 		}
 	}
 

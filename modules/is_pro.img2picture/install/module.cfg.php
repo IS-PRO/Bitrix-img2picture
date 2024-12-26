@@ -146,7 +146,11 @@ $arModuleCfg = [
 			'type'=>'checkbox',
 			'default' => 'N'
 		],
-
+		/* подключать CSS*/
+		'ADD_CSS_FIX' => [
+			'type'=>'checkbox',
+			'default' => 'Y'
+		],
 		/* Режим совместимости */
 		'COMPATIBLE_MODE' => [
 			'type'=>'checkbox',
