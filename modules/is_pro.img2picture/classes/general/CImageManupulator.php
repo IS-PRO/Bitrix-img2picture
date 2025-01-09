@@ -908,6 +908,7 @@ class CImageManupulator extends CSimpleImage
 				$type = pathinfo($filename, PATHINFO_EXTENSION);
 				$data = file_get_contents($filename);
 				$arResult[self::smallWidth][$type_origin] = 'data:image/' . $type . ';base64,' . base64_encode($data);
+				$arResult[self::smallWidth][$type_origin . '_file'] = $file;
 			}
 		}
 		return $arResult;
@@ -1036,10 +1037,10 @@ class CImageManupulator extends CSimpleImage
 			if ($attr_name != 'tag') {
 				if ($attr_name == 'src') {
 					$arResult["img_lazy"]["tag"] .= ' data-i2p="Y" data-srcset="' . $attr_val . '"';
-					if (!empty($arResult['FILES'][self::smallWidth]['src'])) {
-						$arResult["img_lazy"]["tag"] .= ' srcset="' . $arResult['FILES'][self::smallWidth]['src'] . '"';
+					if (!empty($arResult['FILES'][self::smallWidth]['src_file'])) {
+						$arResult["img_lazy"]["tag"] .= ' srcset="' . $arResult['FILES'][self::smallWidth]['src_file'] . '"';
 					} else {
-						$arResult["img_lazy"]["tag"] .= ' srcset="' . self::onePXpng . '"';
+						$arResult["img_lazy"]["tag"] .= ' srcset=""';
 					}
 				}
 				if 	(
