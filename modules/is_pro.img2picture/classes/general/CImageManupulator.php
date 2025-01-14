@@ -28,7 +28,7 @@ class CImageManupulator extends CSimpleImage
 	public function __construct($arParams)
 	{
 
-		$this->startTime = microtime(true);;
+		$this->startTime = microtime(true);
 
 		/* DOCUMENT_ROOT */
 		if ((!isset($arParams['DOCUMENT_ROOT'])) || (empty($arParams['DOCUMENT_ROOT']))) {
@@ -149,6 +149,18 @@ class CImageManupulator extends CSimpleImage
 			$arParams['DEBUG'] = '';
 		}
 
+		$arParams['1x1png'] = str_replace(
+			[
+				$this->DOC_ROOT(),
+				'classes/general'
+			],
+			[
+				'',
+				'img'
+			],
+			__DIR__
+		) . '/1x1.png';
+
 		$this->arParams = $arParams;
 	}
 
@@ -250,6 +262,7 @@ class CImageManupulator extends CSimpleImage
 
 	public function doIt(&$content)
 	{
+		$this->startTime = microtime(true);
 		$arParams = $this->arParams;
 		if ($arParams['DEBUG'] == 'Y') {
 			self::__debug(['ReplaceImg_' . date('Y.M.d H:i:s') => 'start']);
@@ -384,6 +397,10 @@ class CImageManupulator extends CSimpleImage
 		$arAllreadyReplaced = [];
 
 		foreach ($arImg as $img) {
+
+			if (in_array($img['tag'], $arAllreadyReplaced)) {
+				continue;
+			}
 
 			$need = true;
 			if ($arParams['DEBUG'] == 'Y') {
@@ -919,6 +936,7 @@ class CImageManupulator extends CSimpleImage
 		$arResult['img'] = $img;
 		$arResult['sources'] = [];
 
+
 		$files = $this->PrepareResponsive($img[$attr_src], $arParams['WIDTH']);
 
 		if ($files === false) {
@@ -1040,7 +1058,7 @@ class CImageManupulator extends CSimpleImage
 					if (!empty($arResult['FILES'][self::smallWidth]['src_file'])) {
 						$arResult["img_lazy"]["tag"] .= ' srcset="' . $arResult['FILES'][self::smallWidth]['src_file'] . '"';
 					} else {
-						$arResult["img_lazy"]["tag"] .= ' srcset=""';
+						$arResult["img_lazy"]["tag"] .= ' srcset="' . $arParams['1x1png'] . '"';
 					}
 				}
 				if 	(

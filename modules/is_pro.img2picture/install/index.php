@@ -48,8 +48,9 @@ Class is_pro_img2picture extends CModule
 
 	public function InstallEvents()
 	{
-		RegisterModuleDependences("main", "OnEpilog",	$this->MODULE_ID,"IS_PRO\img2picture\Cimg2picture", "SetParamsJS");
-		RegisterModuleDependences("main", "OnEndBufferContent", $this->MODULE_ID, "IS_PRO\img2picture\Cimg2picture", "img2picture");
+		$eventManager = \Bitrix\Main\EventManager::getInstance();
+		$eventManager->registerEventHandler("main", "OnEpilog",	$this->MODULE_ID,"IS_PRO\img2picture\Cimg2picture", "SetParamsJS");
+		$eventManager->registerEventHandler("main", "OnEndBufferContent", $this->MODULE_ID, "IS_PRO\img2picture\Cimg2picture", "img2picture");
 		return false;
 	}
 
@@ -69,8 +70,9 @@ Class is_pro_img2picture extends CModule
 
 	public function UnInstallEvents()
 	{
-		UnRegisterModuleDependences("main", "OnEpilog", $this->MODULE_ID, "IS_PRO\img2picture\Cimg2picture", "SetParamsJS");
-		UnRegisterModuleDependences("main", "OnEndBufferContent", $this->MODULE_ID, "IS_PRO\img2picture\Cimg2picture", "img2picture");
+		$eventManager = \Bitrix\Main\EventManager::getInstance();
+		$eventManager->unRegisterEventHandler("main", "OnEpilog", $this->MODULE_ID, "IS_PRO\img2picture\Cimg2picture", "SetParamsJS");
+		$eventManager->unRegisterEventHandler("main", "OnEndBufferContent", $this->MODULE_ID, "IS_PRO\img2picture\Cimg2picture", "img2picture");
 		return false;
 	}
 
