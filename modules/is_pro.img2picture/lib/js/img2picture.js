@@ -66,6 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const observer = lozad(elements, {
             load: function load(element) {
                 element.classList.add('i2p');
+                var isIE = typeof document !== 'undefined' && document.documentMode;
                 if (element.nodeName.toLowerCase() === 'picture') {
                     var img = element.querySelector('img');
                     var append = false;
