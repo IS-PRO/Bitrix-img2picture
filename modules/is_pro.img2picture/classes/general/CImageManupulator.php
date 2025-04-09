@@ -145,6 +145,10 @@ class CImageManupulator extends CSimpleImage
 			$arParams['CLEAR_CACHE'] = '';
 		}
 
+		if (!isset($arParams['IMITATION'])) {
+			$arParams['IMITATION'] = 'N';
+		}
+
 		if (!isset($arParams['DEBUG'])) {
 			$arParams['DEBUG'] = '';
 		}
@@ -706,21 +710,24 @@ class CImageManupulator extends CSimpleImage
 		}
 		$arResult['type'] = 'image/' . $ext;
 
-		/* проверим существует ли файл вообще */
-		if (!file_exists($doc_root . $src)) {
-			$src = urldecode($src);
-		}
+		if ($arParams['IMITATION'] !== 'Y') {
 
-		if (!file_exists($doc_root . $src)) {
-			return false;
-		}
+			/* проверим существует ли файл вообще */
+			if (!file_exists($doc_root . $src)) {
+				$src = urldecode($src);
+			}
 
-		if (!$this->load($doc_root . $src)) {
-			return false;
-		}
+			if (!file_exists($doc_root . $src)) {
+				return false;
+			}
 
-		$arResult['width'] = $this->getWidth();
-		$arResult['height'] = $this->getHeight();
+			if (!$this->load($doc_root . $src)) {
+				return false;
+			}
+
+			$arResult['width'] = $this->getWidth();
+			$arResult['height'] = $this->getHeight();
+		}
 
 		if ($arParams['USE_WEBP'] == 'Y') {
 			$webpSrc = $this->ConvertImg2webp($src);
@@ -776,56 +783,14 @@ class CImageManupulator extends CSimpleImage
 			$filename = $doc_root . $newsrc;
 
 			$arResult[$width]['src'] = $newsrc;
-
-			if (
-				(!file_exists($filename)) ||
-				(in_array(
-					$this->arParams['CLEAR_CACHE'],
-					[
-						'Y',
-						$fullPathFile,
-						$src,
-						$filename,
-						$newsrc
-					]
-				))
-			) {
-				if (!$loaded) {
-					if (!$this->load($doc_root . $src)) {
-						return false;
-					}
-					$loaded = true;
-				}
-				if ($loaded) {
-					$resized = $this->smallTo($width, $height);
-					if ($resized) {
-						$this->CreateDir($filename, true);
-						if (!$this->save($filename, $this->image_type, $this->arParams['IMG_COMPRESSION'])) {
-							unset($arResult[$width]['src']);
-						}
-					} else {
-						unset($arResult[$width]['src']);
-					}
-				} else {
-					unset($arResult[$width]['src']);
-				}
-			} else {
-				if (in_array(filesize($filename), [0, 4096])) {
-					unset($arResult[$width]['src']);
-				}
-			}
-
-			if ($this->arParams['USE_WEBP'] == 'Y') {
-
-				/* подготовим webp */
-				$filename = $doc_root . $newsrc . '.webp';
-				$arResult[$width]['webp'] = $newsrc . '.webp';
-				if ((!file_exists($filename)) ||
+			if ($this->arParams['IMITATION'] !== 'Y') {
+				if (
+					(!file_exists($filename)) ||
 					(in_array(
 						$this->arParams['CLEAR_CACHE'],
 						[
 							'Y',
-							$doc_root . $src,
+							$fullPathFile,
 							$src,
 							$filename,
 							$newsrc
@@ -839,26 +804,72 @@ class CImageManupulator extends CSimpleImage
 						$loaded = true;
 					}
 					if ($loaded) {
-						if (!$resized) {
-							$resized = $this->smallTo($width, $height);
-						}
+						$resized = $this->smallTo($width, $height);
 						if ($resized) {
 							$this->CreateDir($filename, true);
-							if (!$this->save($filename, IMAGETYPE_WEBP, $this->arParams['IMG_COMPRESSION'])) {
-								unset($arResult[$width]['webp']);
-							};
-							if (in_array(filesize($filename), [0, 4096])) {
+							if (!$this->save($filename, $this->image_type, $this->arParams['IMG_COMPRESSION'])) {
+								unset($arResult[$width]['src']);
+							}
+						} else {
+							unset($arResult[$width]['src']);
+						}
+					} else {
+						unset($arResult[$width]['src']);
+					}
+				} else {
+					if (in_array(filesize($filename), [0, 4096])) {
+						unset($arResult[$width]['src']);
+					}
+				}
+			}
+			if ($this->arParams['USE_WEBP'] == 'Y') {
+
+				/* подготовим webp */
+				$filename = $doc_root . $newsrc . '.webp';
+				$arResult[$width]['webp'] = $newsrc . '.webp';
+				if ($this->arParams['IMITATION'] !== 'Y') {
+					if (
+						(!file_exists($filename)) ||
+						(in_array(
+							$this->arParams['CLEAR_CACHE'],
+							[
+								'Y',
+								$doc_root . $src,
+								$src,
+								$filename,
+								$newsrc
+							]
+						))
+					) {
+						if (!$loaded) {
+							if (!$this->load($doc_root . $src)) {
+								return false;
+							}
+							$loaded = true;
+						}
+						if ($loaded) {
+							if (!$resized) {
+								$resized = $this->smallTo($width, $height);
+							}
+							if ($resized) {
+								$this->CreateDir($filename, true);
+								if (!$this->save($filename, IMAGETYPE_WEBP, $this->arParams['IMG_COMPRESSION'])) {
+									unset($arResult[$width]['webp']);
+								}
+								;
+								if (in_array(filesize($filename), [0, 4096])) {
+									unset($arResult[$width]['webp']);
+								}
+							} else {
 								unset($arResult[$width]['webp']);
 							}
 						} else {
 							unset($arResult[$width]['webp']);
 						}
 					} else {
-						unset($arResult[$width]['webp']);
-					}
-				} else {
-					if (in_array(filesize($filename), [0, 4096])) {
-						unset($arResult[$width]['webp']);
+						if (in_array(filesize($filename), [0, 4096])) {
+							unset($arResult[$width]['webp']);
+						}
 					}
 				}
 			}
@@ -867,47 +878,50 @@ class CImageManupulator extends CSimpleImage
 				/* подготовим avif */
 				$filename = $doc_root . $newsrc . '.avif';
 				$arResult[$width]['avif'] = $newsrc . '.avif';
-				if (
-					(!file_exists($filename)) ||
-					(in_array(
-						$this->arParams['CLEAR_CACHE'],
-						[
-							'Y',
-							$doc_root . $src,
-							$src,
-							$filename,
-							$newsrc
-						]
-					)
-					)
-				) {
-					if (!$loaded) {
-						if (!$this->load($doc_root . $src)) {
-							return false;
+				if ($this->arParams['IMITATION'] !== 'Y') {
+					if (
+						(!file_exists($filename)) ||
+						(in_array(
+							$this->arParams['CLEAR_CACHE'],
+							[
+								'Y',
+								$doc_root . $src,
+								$src,
+								$filename,
+								$newsrc
+							]
+						)
+						)
+					) {
+						if (!$loaded) {
+							if (!$this->load($doc_root . $src)) {
+								return false;
+							}
+							$loaded = true;
 						}
-						$loaded = true;
-					}
-					if ($loaded) {
-						if (!$resized) {
-							$resized = $this->smallTo($width, $height);
-						}
-						if ($resized) {
-							$this->CreateDir($filename, true);
-							if (!$this->save($filename, IMAGETYPE_AVIF, $this->arParams['IMG_COMPRESSION'])) {
-								unset($arResult[$width]['avif']);
-							};
-							if (in_array(filesize($filename), [0, 4096])) {
+						if ($loaded) {
+							if (!$resized) {
+								$resized = $this->smallTo($width, $height);
+							}
+							if ($resized) {
+								$this->CreateDir($filename, true);
+								if (!$this->save($filename, IMAGETYPE_AVIF, $this->arParams['IMG_COMPRESSION'])) {
+									unset($arResult[$width]['avif']);
+								}
+								;
+								if (in_array(filesize($filename), [0, 4096])) {
+									unset($arResult[$width]['avif']);
+								}
+							} else {
 								unset($arResult[$width]['avif']);
 							}
 						} else {
 							unset($arResult[$width]['avif']);
 						}
 					} else {
-						unset($arResult[$width]['avif']);
-					}
-				} else {
-					if (in_array(filesize($filename), [0, 4096])) {
-						unset($arResult[$width]['avif']);
+						if (in_array(filesize($filename), [0, 4096])) {
+							unset($arResult[$width]['avif']);
+						}
 					}
 				}
 			}
@@ -920,12 +934,17 @@ class CImageManupulator extends CSimpleImage
 			}
 		}
 		if (isset($arResult[self::smallWidth]) && is_array($arResult[self::smallWidth])) {
+
 			foreach ($arResult[self::smallWidth] as $type_origin => $file) {
-				$filename = str_replace('//', '/', $this->arParams['DOCUMENT_ROOT'] . '/' . $file);
-				$type = pathinfo($filename, PATHINFO_EXTENSION);
-				$data = file_get_contents($filename);
-				$arResult[self::smallWidth][$type_origin] = 'data:image/' . $type . ';base64,' . base64_encode($data);
-				$arResult[self::smallWidth][$type_origin . '_file'] = $file;
+				if ($this->arParams['IMITATION'] !== 'Y') {
+					$filename = str_replace('//', '/', $this->arParams['DOCUMENT_ROOT'] . '/' . $file);
+					$type = pathinfo($filename, PATHINFO_EXTENSION);
+					$data = file_get_contents($filename);
+					$arResult[self::smallWidth][$type_origin] = 'data:image/' . $type . ';base64,' . base64_encode($data);
+					$arResult[self::smallWidth][$type_origin . '_file'] = $file;
+				} else {
+					$arResult[self::smallWidth][$type_origin] = self::onePXwebp;
+				}
 			}
 		}
 		return $arResult;
@@ -1249,9 +1268,16 @@ class CImageManupulator extends CSimpleImage
 		$doc_root = $this->arParams['DOCUMENT_ROOT'];
 		$webp = self::DIR . $src . '.webp';
 		$webp = str_replace('//', '/', $webp);
+
+		if ($this->arParams['IMITATION']=='Y') {
+			return $webp;
+		}
+
 		$filename = $doc_root . $webp;
 
-		if ((!file_exists($filename)) ||
+
+
+		if ((!file_exists($filename) ) ||
 			(in_array(
 				$this->arParams['CLEAR_CACHE'],
 				[
@@ -1330,6 +1356,11 @@ class CImageManupulator extends CSimpleImage
 		$doc_root = $this->arParams['DOCUMENT_ROOT'];
 		$avif = self::DIR . $src . '.avif';
 		$avif = str_replace('//', '/', $avif);
+
+		if ($this->arParams['IMITATION']=='Y') {
+			return $avif;
+		}
+
 		$filename = $doc_root . $avif;
 
 		if ((!file_exists($filename)) ||

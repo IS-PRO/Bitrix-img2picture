@@ -39,6 +39,8 @@ $MESS['ISPRO_IMG2PICTURE_MODULE_MODE'] = 'Режим работы модуля';
 $MESS['ISPRO_IMG2PICTURE_MODULE_MODE_off'] = 'Выключен';
 $MESS['ISPRO_IMG2PICTURE_MODULE_MODE_test'] = 'Тестирование';
 $MESS['ISPRO_IMG2PICTURE_MODULE_MODE_on'] = 'Включен';
+$MESS['ISPRO_IMG2PICTURE_MODULE_MODE_imitation'] = 'Имитация работы';
+
 
 $jsPath   = str_replace(
 	[$_SERVER['DOCUMENT_ROOT'], 'lang/ru'],
@@ -83,6 +85,11 @@ $MESS['ISPRO_IMG2PICTURE_INFO'] = '
 включить модуль дописав get параметр ?img2picture=on<br>
 выключить модуль дописав get параметр ?img2picture=off<br>
 лог пишется в стандартный файл битрикса (по умолчанию /__bx_log.log)<br>
+</p>
+
+<h3>В режиме "Имитация работы":</h3>
+<p>
+В этом режиме не производиться реальная конвертация изображений, но меняется html-код сайта, как будто все изображения успешно конвертировались.<br>
 </p>
 
 <h3>Доступные функции:</h3>

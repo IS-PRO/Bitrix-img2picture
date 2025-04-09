@@ -8,7 +8,8 @@ $arModuleCfg = [
 			'values' => [					/* Значения настройки */
 				'off',
 				'test',
-				'on'
+				'imitation',
+				'on',
 			],
 			'default' => 'off'				/* Значение по умолчанию */
 		],

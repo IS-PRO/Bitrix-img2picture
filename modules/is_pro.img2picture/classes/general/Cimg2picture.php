@@ -167,6 +167,11 @@ class Cimg2picture
 			$option['MODULE_MODE'] = $_SESSION['img2picture'];
 			$option['DEBUG'] = 'Y';
 		}
+		if ($option['MODULE_MODE'] == 'imitation') {
+			$option['MODULE_MODE'] = 'on';
+			$option['IMITATION'] = 'Y';
+
+		}
 		if ($option['MODULE_MODE'] == 'on') {
 			$img2pictureDebug = \Bitrix\Main\Application::getInstance()->getContext()->getRequest()->get('img2pictureDebug');
 			$img2pictureClearCache = \Bitrix\Main\Application::getInstance()->getContext()->getRequest()->get('img2pictureClearCache');
