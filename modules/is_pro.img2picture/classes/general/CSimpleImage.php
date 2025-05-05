@@ -26,11 +26,10 @@ class CSimpleImage
 
 		if (($this->use_imagick) && (class_exists('Imagick'))) {
 			$this->image = new Imagick($filename);
-			if (!$this->image) {
-				$this->image_type = false;
-				return false;
+
+			if ($this->image && $this->image_type) {
+				return true;
 			}
-			return true;
 		} else {
 			if ($this->image_type == IMAGETYPE_JPEG) {
 				$this->image = imagecreatefromjpeg($filename);
@@ -42,15 +41,16 @@ class CSimpleImage
 				$this->image = imagecreatefromwebp($filename);
 			} elseif ($this->image_type == IMAGETYPE_AVIF) {
 				$this->image = imagecreatefromavif($filename);
-			} else {
-				$this->image_type = false;
-				return false;
 			}
-			imagepalettetotruecolor($this->image);
-			imagealphablending($this->image, false);
-			imagesavealpha($this->image, true);
-			return true;
+			if ($this->image && $this->image_type) {
+				imagepalettetotruecolor($this->image);
+				imagealphablending($this->image, false);
+				imagesavealpha($this->image, true);
+				return true;
+			}
 		}
+		$this->image_type = false;
+		return false;
 	}
 
 	/**
