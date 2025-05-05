@@ -42,7 +42,7 @@ foreach ($options_list as $option_name => $arOption) {
 }
 
 $ok_message = '';
-$eeror_message = '';
+$error_message = '';
 
 function checkOption(string $option_name, $option)
 {
@@ -88,7 +88,7 @@ foreach ($siteIds as $sId => $sName) {
 			$optionIsValid = checkOption($option_name_def, $option[$option_name]);
 			if ($optionIsValid !== true) {
 				$options_list_error[$option_name] = $optionIsValid;
-				$eeror_message .= 'ERROR: ' . mb_substr(Loc::getMessage('ISPRO_IMG2PICTURE_' . $option_name_def), 0, 40) . PHP_EOL;
+				$error_message .= 'ERROR: ' . mb_substr(Loc::getMessage('ISPRO_IMG2PICTURE_' . $option_name_def), 0, 40) . PHP_EOL;
 			}
 			if ($option_name_def == 'RESPONSIVE') {
 				foreach ($option[$option_name] as $key => $val) {
@@ -121,7 +121,7 @@ if ($save == 'removefiles') {
 	Cimg2picture::ClearDirCache();
 }
 
-if (($eeror_message == '') && ($ok_message != '')) {
+if (($error_message == '') && ($ok_message != '')) {
 	$ok_message = 'Saved';
 }
 
@@ -133,9 +133,9 @@ if ($ok_message != '') {
 	echo $message->Show();
 }
 
-if ($eeror_message != '') {
+if ($error_message != '') {
 	$message = new \CAdminMessage(array(
-		'MESSAGE' => $eeror_message,
+		'MESSAGE' => $error_message,
 		'TYPE' => 'ERROR'
 	));
 	echo $message->Show();
