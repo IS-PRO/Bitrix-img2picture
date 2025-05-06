@@ -10,8 +10,8 @@ class CSimpleImage
 {
 
 	private $image,
-			$image_type = false,
-			$use_imagick = false;
+	$image_type = false,
+	$use_imagick = false;
 
 	/**
 	 *   Load image (Загрузит картинку)
@@ -21,7 +21,7 @@ class CSimpleImage
 	public function load($filename)
 	{
 
-		$image_info = getimagesize($filename);
+		$image_info       = getimagesize($filename);
 		$this->image_type = $image_info[2];
 
 		if (($this->use_imagick) && (class_exists('Imagick'))) {
@@ -200,7 +200,7 @@ class CSimpleImage
 			return false;
 		}
 		if (($this->use_imagick) && (class_exists('Imagick'))) {
-			return  $this->image->resizeImage(0, $height);
+			return $this->image->resizeImage(0, $height);
 		} else {
 			$ratio = $height / $this->getHeight();
 			$width = $this->getWidth() * $ratio;
@@ -219,7 +219,7 @@ class CSimpleImage
 			return false;
 		}
 		if (($this->use_imagick) && (class_exists('Imagick'))) {
-			return  $this->image->resizeImage($width, 0);
+			return $this->image->resizeImage($width, 0);
 		} else {
 			$ratio  = $width / $this->getWidth();
 			$height = $this->getheight() * $ratio;
@@ -237,7 +237,7 @@ class CSimpleImage
 		if (!$this->image) {
 			return false;
 		}
-		$width = $this->getWidth() * $scale / 100;
+		$width  = $this->getWidth() * $scale / 100;
 		$height = $this->getheight() * $scale / 100;
 
 		if (($this->use_imagick) && (class_exists('Imagick'))) {
@@ -406,12 +406,12 @@ class CSimpleImage
 		if (!$this->image) {
 			return false;
 		}
-		$w         = abs($x2 - $x1);
-		$h         = abs($y2 - $y1);
-		$x         = min($x1, $x2);
-		$y         = min($y1, $y2);
+		$w = abs($x2 - $x1);
+		$h = abs($y2 - $y1);
+		$x = min($x1, $x2);
+		$y = min($y1, $y2);
 		if (($this->use_imagick) && (class_exists('Imagick'))) {
-			return  $this->image->cropImage($w, $h, $x, $y);
+			return $this->image->cropImage($w, $h, $x, $y);
 		} else {
 			$new_image = imagecreatetruecolor($w, $h);
 			imagealphablending($new_image, false);

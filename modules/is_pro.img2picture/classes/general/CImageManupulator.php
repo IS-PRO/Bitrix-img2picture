@@ -13,13 +13,13 @@ class CImageManupulator extends CSimpleImage
 {
 	const
 		maxWorkTime = 20,
-		DIR = '/upload/img2picture/',
-		max_width = 99999,
-		cachePath  = 'img2picture',
-		smallWidth = 30,
-		onePXpng = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
-		onePXwebp = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA',
-		onePXavif = 'data:image/avif;base64,AAAAFGZ0eXBhdmlmAAAAAG1pZjEAAACgbWV0YQAAAAAAAAAOcGl0bQAAAAAAAQAAAB5pbG9jAAAAAEQAAAEAAQAAAAEAAAC8AAAAGwAAACNpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAARWlwcnAAAAAoaXBjbwAAABRpc3BlAAAAAAAAAAQAAAAEAAAADGF2MUOBAAAAAAAAFWlwbWEAAAAAAAAAAQABAgECAAAAI21kYXQSAAoIP8R8hAQ0BUAyDWeeUy0JG+QAACANEkA=';
+		DIR         = '/upload/img2picture/',
+		max_width   = 99999,
+		cachePath   = 'img2picture',
+		smallWidth  = 30,
+		onePXpng    = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=',
+		onePXwebp   = 'data:image/webp;base64,UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA',
+		onePXavif   = 'data:image/avif;base64,AAAAFGZ0eXBhdmlmAAAAAG1pZjEAAACgbWV0YQAAAAAAAAAOcGl0bQAAAAAAAQAAAB5pbG9jAAAAAEQAAAEAAQAAAAEAAAC8AAAAGwAAACNpaW5mAAAAAAABAAAAFWluZmUCAAAAAAEAAGF2MDEAAAAARWlwcnAAAAAoaXBjbwAAABRpc3BlAAAAAAAAAAQAAAAEAAAADGF2MUOBAAAAAAAAFWlwbWEAAAAAAAAAAQABAgECAAAAI21kYXQSAAoIP8R8hAQ0BUAyDWeeUy0JG+QAACANEkA=';
 
 	private $arParams = array();
 	private $startTime = 0;
@@ -57,8 +57,8 @@ class CImageManupulator extends CSimpleImage
 		/* EXCEPTIONS_SRC_REG */
 		if ((isset($arParams['EXCEPTIONS_SRC'])) && (!empty($arParams['EXCEPTIONS_SRC']))) {
 			$arParams['EXCEPTIONS_SRC_REG'] = [];
-			$arExceptions = [];
-			$arExceptions = explode("\n", $arParams['EXCEPTIONS_SRC']);
+			$arExceptions                   = [];
+			$arExceptions                   = explode("\n", $arParams['EXCEPTIONS_SRC']);
 			if (is_array($arExceptions)) {
 				foreach ($arExceptions as $k => $v) {
 					$v = trim($v);
@@ -69,15 +69,15 @@ class CImageManupulator extends CSimpleImage
 				}
 			}
 		} else {
-			$arParams['EXCEPTIONS_SRC'] = '';
+			$arParams['EXCEPTIONS_SRC']     = '';
 			$arParams['EXCEPTIONS_SRC_REG'] = [];
 		}
 
 		/* EXCEPTIONS_TAG_REG */
 		if (isset($arParams['EXCEPTIONS_TAG']) && !empty($arParams['EXCEPTIONS_TAG'])) {
 			$arParams['EXCEPTIONS_TAG_REG'] = [];
-			$arExceptions = [];
-			$arExceptions = explode("\n", $arParams['EXCEPTIONS_TAG']);
+			$arExceptions                   = [];
+			$arExceptions                   = explode("\n", $arParams['EXCEPTIONS_TAG']);
 			if (is_array($arExceptions)) {
 				foreach ($arExceptions as $k => $v) {
 					$v = trim($v);
@@ -88,7 +88,7 @@ class CImageManupulator extends CSimpleImage
 				}
 			}
 		} else {
-			$arParams['EXCEPTIONS_TAG'] = '';
+			$arParams['EXCEPTIONS_TAG']     = '';
 			$arParams['EXCEPTIONS_TAG_REG'] = [];
 		}
 
@@ -194,20 +194,20 @@ class CImageManupulator extends CSimpleImage
 		$arParams = $this->arParams;
 		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
 			$this->cache = \Bitrix\Main\Data\Cache::createInstance();
-			$cachePath = self::cachePath;
-			$cacheTtl = (int) $arParams['CACHE_TTL'];
+			$cachePath   = self::cachePath;
+			$cacheTtl    = (int) $arParams['CACHE_TTL'];
 			if ($this->cache->initCache($cacheTtl, $cacheKey, $cachePath)) {
 				return $this->cache->getVars();
 			}
 		} else {
-			$curDate = time();
-			$fileCache = $this->arParams['DOCUMENT_ROOT'] . self::DIR . 'cache/' . $cacheKey;
+			$curDate     = time();
+			$fileCache   = $this->arParams['DOCUMENT_ROOT'] . self::DIR . 'cache/' . $cacheKey;
 			$this->cache = $fileCache;
 			if (file_exists($fileCache)) {
 				$lastUpdate = filemtime($fileCache);
 				if (!empty($arParams['CACHE_TTL']) && ($curDate - $lastUpdate) < (int) $arParams['CACHE_TTL']) {
-					$var = file_get_contents($fileCache);
-					$result = unserialize($var);
+					$var    = file_get_contents($fileCache);
+					$result = unserialize($var, ['allowed_classes' => false]);
 					return $result;
 				}
 			}
@@ -241,13 +241,13 @@ class CImageManupulator extends CSimpleImage
 				$this->CreateDir($this->cache, true);
 				file_put_contents($this->cache, $data);
 				if ($arParams['DEBUG'] == 'Y') {
-					self::__debug(['CacheSave OK'  => $this->cache]);
+					self::__debug(['CacheSave OK' => $this->cache]);
 				}
 				return true;
 			}
 		}
 		if ($arParams['DEBUG'] == 'Y') {
-			self::__debug(['CacheSave FALSE'  => __LINE__]);
+			self::__debug(['CacheSave FALSE' => __LINE__]);
 		}
 		return false;
 	}
@@ -267,7 +267,7 @@ class CImageManupulator extends CSimpleImage
 	public function doIt(&$content)
 	{
 		$this->startTime = microtime(true);
-		$arParams = $this->arParams;
+		$arParams        = $this->arParams;
 		if ($arParams['DEBUG'] == 'Y') {
 			self::__debug(['ReplaceImg_' . date('Y.M.d H:i:s') => 'start']);
 		}
@@ -289,9 +289,9 @@ class CImageManupulator extends CSimpleImage
 	public function ReplaceBackground(&$content)
 	{
 		$arParams = $this->arParams;
-		$preg = '/<[^>]+style[^>]*=[^>]*(background(-image)*\s*:\s*url\((.*)\))[^>]*\>/ismuU';
-		$tagkey = 0;
-		$srckey = 3;
+		$preg     = '/<[^>]+style[^>]*=[^>]*(background(-image)*\s*:\s*url\((.*)\))[^>]*\>/ismuU';
+		$tagkey   = 0;
+		$srckey   = 3;
 
 		if (!preg_match_all($preg, $content, $matches)) {
 			return;
@@ -308,7 +308,7 @@ class CImageManupulator extends CSimpleImage
 				self::__debug(['FOUND background el' => $tag]);
 			}
 
-			$need = true;
+			$need       = true;
 			$img['tag'] = $matches[$tagkey][$key];
 			$img['src'] = trim($matches[$srckey][$key], '"' . "'");
 
@@ -332,7 +332,7 @@ class CImageManupulator extends CSimpleImage
 					$cachedPlace = $cachedPlace['place'];
 				}
 			} else {
-				$arResult = [];
+				$arResult          = [];
 				$arResult['place'] = '';
 				if (mb_strpos($img['tag'], 'data-i2p')) {
 					$need = false;
@@ -371,10 +371,10 @@ class CImageManupulator extends CSimpleImage
 			}
 			$arResult['place'] = $cachedPlace;
 			if ((trim($arResult['place']) != '') && (mb_strpos($arResult['place'], '</style>'))) {
-				[$tohead, $newtag] = explode('</style>', $arResult['place']);
+				[$tohead, $newtag]    = explode('</style>', $arResult['place']);
 				$tohead .= '</style></head>';
 				$arAllreadyReplaced[] = $img['tag'];
-				$content = str_replace(
+				$content              = str_replace(
 					['</head>', $img['tag']],
 					[$tohead, $newtag],
 					$content
@@ -382,21 +382,21 @@ class CImageManupulator extends CSimpleImage
 				if ($arParams['DEBUG'] == 'Y') {
 					self::__debug([
 						'REPLACED_FROM' => $img['tag'],
-						'REPLACED_TO' => $arResult['place']
+						'REPLACED_TO'   => $arResult['place']
 					]);
 				}
 			}
 			if (!$this->canContinue()) {
 				break;
 			}
-		};
+		}
 	}
 
 	public function ReplaceImg(&$content)
 	{
-		$arParams = $this->arParams;
+		$arParams  = $this->arParams;
 		$arPicture = $this->get_tags('picture', $content, true);
-		$arImg = $this->get_tags('img', $content, false);
+		$arImg     = $this->get_tags('img', $content, false);
 
 		$arAllreadyReplaced = [];
 
@@ -412,7 +412,7 @@ class CImageManupulator extends CSimpleImage
 			}
 
 			$found_src = false;
-			$attr_src = '';
+			$attr_src  = '';
 			foreach ($arParams['ATTR_SRC_VALUES'] as $attr_src) {
 				if (trim($img[$attr_src]) !== '') {
 					$found_src = true;
@@ -485,7 +485,7 @@ class CImageManupulator extends CSimpleImage
 			$arResult['place'] = $cachedPlace;
 			if (!empty($arResult['place'])) {
 				$arAllreadyReplaced[] = $img['tag'];
-				$content = str_replace($img['tag'], $arResult['place'], $content);
+				$content              = str_replace($img['tag'], $arResult['place'], $content);
 				if ($arParams['DEBUG'] == 'Y') {
 					self::__debug([
 						'REPLACED_FROM' => $img['tag'],
@@ -521,7 +521,7 @@ class CImageManupulator extends CSimpleImage
 	public function ReplaceTag(&$content, $tagSearch, $attrImg)
 	{
 		$arParams = $this->arParams;
-		$arImg = $this->get_tags($tagSearch, $content, false);
+		$arImg    = $this->get_tags($tagSearch, $content, false);
 
 		$arAllreadyReplaced = [];
 
@@ -532,7 +532,7 @@ class CImageManupulator extends CSimpleImage
 				self::__debug(['FOUND_TAG' => $img]);
 			}
 
-			$attr_src = $attrImg;
+			$attr_src  = $attrImg;
 			$found_src = self::isImg($img[$attr_src]);
 
 			if (!$found_src) {
@@ -565,7 +565,7 @@ class CImageManupulator extends CSimpleImage
 				$arResult = false;
 
 				if ($need) {
-					$arImgPrepared =  $this->PrepareOriginal($img[$attr_src]);
+					$arImgPrepared = $this->PrepareOriginal($img[$attr_src]);
 					if ($arParams['DEBUG'] == 'Y') {
 						self::__debug(['Try generate WEBP/AVIF' => $arImgPrepared]);
 					}
@@ -596,8 +596,8 @@ class CImageManupulator extends CSimpleImage
 				}
 
 				$arResult = [
-					'tag' => $img['tag'],
-					'img' => $img,
+					'tag'   => $img['tag'],
+					'img'   => $img,
 					'FILES' => $arImgPrepared,
 					'place' => str_replace($img[$attr_src], $newSrc, $img['tag'])
 				];
@@ -621,7 +621,7 @@ class CImageManupulator extends CSimpleImage
 			$arResult['place'] = $cachedPlace;
 			if (!empty($arResult['place'])) {
 				$arAllreadyReplaced[] = $img['tag'];
-				$content = str_replace($img['tag'], $arResult['place'], $content);
+				$content              = str_replace($img['tag'], $arResult['place'], $content);
 
 				if ($arParams['DEBUG'] == 'Y') {
 					self::__debug([
@@ -639,7 +639,7 @@ class CImageManupulator extends CSimpleImage
 
 	function ExceptionBySrc($src)
 	{
-		$result = true;
+		$result   = true;
 		$arParams = $this->arParams;
 		if (is_array($arParams['EXCEPTIONS_SRC_REG'])) {
 			foreach ($arParams['EXCEPTIONS_SRC_REG'] as $exception) {
@@ -657,7 +657,7 @@ class CImageManupulator extends CSimpleImage
 
 	function ExceptionByTag($tag)
 	{
-		$result = true;
+		$result   = true;
 		$arParams = $this->arParams;
 		if (is_array($arParams['EXCEPTIONS_TAG_REG'])) {
 			foreach ($arParams['EXCEPTIONS_TAG_REG'] as $exception) {
@@ -701,10 +701,10 @@ class CImageManupulator extends CSimpleImage
 
 	function PrepareOriginal($src)
 	{
-		$doc_root = $this->arParams['DOCUMENT_ROOT'];
-		$arParams = $this->arParams;
+		$doc_root        = $this->arParams['DOCUMENT_ROOT'];
+		$arParams        = $this->arParams;
 		$arResult['src'] = $src;
-		$ext = mb_strtolower(substr(strrchr($src, '.'), 1));
+		$ext             = mb_strtolower(substr(strrchr($src, '.'), 1));
 		if ($ext == 'jpg') {
 			$ext = 'jpeg';
 		}
@@ -725,7 +725,7 @@ class CImageManupulator extends CSimpleImage
 				return false;
 			}
 
-			$arResult['width'] = $this->getWidth();
+			$arResult['width']  = $this->getWidth();
 			$arResult['height'] = $this->getHeight();
 		}
 
@@ -743,10 +743,10 @@ class CImageManupulator extends CSimpleImage
 		}
 		if ($arParams['USE_ONLY_WEBP_AVIF'] == 'Y') {
 			if (!empty($arResult['webp'])) {
-				$arResult['src'] = $arResult['webp'];
+				$arResult['src']  = $arResult['webp'];
 				$arResult['type'] = 'image/webp';
 			} else if (!empty($arResult['avif'])) {
-				$arResult['src'] = $arResult['avif'];
+				$arResult['src']  = $arResult['avif'];
 				$arResult['type'] = 'image/avif';
 			}
 		}
@@ -777,9 +777,9 @@ class CImageManupulator extends CSimpleImage
 
 		/* подготовим файлы для каждой ширины */
 		foreach ($arWidth as $width) {
-			$resized = false;
-			$newsrc = self::DIR . '/' . $width . '/' .  str_replace(['%2F', '+', '%'], ['/', '_', '_'], urlencode($src));
-			$newsrc = str_replace('//', '/', $newsrc);
+			$resized  = false;
+			$newsrc   = self::DIR . '/' . $width . '/' . str_replace(['%2F', '+', '%'], ['/', '_', '_'], urlencode($src));
+			$newsrc   = str_replace('//', '/', $newsrc);
 			$filename = $doc_root . $newsrc;
 
 			$arResult[$width]['src'] = $newsrc;
@@ -825,7 +825,7 @@ class CImageManupulator extends CSimpleImage
 			if ($this->arParams['USE_WEBP'] == 'Y') {
 
 				/* подготовим webp */
-				$filename = $doc_root . $newsrc . '.webp';
+				$filename                 = $doc_root . $newsrc . '.webp';
 				$arResult[$width]['webp'] = $newsrc . '.webp';
 				if ($this->arParams['IMITATION'] !== 'Y') {
 					if (
@@ -876,7 +876,7 @@ class CImageManupulator extends CSimpleImage
 
 			if ($this->arParams['USE_AVIF'] == 'Y') {
 				/* подготовим avif */
-				$filename = $doc_root . $newsrc . '.avif';
+				$filename                 = $doc_root . $newsrc . '.avif';
 				$arResult[$width]['avif'] = $newsrc . '.avif';
 				if ($this->arParams['IMITATION'] !== 'Y') {
 					if (
@@ -937,10 +937,10 @@ class CImageManupulator extends CSimpleImage
 
 			foreach ($arResult[self::smallWidth] as $type_origin => $file) {
 				if ($this->arParams['IMITATION'] !== 'Y') {
-					$filename = str_replace('//', '/', $this->arParams['DOCUMENT_ROOT'] . '/' . $file);
-					$type = pathinfo($filename, PATHINFO_EXTENSION);
-					$data = file_get_contents($filename);
-					$arResult[self::smallWidth][$type_origin] = 'data:image/' . $type . ';base64,' . base64_encode($data);
+					$filename                                           = str_replace('//', '/', $this->arParams['DOCUMENT_ROOT'] . '/' . $file);
+					$type                                               = pathinfo($filename, PATHINFO_EXTENSION);
+					$data                                               = file_get_contents($filename);
+					$arResult[self::smallWidth][$type_origin]           = 'data:image/' . $type . ';base64,' . base64_encode($data);
 					$arResult[self::smallWidth][$type_origin . '_file'] = $file;
 				} else {
 					$arResult[self::smallWidth][$type_origin] = self::onePXwebp;
@@ -952,7 +952,7 @@ class CImageManupulator extends CSimpleImage
 
 	public function PrepareResultImg($img, $attr_src, $arParams)
 	{
-		$arResult['img'] = $img;
+		$arResult['img']     = $img;
 		$arResult['sources'] = [];
 
 
@@ -962,8 +962,8 @@ class CImageManupulator extends CSimpleImage
 			return false;
 		}
 
-		$PreparedOriginal = $this->PrepareOriginal($img[$attr_src]);
-		$arResult['FILES'] =  $files;
+		$PreparedOriginal  = $this->PrepareOriginal($img[$attr_src]);
+		$arResult['FILES'] = $files;
 
 		if ($arParams['DEBUG'] == 'Y') {
 			self::__debug(['CREATE_FILES' => $arResult['FILES']]);
@@ -976,7 +976,7 @@ class CImageManupulator extends CSimpleImage
 			if (count($arResult['FILES'][$val['width']]) == 0) {
 				continue;
 			}
-			$addsourse = ['', ''];
+			$addsourse     = ['', ''];
 			$addsourseLazy = ['', ''];
 			foreach ($arResult['FILES'][$val['width']] as $file_type => $file_src) {
 				if ($file_type == 'avif') {
@@ -1008,7 +1008,7 @@ class CImageManupulator extends CSimpleImage
 					}
 					$index = 3;
 				}
-				$media = 'media="';
+				$media    = 'media="';
 				$mediaand = '';
 				if ((int) $val['min'] >= 0) {
 					$media .= $mediaand . '(min-width: ' . $val['min'] . 'px)';
@@ -1020,7 +1020,7 @@ class CImageManupulator extends CSimpleImage
 				}
 
 				$media .= '"';
-				$addsourse[$index] = '<source srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
+				$addsourse[$index]     = '<source srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
 				$addsourseLazy[$index] = '<source ' . $lazy . ' data-i2p="Y" data-srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
 			}
 			ksort($addsourse);
@@ -1046,7 +1046,7 @@ class CImageManupulator extends CSimpleImage
 			} else {
 				$lazy = 'srcset="' . self::onePXavif . '"';
 			}
-			$arResult['sources'][] = '<source srcset="' . $arResult['FILES']['original']['avif'] . '"  type="image/avif">';
+			$arResult['sources'][]      = '<source srcset="' . $arResult['FILES']['original']['avif'] . '"  type="image/avif">';
 			$arResult['sources_lazy'][] = '<source ' . $lazy . '  data-i2p="Y" data-srcset="' . $arResult['FILES']['original']['avif'] . '"  type="image/avif">';
 		}
 
@@ -1056,7 +1056,7 @@ class CImageManupulator extends CSimpleImage
 			} else {
 				$lazy = 'srcset="' . self::onePXwebp . '"';
 			}
-			$arResult['sources'][] = '<source srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
+			$arResult['sources'][]      = '<source srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
 			$arResult['sources_lazy'][] = '<source ' . $lazy . '  data-i2p="Y" data-srcset="' . $arResult['FILES']['original']['webp'] . '"  type="image/webp">';
 		}
 
@@ -1080,16 +1080,16 @@ class CImageManupulator extends CSimpleImage
 						$arResult["img_lazy"]["tag"] .= ' srcset="' . $arParams['1x1png'] . '"';
 					}
 				}
-				if 	(
-						in_array($attr_name, ['width', 'height'])
-						|| (
-							$attr_name == 'style'
-							&& (
-								mb_strpos($attr_val, 'width') !== false
-								|| mb_strpos($attr_val, 'height') !== false
-							)
+				if (
+					in_array($attr_name, ['width', 'height'])
+					|| (
+						$attr_name == 'style'
+						&& (
+							mb_strpos($attr_val, 'width') !== false
+							|| mb_strpos($attr_val, 'height') !== false
 						)
-					) {
+					)
+				) {
 					unset($arResult['FILES']['original']['width']);
 					unset($arResult['FILES']['original']['height']);
 				}
@@ -1135,9 +1135,9 @@ class CImageManupulator extends CSimpleImage
 		$img['parse_tag'] = $this->get_tags('', $img['tag'], false);
 		$img['parse_tag'] = $img['parse_tag'][0];
 
-		$arResult['img'] = $img;
+		$arResult['img']    = $img;
 		$arResult['md5key'] = md5($img['tag']);
-		$files = $this->PrepareResponsive($img['src'], $arParams['WIDTH']);
+		$files              = $this->PrepareResponsive($img['src'], $arParams['WIDTH']);
 
 		if (empty($files)) {
 			if ($arParams['DEBUG'] == 'Y') {
@@ -1145,8 +1145,8 @@ class CImageManupulator extends CSimpleImage
 			}
 			return false;
 		}
-		$PreparedOriginal = $this->PrepareOriginal($img['src']);
-		$arResult['FILES'] =  $files;
+		$PreparedOriginal  = $this->PrepareOriginal($img['src']);
+		$arResult['FILES'] = $files;
 		if ($arResult['FILES'][self::smallWidth]['src'] == '') {
 			$arResult['FILES'][self::smallWidth]['src'] = $arResult['img']['src'];
 		}
@@ -1155,7 +1155,7 @@ class CImageManupulator extends CSimpleImage
 			self::__debug(['TAG FILES' => $arResult['FILES']]);
 		}
 		$arResult['cssSelector'] = '[data-i2p="' . $arResult['md5key'] . '"]';
-		$arResult['style'] = '<style>';
+		$arResult['style']       = '<style>';
 
 		$arResult['style'] .= '*' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $arResult['FILES'][self::smallWidth]['src'], $arResult['img']['parse_tag']['style']) . '}';
 
@@ -1166,32 +1166,32 @@ class CImageManupulator extends CSimpleImage
 			if (count($arResult['FILES'][$val['width']]) == 0) {
 				continue;
 			}
-			$haveFiles = false;
-			$addsourse  = ['', ''];
-			$addsourseLazy  = ['', ''];
-			$minmax = 0;
+			$haveFiles     = false;
+			$addsourse     = ['', ''];
+			$addsourseLazy = ['', ''];
+			$minmax        = 0;
 
 			foreach ($arResult['FILES'][$val['width']] as $file_type => $file_src) {
 				if ($file_type == 'avif') {
-					$haveFiles = true;
-					$addsourse[2] = '.avif' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']) . '}';
+					$haveFiles        = true;
+					$addsourse[2]     = '.avif' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']) . '}';
 					$addsourseLazy[2] = '.loaded' . $addsourse[2];
 				} else if ($file_type == 'webp') {
-					$haveFiles = true;
-					$addsourse[1] = '.webp' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']) . '}';
+					$haveFiles        = true;
+					$addsourse[1]     = '.webp' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']) . '}';
 					$addsourseLazy[1] = '.loaded' . $addsourse[1];
 				} else if ($arParams['USE_ONLY_WEBP_AVIF'] != 'Y') {
-					$haveFiles = true;
-					$addsourse[0] = '' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']) . '}';
+					$haveFiles        = true;
+					$addsourse[0]     = '' . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']) . '}';
 					$addsourseLazy[0] = '.loaded' . $addsourse[0];
 				}
 			}
 			if ($haveFiles) {
 				$arResult['style'] .= '@media ';
-				$styleand = '';
+				$styleand          = '';
 				if ((int) $val['min'] >= 0) {
 					$arResult['style'] .= '(min-width: ' . $val['min'] . 'px)';
-					$styleand = ' and ';
+					$styleand          = ' and ';
 					if ($minmax < $val['min']) {
 						$minmax = $val['min'];
 					}
@@ -1264,12 +1264,12 @@ class CImageManupulator extends CSimpleImage
 		if ($this->arParams['DEBUG'] == 'Y') {
 			self::__debug(['TRY CONVERT TO WEBP' => $src]);
 		}
-		$need = false;
+		$need     = false;
 		$doc_root = $this->arParams['DOCUMENT_ROOT'];
-		$webp = self::DIR . $src . '.webp';
-		$webp = str_replace('//', '/', $webp);
+		$webp     = self::DIR . $src . '.webp';
+		$webp     = str_replace('//', '/', $webp);
 
-		if ($this->arParams['IMITATION']=='Y') {
+		if ($this->arParams['IMITATION'] == 'Y') {
 			return $webp;
 		}
 
@@ -1277,7 +1277,8 @@ class CImageManupulator extends CSimpleImage
 
 
 
-		if ((!file_exists($filename) ) ||
+		if (
+			(!file_exists($filename)) ||
 			(in_array(
 				$this->arParams['CLEAR_CACHE'],
 				[
@@ -1297,7 +1298,7 @@ class CImageManupulator extends CSimpleImage
 				return false;
 			}
 
-			$srcModified = filemtime($doc_root . $src);
+			$srcModified  = filemtime($doc_root . $src);
 			$fileModified = filemtime($filename);
 			if ($this->arParams['DEBUG'] == 'Y') {
 				self::__debug(['Check files modification' => [$filename => $fileModified, $doc_root . $src => $srcModified]]);
@@ -1352,18 +1353,19 @@ class CImageManupulator extends CSimpleImage
 		if ($this->arParams['DEBUG'] == 'Y') {
 			self::__debug(['TRY CONVERT TO AVIF' => $src]);
 		}
-		$need = false;
+		$need     = false;
 		$doc_root = $this->arParams['DOCUMENT_ROOT'];
-		$avif = self::DIR . $src . '.avif';
-		$avif = str_replace('//', '/', $avif);
+		$avif     = self::DIR . $src . '.avif';
+		$avif     = str_replace('//', '/', $avif);
 
-		if ($this->arParams['IMITATION']=='Y') {
+		if ($this->arParams['IMITATION'] == 'Y') {
 			return $avif;
 		}
 
 		$filename = $doc_root . $avif;
 
-		if ((!file_exists($filename)) ||
+		if (
+			(!file_exists($filename)) ||
 			(in_array(
 				$this->arParams['CLEAR_CACHE'],
 				[
@@ -1381,7 +1383,7 @@ class CImageManupulator extends CSimpleImage
 				return false;
 			}
 
-			$srcModified = filemtime($doc_root . $src);
+			$srcModified  = filemtime($doc_root . $src);
 			$fileModified = filemtime($filename);
 			if ($this->arParams['DEBUG'] == 'Y') {
 				self::__debug(['Check files modification' => [$filename => $fileModified, $doc_root . $src => $srcModified]]);
@@ -1442,7 +1444,7 @@ class CImageManupulator extends CSimpleImage
 	}
 
 
-	public function CreateDir($path,  $lastIsFile = false)
+	public function CreateDir($path, $lastIsFile = false)
 	{
 		$dirs = explode('/', $path);
 		if ($lastIsFile) {
@@ -1500,7 +1502,7 @@ class CImageManupulator extends CSimpleImage
 		if (is_array($seletorParams[1])) {
 			foreach ($seletorParams[1] as $key => $val) {
 				$arFilter[$val][] = $seletorParams[2][$key];
-			};
+			}
 		}
 		$notClosedTags = [
 			'araa',
@@ -1522,17 +1524,17 @@ class CImageManupulator extends CSimpleImage
 		];
 
 		if (!in_array($tag, $notClosedTags) && $haveClosedTag) {
-			$arTag['tag'] = '/(<' . $tag . '[^>]*>)(.*)<\/' . $tag . '>/ismuU';;
+			$arTag['tag'] = '/(<' . $tag . '[^>]*>)(.*)<\/' . $tag . '>/ismuU';
 		} else {
 			$arTag['tag'] = '/(<' . $tag . '[^>]*>)/ismuU';
-		};
+		}
 
 		$arTag['attr'][0] = '/\s+([a-zA-Z-]+)\s*=\s*"([^"]*)"/ismuU';
-		$arTag['attr'][] = str_replace('"', "'", $arTag['attr'][0]);
-		$result = [];
+		$arTag['attr'][]  = str_replace('"', "'", $arTag['attr'][0]);
+		$result           = [];
 		if (preg_match_all($arTag['tag'], $content, $matches)) {
 			foreach ($matches[0] as $k => $match) {
-				$res_tag = [];
+				$res_tag        = [];
 				$res_tag['tag'] = $match;
 				if (isset($matches[1][$k])) {
 					foreach ($arTag['attr'] as $arTagAttr) {

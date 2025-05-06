@@ -27,9 +27,10 @@ class Cimg2picture
 
 		$context = \Bitrix\Main\Context::getCurrent();
 		$request = $context->getRequest();
-		if ($request->isPost()
-		    || $request->isAjaxRequest()
-		    || $request->isJson()
+		if (
+			$request->isPost()
+			|| $request->isAjaxRequest()
+			|| $request->isJson()
 		) {
 			return;
 		}
@@ -55,12 +56,12 @@ class Cimg2picture
 			}
 		}
 
-		$jsPath   = str_replace(
+		$jsPath  = str_replace(
 			[$option['DOCUMENT_ROOT'], 'classes/general'],
 			['', 'lib/js/'],
 			__DIR__
 		);
-		$cssPath   = str_replace(
+		$cssPath = str_replace(
 			[$option['DOCUMENT_ROOT'], 'classes/general'],
 			['', 'lib/css/'],
 			__DIR__
@@ -71,13 +72,13 @@ class Cimg2picture
 			$jsInline      = "<script>{$jsLozad};{$jsImg2picture};</script>";
 			\Bitrix\Main\Page\Asset::getInstance()->addString($jsInline);
 		} else {
-			\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'lozad.min.js');
-			\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath.'img2picture.min.js');
+			\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath . 'lozad.min.js');
+			\Bitrix\Main\Page\Asset::getInstance()->addJs($jsPath . 'img2picture.min.js');
 
 		}
 
 		if ($option['ADD_CSS_FIX'] === 'Y') {
-			\Bitrix\Main\Page\Asset::getInstance()->addCss($cssPath.'img2picture.css');
+			\Bitrix\Main\Page\Asset::getInstance()->addCss($cssPath . 'img2picture.css');
 		}
 	}
 
@@ -150,7 +151,8 @@ class Cimg2picture
 		return $img2picture->ConvertImg2avif($src);
 	}
 
-	public static function GetOptions() {
+	public static function GetOptions()
+	{
 		include(__DIR__ . "/../../install/module.cfg.php");
 		$options_list = $arModuleCfg['options_list'];
 		foreach ($options_list as $option_name => $arOption) {
@@ -165,15 +167,15 @@ class Cimg2picture
 				$_SESSION['img2picture'] = $img2picture;
 			}
 			$option['MODULE_MODE'] = $_SESSION['img2picture'];
-			$option['DEBUG'] = 'Y';
+			$option['DEBUG']       = 'Y';
 		}
 		if ($option['MODULE_MODE'] == 'imitation') {
 			$option['MODULE_MODE'] = 'on';
-			$option['IMITATION'] = 'Y';
+			$option['IMITATION']   = 'Y';
 
 		}
 		if ($option['MODULE_MODE'] == 'on') {
-			$img2pictureDebug = \Bitrix\Main\Application::getInstance()->getContext()->getRequest()->get('img2pictureDebug');
+			$img2pictureDebug      = \Bitrix\Main\Application::getInstance()->getContext()->getRequest()->get('img2pictureDebug');
 			$img2pictureClearCache = \Bitrix\Main\Application::getInstance()->getContext()->getRequest()->get('img2pictureClearCache');
 			if ($img2pictureDebug == 'Y') {
 				$option['DEBUG'] = 'Y';
@@ -188,8 +190,9 @@ class Cimg2picture
 		return $option;
 	}
 
-	public static function ClearDirCache() {
-		$option = self::GetOptions();
+	public static function ClearDirCache()
+	{
+		$option      = self::GetOptions();
 		$img2picture = new CImageManupulator($option);
 		return $img2picture->ClearDirCache();
 	}
