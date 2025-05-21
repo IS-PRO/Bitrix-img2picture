@@ -1070,6 +1070,7 @@ class CImageManupulator extends CSimpleImage
 		}
 
 		$arResult["img_lazy"]["tag"] = '<img ';
+		$arResult["img"]["tag"] = '<img ';
 		foreach ($arResult["img"] as $attr_name => $attr_val) {
 			if ($attr_name != 'tag') {
 				if ($attr_name == 'src') {
@@ -1094,14 +1095,19 @@ class CImageManupulator extends CSimpleImage
 					unset($arResult['FILES']['original']['height']);
 				}
 				$arResult["img_lazy"]["tag"] .= ' ' . $attr_name . '="' . $attr_val . '"';
+				$arResult["img"]["tag"] .= ' ' . $attr_name . '="' . $attr_val . '"';
 			}
 		}
 		if (($arParams['ADD_WIDTH'] == "Y") && !empty($arResult['FILES']['original']['width']) && !empty($arResult['FILES']['original']['height'])) {
 			$arResult["img_lazy"]["tag"] .= ' width="' . $arResult['FILES']['original']['width'] . '" ';
 			$arResult["img_lazy"]["tag"] .= ' height="' . $arResult['FILES']['original']['height'] . '" ';
+			$arResult["img"]["tag"] .= ' width="' . $arResult['FILES']['original']['width'] . '" ';
+			$arResult["img"]["tag"] .= ' height="' . $arResult['FILES']['original']['height'] . '" ';
+
 		}
 
 		$arResult["img_lazy"]["tag"] .= '>';
+		$arResult["img"]["tag"] .= '>';
 
 		if ($arParams['LAZYLOAD'] != "Y") {
 			if ((isset($arResult["sources"])) && (count($arResult["sources"]) > 0)) {
