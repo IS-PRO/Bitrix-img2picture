@@ -24,7 +24,10 @@ if (!class_exists('Imagick')) {
 $MESS['ISPRO_IMG2PICTURE_LAZYLOAD'] = 'Использовать ленивую загрузку изображений (lazyload)';
 $MESS['ISPRO_IMG2PICTURE_ATTR_SRC'] = 'В каких аттрибутах тега img искать ссылку на изображение *<br> (по умолчанию src)';
 $MESS['ISPRO_IMG2PICTURE_ATTR_SRC_ERROR'] = 'Поле является обязательным для заполнения (по умолчанию "src")';
-$MESS['ISPRO_IMG2PICTURE_CACHE_TTL'] = 'Время хранения кеша<br>(по умолчанию 2592000 - 30 дней)';
+$MESS['ISPRO_IMG2PICTURE_CACHE_TTL'] = 'Время хранения кеша изображений<br>(по умолчанию 2592000 - 30 дней)';
+
+$MESS['ISPRO_IMG2PICTURE_CACHE_FULLPAGE'] = 'Использовать кеш для всей страницы';
+$MESS['ISPRO_IMG2PICTURE_CACHE_TTL_FULLPAGE'] = 'Время хранения страницы в кеш<br>';
 
 
 

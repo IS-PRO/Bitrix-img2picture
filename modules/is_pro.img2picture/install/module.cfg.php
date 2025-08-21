@@ -157,5 +157,15 @@ $arModuleCfg = [
 			'type'    => 'checkbox',
 			'default' => 'N'
 		],
+		/* Полное кеширование страницы */
+		'CACHE_FULLPAGE'    => [
+			'type'    => 'checkbox',
+			'default' => 'N'
+		],
+		/* Время хранения кеша */
+		'CACHE_TTL_FULLPAGE'          => [
+			'type'    => 'text',
+			'default' => '36000' /* 10 часов */
+		],
 	]
 ];
