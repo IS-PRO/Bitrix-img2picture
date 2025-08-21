@@ -236,7 +236,6 @@ class CImageManupulator extends CSimpleImage
 					$this->cache->endDataCache($cached);
 					return true;
 				}
-
 			}
 		} else {
 			if (!empty($this->cache)) {
@@ -275,9 +274,9 @@ class CImageManupulator extends CSimpleImage
 			self::__debug(['ReplaceImg_' . date('Y.M.d H:i:s') => 'start']);
 		}
 		if ($arParams['CACHE_FULLPAGE'] == 'Y') {
-			$cachekey = md5(print_r([$content, $arParams], true));
-			$arParamsExt['CACHE_TTL'] = $arParams['CACHE_TTL_FULLAPGE'];
-			$cachedPage = $this->CacheInitCheck($cachekey, $arParamsExt['CACHE_TTL']);
+			$cachekey                 = 'page_' . md5(print_r([$content, $arParams], true));
+			$arParamsExt['CACHE_TTL'] = $arParams['CACHE_TTL_FULLPAGE'];
+			$cachedPage               = $this->CacheInitCheck($cachekey, $arParamsExt['CACHE_TTL']);
 			if (($cachedPage !== false) && empty($arParams['CLEAR_CACHE'])) {
 				if ($arParams['DEBUG'] == 'Y') {
 					self::__debug(['GET_FROM_CACHE' => $cachedPage]);
@@ -1036,7 +1035,7 @@ class CImageManupulator extends CSimpleImage
 						}
 					}
 					$index = 0;
-				} else	if ($file_type == 'avif') {
+				} else if ($file_type == 'avif') {
 					if ($arResult['FILES'][$val['width']]['min'] != 'avif') {
 						continue;
 					}
@@ -1113,8 +1112,8 @@ class CImageManupulator extends CSimpleImage
 					$lazy = 'srcset="' . self::onePXwebp . '"';
 				}
 			}
-			$arResult['sources'][]      = '<source srcset="' . $arResult['FILES']['original'][$arResult['FILES']['original']['min']] . '"  type="image/'.$arResult['FILES']['original']['min'].'">';
-			$arResult['sources_lazy'][] = '<source ' . $lazy . '  data-i2p="Y" data-srcset="' . $arResult['FILES']['original'][$arResult['FILES']['original']['min']] . '"  type="image/'.$arResult['FILES']['original']['min'].'">';
+			$arResult['sources'][]      = '<source srcset="' . $arResult['FILES']['original'][$arResult['FILES']['original']['min']] . '"  type="image/' . $arResult['FILES']['original']['min'] . '">';
+			$arResult['sources_lazy'][] = '<source ' . $lazy . '  data-i2p="Y" data-srcset="' . $arResult['FILES']['original'][$arResult['FILES']['original']['min']] . '"  type="image/' . $arResult['FILES']['original']['min'] . '">';
 		}
 
 		if (!empty($arResult['FILES']['original']['avif']) && ($arResult['FILES']['original']['min'] != 'avif')) {
@@ -1127,7 +1126,7 @@ class CImageManupulator extends CSimpleImage
 			$arResult['sources_lazy'][] = '<source ' . $lazy . '  data-i2p="Y" data-srcset="' . $arResult['FILES']['original']['avif'] . '"  type="image/avif">';
 		}
 
-		if (!empty($arResult['FILES']['original']['webp'])  && ($arResult['FILES']['original']['min'] != 'webp')) {
+		if (!empty($arResult['FILES']['original']['webp']) && ($arResult['FILES']['original']['min'] != 'webp')) {
 			if (!empty($arResult['FILES'][self::smallWidth]['webp'])) {
 				$lazy = 'srcset="' . $arResult['FILES'][self::smallWidth]['webp'] . '"';
 			} else {
@@ -1260,7 +1259,7 @@ class CImageManupulator extends CSimpleImage
 					$file_src         = $arResult['FILES'][$val['width']][$file_src];
 					$addsource[3]     = '.' . $arResult['FILES'][$val['width']]['min'] . $arResult['cssSelector'] . '{' . str_replace($arResult['img']['src'], $file_src, $arResult['img']['parse_tag']['style']) . '}';
 					$addsourceLazy[3] = '.loaded' . $addsource[3];
-				} else	if ($file_type == 'avif') {
+				} else if ($file_type == 'avif') {
 					if ($arResult['FILES'][$val['width']]['min'] == 'avif') {
 						continue;
 					}
