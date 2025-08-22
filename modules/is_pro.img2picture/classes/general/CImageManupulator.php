@@ -149,6 +149,10 @@ class CImageManupulator extends CSimpleImage
 			$arParams['IMITATION'] = 'N';
 		}
 
+		if (!empty($_COOKIE['debug']) && $_COOKIE['debug'] == 'i2p') {
+			$arParams['DEBUG'] = 'Y';
+		}
+
 		if (!isset($arParams['DEBUG'])) {
 			$arParams['DEBUG'] = '';
 		}
@@ -192,16 +196,18 @@ class CImageManupulator extends CSimpleImage
 	{
 		/* функция инициализации и проверки кеша, даже если класс используется не в Битрикс */
 		$arParams = $this->arParams;
-		if (!empty($arParamsExt)) {
+		if (!empty($arParamsExt) && is_array($arParamsExt)) {
 			$arParams = array_merge($arParams, $arParamsExt);
 		}
 		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
+
 			$this->cache = \Bitrix\Main\Data\Cache::createInstance();
 			$cachePath   = self::cachePath;
 			$cacheTtl    = (int) $arParams['CACHE_TTL'];
 			if ($this->cache->initCache($cacheTtl, $cacheKey, $cachePath)) {
 				return $this->cache->getVars();
 			}
+			$this->cache->noOutput();
 		} else {
 			$curDate     = time();
 			$fileCache   = $this->arParams['DOCUMENT_ROOT'] . self::DIR . 'cache/' . $cacheKey;
@@ -221,7 +227,7 @@ class CImageManupulator extends CSimpleImage
 	private function CacheAbort()
 	{
 		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
-			if (!empty($this->cache)) {
+			if (!empty($this->cache) && is_object($this->cache)) {
 				$this->cache->abortDataCache();
 			}
 		}
@@ -270,13 +276,11 @@ class CImageManupulator extends CSimpleImage
 	{
 		$this->startTime = microtime(true);
 		$arParams        = $this->arParams;
-		if ($arParams['DEBUG'] == 'Y') {
-			self::__debug(['ReplaceImg_' . date('Y.M.d H:i:s') => 'start']);
-		}
+
 		if ($arParams['CACHE_FULLPAGE'] == 'Y') {
 			$cachekey                 = 'page_' . md5(print_r([$content, $arParams], true));
 			$arParamsExt['CACHE_TTL'] = $arParams['CACHE_TTL_FULLPAGE'];
-			$cachedPage               = $this->CacheInitCheck($cachekey, $arParamsExt['CACHE_TTL']);
+			$cachedPage               = $this->CacheInitCheck($cachekey, $arParamsExt);
 			if (($cachedPage !== false) && empty($arParams['CLEAR_CACHE'])) {
 				if ($arParams['DEBUG'] == 'Y') {
 					self::__debug(['GET_FROM_CACHE' => $cachedPage]);
@@ -287,25 +291,22 @@ class CImageManupulator extends CSimpleImage
 			$this->CacheAbort();
 		}
 
+		if ($arParams['DEBUG'] == 'Y') {
+			self::__debug(['ReplaceImg_' . date('Y.M.d H:i:s') => 'start']);
+		}
 		$this->ReplaceImg($content);
 
 		if ($arParams['BACKGROUNDS'] == 'Y' && $this->canContinue()) {
-
 			if ($arParams['DEBUG'] == 'Y') {
 				self::__debug(['ReplaceBackground_' . date('Y.M.d H:i:s') => 'start']);
 			}
-
 			$this->ReplaceBackground($content);
 		}
 
 		$this->ReplaceTagsAttr($content);
-		if ($arParams['CACHE_FULLPAGE'] == 'Y') {
-			$cachedPage = $this->CacheInitCheck($cachekey, $arParamsExt['CACHE_TTL']);
-			if (!$this->canContinue()) {
-				$this->CacheAbort();
-			} else {
-				$this->CacheSave($content);
-			}
+		if ($arParams['CACHE_FULLPAGE'] == 'Y' && $this->canContinue()) {
+			$cachedPage = $this->CacheInitCheck($cachekey, $arParamsExt);
+			$this->CacheSave($content);
 		}
 	}
 
