@@ -178,7 +178,7 @@ class CImageManupulator extends CSimpleImage
 		if (defined('B_PROLOG_INCLUDED') && B_PROLOG_INCLUDED === true) {
 			\Bitrix\Main\Diag\Debug::writeToFile($arr);
 		} else {
-			file_put_contents($this->arParams['DOCUMENT_ROOT'] . '/img2picture.log', print_r($arr, true), FILE_APPEND);
+			file_put_contents($_SERVER['DOCUMENT_ROOT'] . '/img2picture.log', print_r($arr, true), FILE_APPEND);
 		}
 	}
 
@@ -286,7 +286,7 @@ class CImageManupulator extends CSimpleImage
 					self::__debug(['GET_FROM_CACHE' => $cachedPage]);
 				}
 				$content = $cachedPage;
-				return;
+				return $content;
 			}
 			$this->CacheAbort();
 		}
@@ -308,6 +308,7 @@ class CImageManupulator extends CSimpleImage
 			$cachedPage = $this->CacheInitCheck($cachekey, $arParamsExt);
 			$this->CacheSave($content);
 		}
+		return $content;
 	}
 
 	public function ReplaceBackground(&$content)
@@ -1026,8 +1027,8 @@ class CImageManupulator extends CSimpleImage
 			foreach ($arResult['FILES'][$val['width']] as $file_type => $file_src) {
 				if ($file_type == 'min') {
 					$type = 'type="image/' . $file_src . '"';
-					if (!empty($arResult['FILES'][self::smallWidth][$file_src])) {
-						$lazy = 'srcset="' . $arResult['FILES'][self::smallWidth][$file_src] . '"';
+					if (!empty($arResult['FILES'][self::smallWidth][$file_type])) {
+						$lazy = 'srcset="' . $arResult['FILES'][self::smallWidth][$file_type] . '"';
 					} else {
 						if ($file_src == 'avif') {
 							$lazy = 'srcset="' . self::onePXavif . '"';
@@ -1035,6 +1036,7 @@ class CImageManupulator extends CSimpleImage
 							$lazy = 'srcset="' . self::onePXwebp . '"';
 						}
 					}
+
 					$index = 0;
 				} else if ($file_type == 'avif') {
 					if ($arResult['FILES'][$val['width']]['min'] != 'avif') {
@@ -1071,20 +1073,21 @@ class CImageManupulator extends CSimpleImage
 					}
 					$index = 3;
 				}
-				$media    = 'media="';
-				$mediaand = '';
-				if ((int) $val['min'] >= 0) {
-					$media .= $mediaand . '(min-width: ' . $val['min'] . 'px)';
-					$mediaand = ' and ';
-				}
+				if (!in_array($file_src, ['webp', 'avif'])) {
+					$media    = 'media="';
+					$mediaand = '';
+					if ((int) $val['min'] >= 0) {
+						$media .= $mediaand . '(min-width: ' . $val['min'] . 'px)';
+						$mediaand = ' and ';
+					}
 
-				if ((int) $val['max'] > (int) $val['min']) {
-					$media .= $mediaand . '(max-width: ' . $val['max'] . 'px)';
+					if ((int) $val['max'] > (int) $val['min']) {
+						$media .= $mediaand . '(max-width: ' . $val['max'] . 'px)';
+					}
+					$media .= '"';
+					$addsource[$index]     = '<source srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
+					$addsourceLazy[$index] = '<source ' . $lazy . ' data-i2p="Y" data-srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
 				}
-
-				$media .= '"';
-				$addsource[$index]     = '<source srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
-				$addsourceLazy[$index] = '<source ' . $lazy . ' data-i2p="Y" data-srcset="' . $file_src . '" ' . $media . ' ' . $type . '>';
 			}
 			ksort($addsource);
 			foreach ($addsource as $oneaddsource) {
